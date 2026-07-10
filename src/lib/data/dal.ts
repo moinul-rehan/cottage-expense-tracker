@@ -3,13 +3,25 @@ import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+export { getDisplayName, getFullName } from './display-name'
+
 export type Profile = {
   id: string
-  full_name: string
+  first_name: string
+  last_name: string | null
+  email: string | null
   role: 'super_admin' | 'member'
   room_label: string | null
   is_active: boolean
+  avatar_url: string | null
+  gender: 'male' | 'female' | 'other' | null
+  hometown: string | null
+  mobile_number: string | null
+  can_add_expenses: boolean
 }
+
+const PROFILE_COLUMNS =
+  'id, first_name, last_name, email, role, room_label, is_active, avatar_url, gender, hometown, mobile_number, can_add_expenses'
 
 /**
  * Verifies the caller has an active Supabase session and loads their profile
@@ -29,7 +41,7 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, full_name, role, room_label, is_active')
+    .select(PROFILE_COLUMNS)
     .eq('id', user.id)
     .single()
 

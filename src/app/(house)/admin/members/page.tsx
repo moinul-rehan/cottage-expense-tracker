@@ -2,6 +2,15 @@ import { requireSuperAdmin } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { InviteForm } from "./InviteForm";
 import { MemberRow } from "./MemberRow";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function MembersPage() {
   await requireSuperAdmin();
@@ -9,45 +18,46 @@ export default async function MembersPage() {
 
   const { data: members } = await supabase
     .from("profiles")
-    .select("id, full_name, role, room_label, is_active")
-    .order("full_name");
+    .select("id, first_name, last_name, role, room_label, is_active, can_add_expenses")
+    .order("last_name");
 
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-900">Members</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-xl font-semibold text-foreground">Members</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Invite roommates and manage who has access.
         </p>
       </div>
 
       <InviteForm />
 
-      <div className="overflow-hidden rounded-lg border border-zinc-200">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-zinc-50 text-zinc-500">
-            <tr>
-              <th className="px-4 py-2 font-medium">Name</th>
-              <th className="px-4 py-2 font-medium">Room</th>
-              <th className="px-4 py-2 font-medium">Role</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
+      <Card className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Room</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Permissions</TableHead>
+              <TableHead />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {members?.map((member) => (
               <MemberRow key={member.id} member={member} />
             ))}
             {!members?.length && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-zinc-400">
+              <TableRow>
+                <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
                   No members yet.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 }

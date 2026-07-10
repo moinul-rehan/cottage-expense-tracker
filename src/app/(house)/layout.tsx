@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { getCurrentProfile } from "@/lib/data/dal";
+import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { logout } from "@/lib/auth-actions";
+import { Button } from "@/components/ui/button";
 
 const memberLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/expenses", label: "Expenses" },
   { href: "/history", label: "History" },
   { href: "/settle-up", label: "Settle Up" },
+  { href: "/profile", label: "Profile" },
 ];
 
 const adminLinks = [
@@ -22,36 +24,44 @@ export default async function HouseLayout({
   const profile = await getCurrentProfile();
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="flex flex-1 flex-col bg-muted/30">
+      <header className="border-b bg-background">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-4 py-3">
-          <nav className="flex flex-wrap items-center gap-4 text-sm">
+          <nav className="flex flex-wrap items-center gap-1 text-sm">
             {memberLinks.map((link) => (
-              <Link
+              <Button
                 key={link.href}
-                href={link.href}
-                className="font-medium text-zinc-600 hover:text-zinc-900"
+                variant="ghost"
+                size="sm"
+                nativeButton={false}
+                render={<Link href={link.href} />}
               >
                 {link.label}
-              </Link>
+              </Button>
             ))}
-            {profile.role === "super_admin" &&
-              adminLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="font-medium text-zinc-400 hover:text-zinc-900"
-                >
-                  {link.label}
-                </Link>
-              ))}
+            {profile.role === "super_admin" && (
+              <>
+                <span className="mx-1 h-4 w-px bg-border" />
+                {adminLinks.map((link) => (
+                  <Button
+                    key={link.href}
+                    variant="ghost"
+                    size="sm"
+                    nativeButton={false}
+                    render={<Link href={link.href} />}
+                  >
+                    {link.label}
+                  </Button>
+                ))}
+              </>
+            )}
           </nav>
-          <div className="flex items-center gap-3 text-sm text-zinc-500">
-            <span>{profile.full_name}</span>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span>{getDisplayName(profile)}</span>
             <form action={logout}>
-              <button type="submit" className="font-medium text-zinc-600 hover:text-zinc-900">
+              <Button type="submit" variant="outline" size="sm">
                 Log out
-              </button>
+              </Button>
             </form>
           </div>
         </div>

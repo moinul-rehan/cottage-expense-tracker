@@ -1,4 +1,5 @@
-import { getCurrentProfile } from "@/lib/data/dal";
+import Link from "next/link";
+import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
   currentMonthKey,
@@ -6,14 +7,30 @@ import {
   getMonthlyDues,
   monthRange,
 } from "@/lib/data/finance";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-zinc-200 p-4">
-      <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</span>
-      <span className="text-2xl font-semibold text-zinc-900">{value}</span>
-      {hint && <span className="text-xs text-zinc-400">{hint}</span>}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardDescription className="text-xs font-medium tracking-wide uppercase">
+          {label}
+        </CardDescription>
+        <CardTitle className="text-2xl font-semibold">{value}</CardTitle>
+      </CardHeader>
+      {hint && (
+        <CardContent className="pt-0 text-xs text-muted-foreground">{hint}</CardContent>
+      )}
+    </Card>
   );
 }
 
@@ -28,7 +45,7 @@ export default async function DashboardPage() {
     getAmountOwedToUser(supabase, profile.id, monthKey),
     supabase
       .from("expenses")
-      .select("id, category, amount, description, expense_date, payer:paid_by(full_name)")
+      .select("id, category, amount, description, expense_date, payer:paid_by(first_name, last_name)")
       .gte("expense_date", start)
       .lt("expense_date", end)
       .order("expense_date", { ascending: false })
@@ -39,59 +56,86 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-xl font-semibold text-zinc-900">
-          Welcome, {profile.full_name.split(" ")[0]}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Here&apos;s where things stand for {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">
+            Welcome, {getDisplayName(profile)}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Here&apos;s where things stand for{" "}
+            {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
+          </p>
+        </div>
+        {profile.role === "super_admin" && (
+          <Card className="w-full sm:w-auto">
+            <CardContent className="flex items-center gap-3 py-3">
+              <div className="text-sm">
+                <p className="font-medium text-foreground">Growing the house?</p>
+                <p className="text-muted-foreground">Invite a new roommate.</p>
+              </div>
+              <Button size="sm" render={<Link href="/admin/members" />}>
+                Add a roommate
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Rent" value={myDue.rent.toFixed(2)} />
         <StatCard label="Your expense share" value={myDue.expenses.toFixed(2)} />
-        <StatCard label="You owe this month" value={myDue.due.toFixed(2)} hint="Rent + share, minus what you've settled" />
-        <StatCard label="Others owe you" value={owedToYou.toFixed(2)} hint="From expenses you fronted" />
+        <StatCard
+          label="You owe this month"
+          value={myDue.due.toFixed(2)}
+          hint="Rent + share, minus what you've settled"
+        />
+        <StatCard
+          label="Others owe you"
+          value={owedToYou.toFixed(2)}
+          hint="From expenses you fronted"
+        />
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-zinc-900">Recent activity</h2>
-        <div className="overflow-hidden rounded-lg border border-zinc-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Date</th>
-                <th className="px-4 py-2 font-medium">Category</th>
-                <th className="px-4 py-2 font-medium">Description</th>
-                <th className="px-4 py-2 font-medium">Paid by</th>
-                <th className="px-4 py-2 text-right font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {recentExpenses.data?.map((e) => (
-                <tr key={e.id}>
-                  <td className="px-4 py-2 text-zinc-600">{e.expense_date}</td>
-                  <td className="px-4 py-2 capitalize text-zinc-600">{e.category}</td>
-                  <td className="px-4 py-2 text-zinc-600">{e.description ?? "—"}</td>
-                  <td className="px-4 py-2 text-zinc-600">
-                    {(e.payer as unknown as { full_name: string } | null)?.full_name ?? "—"}
-                  </td>
-                  <td className="px-4 py-2 text-right font-medium text-zinc-900">
-                    {Number(e.amount).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
+        <h2 className="mb-3 text-sm font-semibold text-foreground">Recent activity</h2>
+        <Card className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Paid by</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentExpenses.data?.map((e) => {
+                const payer = e.payer as unknown as { first_name: string; last_name: string | null } | null;
+                return (
+                  <TableRow key={e.id}>
+                    <TableCell className="text-muted-foreground">{e.expense_date}</TableCell>
+                    <TableCell className="capitalize text-muted-foreground">{e.category}</TableCell>
+                    <TableCell className="text-muted-foreground">{e.description ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {payer ? getDisplayName(payer) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {Number(e.amount).toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {!recentExpenses.data?.length && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-zinc-400">
+                <TableRow>
+                  <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
                     No expenses recorded this month yet.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       </div>
     </div>
   );

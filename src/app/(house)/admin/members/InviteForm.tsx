@@ -2,46 +2,65 @@
 
 import { useActionState } from "react";
 import { inviteMember } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function InviteForm() {
   const [state, action, pending] = useActionState(inviteMember, undefined);
 
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4">
-      <h2 className="text-sm font-semibold text-zinc-900">Invite a roommate</h2>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <input
-          name="full_name"
-          placeholder="Full name"
-          required
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          required
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        />
-        <input
-          name="room_label"
-          placeholder="Room label (e.g. Room 2A)"
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        />
-        <select name="role" defaultValue="member" className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
-          <option value="member">Member</option>
-          <option value="super_admin">Super admin</option>
-        </select>
-      </div>
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-700">{state.success}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-      >
-        {pending ? "Sending invite…" : "Send invite"}
-      </button>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">Invite a roommate</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form action={action} className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="first_name">First name</Label>
+              <Input id="first_name" name="first_name" required />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="last_name">Last name</Label>
+              <Input id="last_name" name="last_name" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="room_label">Room label</Label>
+              <Input id="room_label" name="room_label" placeholder="e.g. Room 2A" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Role</Label>
+              <Select name="role" defaultValue="member">
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="super_admin">Super admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+          {state?.success && <p className="text-sm text-emerald-600">{state.success}</p>}
+          <Button type="submit" disabled={pending} className="self-start">
+            {pending ? "Sending invite…" : "Send invite"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

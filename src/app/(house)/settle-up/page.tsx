@@ -1,16 +1,31 @@
-import { getCurrentProfile } from "@/lib/data/dal";
+import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { SettleForm } from "./SettleForm";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function SettleUpPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
   const [{ data: members }, { data: settlements }] = await Promise.all([
-    supabase.from("profiles").select("id, full_name").eq("is_active", true).order("full_name"),
+    supabase
+      .from("profiles")
+      .select("id, first_name, last_name")
+      .eq("is_active", true)
+      .order("last_name"),
     supabase
       .from("settlements")
-      .select("id, amount, settled_on, note, from:from_user(full_name), to:to_user(full_name)")
+      .select(
+        "id, amount, settled_on, note, from:from_user(first_name, last_name), to:to_user(first_name, last_name)"
+      )
       .order("settled_on", { ascending: false })
       .limit(20),
   ]);
@@ -18,49 +33,53 @@ export default async function SettleUpPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-900">Settle Up</h1>
-        <p className="mt-1 text-sm text-zinc-500">Record a payment made between roommates.</p>
+        <h1 className="text-xl font-semibold text-foreground">Settle Up</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Record a payment made between roommates.</p>
       </div>
 
       <SettleForm members={members ?? []} currentUserId={profile.id} />
 
-      <div className="overflow-hidden rounded-lg border border-zinc-200">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-zinc-50 text-zinc-500">
-            <tr>
-              <th className="px-4 py-2 font-medium">Date</th>
-              <th className="px-4 py-2 font-medium">From</th>
-              <th className="px-4 py-2 font-medium">To</th>
-              <th className="px-4 py-2 font-medium">Note</th>
-              <th className="px-4 py-2 text-right font-medium">Amount</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {settlements?.map((s) => (
-              <tr key={s.id}>
-                <td className="px-4 py-2 text-zinc-600">{s.settled_on}</td>
-                <td className="px-4 py-2 text-zinc-600">
-                  {(s.from as unknown as { full_name: string } | null)?.full_name ?? "—"}
-                </td>
-                <td className="px-4 py-2 text-zinc-600">
-                  {(s.to as unknown as { full_name: string } | null)?.full_name ?? "—"}
-                </td>
-                <td className="px-4 py-2 text-zinc-600">{s.note ?? "—"}</td>
-                <td className="px-4 py-2 text-right font-medium text-zinc-900">
-                  {Number(s.amount).toFixed(2)}
-                </td>
-              </tr>
-            ))}
+      <Card className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Note</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {settlements?.map((s) => {
+              const from = s.from as unknown as { first_name: string; last_name: string | null } | null;
+              const to = s.to as unknown as { first_name: string; last_name: string | null } | null;
+              return (
+                <TableRow key={s.id}>
+                  <TableCell className="text-muted-foreground">{s.settled_on}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {from ? getDisplayName(from) : "—"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {to ? getDisplayName(to) : "—"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{s.note ?? "—"}</TableCell>
+                  <TableCell className="text-right font-medium">
+                    {Number(s.amount).toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
             {!settlements?.length && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-zinc-400">
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
                   No settlements recorded yet.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 }

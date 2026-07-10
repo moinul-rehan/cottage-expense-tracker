@@ -2,65 +2,75 @@
 
 import { useActionState } from "react";
 import { recordSettlement } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getDisplayName } from "@/lib/data/display-name";
 
-type Member = { id: string; full_name: string };
+type Member = { id: string; first_name: string; last_name: string | null };
 
 export function SettleForm({ members, currentUserId }: { members: Member[]; currentUserId: string }) {
   const [state, action, pending] = useActionState(recordSettlement, undefined);
 
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4">
-      <h2 className="text-sm font-semibold text-zinc-900">Record a payment</h2>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <select name="from_user" defaultValue={currentUserId} required className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
-          <option value="" disabled>
-            Paid by…
-          </option>
-          {members.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.full_name}
-            </option>
-          ))}
-        </select>
-        <select name="to_user" defaultValue="" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm">
-          <option value="" disabled>
-            Paid to…
-          </option>
-          {members.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.full_name}
-            </option>
-          ))}
-        </select>
-        <input
-          name="amount"
-          type="number"
-          step="0.01"
-          min="0.01"
-          placeholder="Amount"
-          required
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        />
-        <input
-          name="settled_on"
-          type="date"
-          defaultValue={new Date().toISOString().slice(0, 10)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        />
-        <input
-          name="note"
-          placeholder="Note (optional)"
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2"
-        />
-      </div>
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-      >
-        {pending ? "Saving…" : "Record payment"}
-      </button>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">Record a payment</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form action={action} className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Select name="from_user" defaultValue={currentUserId} required>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Paid by…">
+                  {(value: string | null) => {
+                    const member = members.find((m) => m.id === value);
+                    return member ? getDisplayName(member) : "Paid by…";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {members.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {getDisplayName(m)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select name="to_user" required>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Paid to…">
+                  {(value: string | null) => {
+                    const member = members.find((m) => m.id === value);
+                    return member ? getDisplayName(member) : "Paid to…";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {members.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {getDisplayName(m)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input name="amount" type="number" step="0.01" min="0.01" placeholder="Amount" required />
+            <Input name="settled_on" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+            <Input name="note" placeholder="Note (optional)" className="sm:col-span-2" />
+          </div>
+          {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+          <Button type="submit" disabled={pending} className="self-start">
+            {pending ? "Saving…" : "Record payment"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

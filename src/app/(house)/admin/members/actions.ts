@@ -14,17 +14,18 @@ export async function inviteMember(
   await requireSuperAdmin();
 
   const email = String(formData.get("email") ?? "").trim();
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const firstName = String(formData.get("first_name") ?? "").trim();
+  const lastName = String(formData.get("last_name") ?? "").trim();
   const roomLabel = String(formData.get("room_label") ?? "").trim();
   const role = formData.get("role") === "super_admin" ? "super_admin" : "member";
 
-  if (!email || !fullName) {
-    return { error: "Name and email are required." };
+  if (!email || !firstName) {
+    return { error: "First name and email are required." };
   }
 
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { full_name: fullName, role },
+    data: { first_name: firstName, last_name: lastName || null, role },
   });
 
   if (error || !data.user) {
@@ -47,5 +48,12 @@ export async function setMemberActive(userId: string, isActive: boolean) {
   await requireSuperAdmin();
   const supabase = await createClient();
   await supabase.from("profiles").update({ is_active: isActive }).eq("id", userId);
+  revalidatePath("/admin/members");
+}
+
+export async function setCanAddExpenses(userId: string, canAddExpenses: boolean) {
+  await requireSuperAdmin();
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ can_add_expenses: canAddExpenses }).eq("id", userId);
   revalidatePath("/admin/members");
 }

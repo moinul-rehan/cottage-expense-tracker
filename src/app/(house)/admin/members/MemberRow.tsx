@@ -1,48 +1,66 @@
 "use client";
 
 import { useTransition } from "react";
-import { setMemberActive } from "./actions";
+import { setMemberActive, setCanAddExpenses } from "./actions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { getDisplayName } from "@/lib/data/display-name";
 
 type Member = {
   id: string;
-  full_name: string;
+  first_name: string;
+  last_name: string | null;
   role: string;
   room_label: string | null;
   is_active: boolean;
+  can_add_expenses: boolean;
 };
 
 export function MemberRow({ member }: { member: Member }) {
   const [pending, startTransition] = useTransition();
 
   return (
-    <tr>
-      <td className="px-4 py-2 text-zinc-900">{member.full_name}</td>
-      <td className="px-4 py-2 text-zinc-600">{member.room_label ?? "—"}</td>
-      <td className="px-4 py-2 text-zinc-600">
+    <TableRow>
+      <TableCell className="font-medium text-foreground">{getDisplayName(member)}</TableCell>
+      <TableCell className="text-muted-foreground">{member.room_label ?? "—"}</TableCell>
+      <TableCell className="text-muted-foreground">
         {member.role === "super_admin" ? "Super admin" : "Member"}
-      </td>
-      <td className="px-4 py-2">
-        <span
-          className={
-            member.is_active
-              ? "rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700"
-              : "rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500"
-          }
-        >
+      </TableCell>
+      <TableCell>
+        <Badge variant={member.is_active ? "default" : "secondary"}>
           {member.is_active ? "Active" : "Inactive"}
-        </span>
-      </td>
-      <td className="px-4 py-2 text-right">
-        <button
-          disabled={pending}
-          onClick={() =>
-            startTransition(() => setMemberActive(member.id, !member.is_active))
-          }
-          className="text-xs font-medium text-zinc-500 hover:text-zinc-900 disabled:opacity-50"
-        >
-          {member.is_active ? "Deactivate" : "Activate"}
-        </button>
-      </td>
-    </tr>
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Badge variant={member.can_add_expenses ? "default" : "outline"}>
+          {member.can_add_expenses ? "Can add expenses" : "No expense access"}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={pending || member.role === "super_admin"}
+            onClick={() =>
+              startTransition(() => setCanAddExpenses(member.id, !member.can_add_expenses))
+            }
+          >
+            {member.can_add_expenses ? "Revoke expenses" : "Grant expenses"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={pending}
+            onClick={() =>
+              startTransition(() => setMemberActive(member.id, !member.is_active))
+            }
+          >
+            {member.is_active ? "Deactivate" : "Activate"}
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }

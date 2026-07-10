@@ -13,6 +13,11 @@ export async function addExpense(
   formData: FormData
 ): Promise<AddExpenseState> {
   const profile = await getCurrentProfile();
+
+  if (profile.role !== "super_admin" && !profile.can_add_expenses) {
+    return { error: "You don't have permission to add expenses." };
+  }
+
   const supabase = await createClient();
 
   const category = String(formData.get("category") ?? "");
