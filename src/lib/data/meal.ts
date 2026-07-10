@@ -66,6 +66,58 @@ export async function getMemberMealSummary<
   return { rows, mealRate, totalBazaar, totalMeals };
 }
 
+type MemberRef = { first_name: string; last_name: string | null; avatar_url: string | null } | null;
+
+/** Every daily-meal entry for the month, newest first, with the member's name. */
+export async function getDailyMealRecords(supabase: SupabaseClient, monthKey: string) {
+  const { data } = await supabase
+    .from("daily_meals")
+    .select("id, meal_date, count, member:user_id(first_name, last_name, avatar_url)")
+    .eq("month_key", monthKey)
+    .order("meal_date", { ascending: false });
+
+  return (data ?? []) as unknown as {
+    id: string;
+    meal_date: string;
+    count: number;
+    member: MemberRef;
+  }[];
+}
+
+/** Every meal-deposit entry for the month, newest first, with the member's name. */
+export async function getDepositRecords(supabase: SupabaseClient, monthKey: string) {
+  const { data } = await supabase
+    .from("meal_deposits")
+    .select("id, deposit_date, amount, note, member:user_id(first_name, last_name, avatar_url)")
+    .eq("month_key", monthKey)
+    .order("deposit_date", { ascending: false });
+
+  return (data ?? []) as unknown as {
+    id: string;
+    deposit_date: string;
+    amount: number;
+    note: string | null;
+    member: MemberRef;
+  }[];
+}
+
+/** Every bazaar (meal cost) entry for the month, newest first, with the spender's name. */
+export async function getBazaarRecords(supabase: SupabaseClient, monthKey: string) {
+  const { data } = await supabase
+    .from("bazaar_entries")
+    .select("id, entry_date, amount, description, member:spent_by(first_name, last_name, avatar_url)")
+    .eq("month_key", monthKey)
+    .order("entry_date", { ascending: false });
+
+  return (data ?? []) as unknown as {
+    id: string;
+    entry_date: string;
+    amount: number;
+    description: string | null;
+    member: MemberRef;
+  }[];
+}
+
 export async function getUtilityCarryIns(
   supabase: SupabaseClient,
   cottageId: string,

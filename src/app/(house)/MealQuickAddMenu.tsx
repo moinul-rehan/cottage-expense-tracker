@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Wallet, ShoppingBasket } from "lucide-react";
+import Link from "next/link";
+import { Plus, Wallet, ShoppingBasket, CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar";
 import { BazaarForm } from "./meal/BazaarForm";
@@ -25,6 +26,12 @@ export function MealQuickAddMenu({
 
   return (
     <SidebarMenuSub>
+      <SidebarMenuSubItem>
+        <SidebarMenuSubButton render={<Link href="/meal/month-details" />}>
+          <CalendarDays />
+          Month Details
+        </SidebarMenuSubButton>
+      </SidebarMenuSubItem>
       {canAddMeals && (
         <SidebarMenuSubItem>
           <SidebarMenuSubButton onClick={() => setOpen("meal")}>
