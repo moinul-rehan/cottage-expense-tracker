@@ -93,21 +93,29 @@ export default async function MealPage({
 
       {monthKey === currentMonthKey() && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {canAddBazaar ? (
-            <BazaarForm members={members ?? []} />
-          ) : (
-            <Card className="p-4 text-sm text-muted-foreground">
-              You don&apos;t have permission to add bazaar entries.
-            </Card>
+          <div id="bazaar-form" className="scroll-mt-20">
+            {canAddBazaar ? (
+              <BazaarForm members={members ?? []} />
+            ) : (
+              <Card className="p-4 text-sm text-muted-foreground">
+                You don&apos;t have permission to add bazaar entries.
+              </Card>
+            )}
+          </div>
+          <div id="daily-meal-form" className="scroll-mt-20">
+            {canAddMeals ? (
+              <DailyMealForm members={members ?? []} />
+            ) : (
+              <Card className="p-4 text-sm text-muted-foreground">
+                You don&apos;t have permission to log meals.
+              </Card>
+            )}
+          </div>
+          {profile.role === "super_admin" && (
+            <div id="deposit-form" className="scroll-mt-20">
+              <DepositForm members={members ?? []} />
+            </div>
           )}
-          {canAddMeals ? (
-            <DailyMealForm members={members ?? []} />
-          ) : (
-            <Card className="p-4 text-sm text-muted-foreground">
-              You don&apos;t have permission to log meals.
-            </Card>
-          )}
-          {profile.role === "super_admin" && <DepositForm members={members ?? []} />}
         </div>
       )}
 

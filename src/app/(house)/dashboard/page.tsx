@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
+import { getDisplayName, getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
   currentMonthKey,
@@ -11,9 +11,6 @@ import {
 import { getMemberMealSummary } from "@/lib/data/meal";
 import { getNotifications } from "@/lib/data/notifications";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { VerifiedBadge } from "@/components/verified-badge";
 import {
   Table,
   TableBody,
@@ -68,47 +65,9 @@ export default async function DashboardPage() {
     monthKey,
     members ?? []
   );
-  const myMeal = mealRows.find((r) => r.id === profile.id);
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Avatar size="lg" className="size-12">
-            <AvatarImage src={profile.avatar_url ?? undefined} alt={getDisplayName(profile)} />
-            <AvatarFallback>{profile.first_name[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="flex items-center gap-1.5 text-xl font-semibold text-foreground">
-              Welcome, {getDisplayName(profile)}
-              <VerifiedBadge
-                role={profile.role}
-                can_add_expenses={profile.can_add_expenses}
-                can_add_bazaar={profile.can_add_bazaar}
-                can_add_meals={profile.can_add_meals}
-              />
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Here&apos;s where things stand for{" "}
-              {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
-            </p>
-          </div>
-        </div>
-        {profile.role === "super_admin" && (
-          <Card className="w-full sm:w-auto">
-            <CardContent className="flex items-center gap-3 py-3">
-              <div className="text-sm">
-                <p className="font-medium text-foreground">Growing the Cottage?</p>
-                <p className="text-muted-foreground">Invite a new member.</p>
-              </div>
-              <Button size="sm" nativeButton={false} render={<Link href="/members" />}>
-                Add a member
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
       <div>
         <h2 className="mb-3 text-sm font-semibold text-foreground">Utility overview</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -130,15 +89,55 @@ export default async function DashboardPage() {
 
       <div>
         <h2 className="mb-3 text-sm font-semibold text-foreground">Meal overview</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard label="Meal rate" value={mealRate.toFixed(2)} hint="Total bazaar ÷ total meals" />
           <StatCard label="Total meals" value={String(totalMeals)} />
           <StatCard label="Total bazaar" value={totalBazaar.toFixed(2)} />
-          <StatCard
-            label="Your meal balance"
-            value={(myMeal?.balance ?? 0).toFixed(2)}
-            hint="Deposit minus meal cost"
-          />
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">Member meal summary</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {mealRows.map((r) => (
+            <Card key={r.id}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold text-foreground">
+                  {getDisplayName(r)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total meals</p>
+                  <p className="font-medium text-foreground">{r.meals}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Deposit</p>
+                  <p className="font-medium text-foreground">{r.deposit.toFixed(2)} tk</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Meal cost</p>
+                  <p className="font-medium text-foreground">{r.cost.toFixed(2)} tk</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Balance</p>
+                  <p
+                    className={cn(
+                      "font-semibold",
+                      r.balance < 0 ? "text-destructive" : "text-emerald-600"
+                    )}
+                  >
+                    {r.balance.toFixed(2)} tk
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {!mealRows.length && (
+            <Card className="p-4 text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
+              No meal data yet.
+            </Card>
+          )}
         </div>
       </div>
 
@@ -176,46 +175,6 @@ export default async function DashboardPage() {
                 <TableRow>
                   <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
                     No expenses recorded this month yet.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      </div>
-
-      <div>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Member meal summary</h2>
-        <Card className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead className="text-right">Meals</TableHead>
-                <TableHead className="text-right">Deposit</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mealRows.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell className="text-foreground">{getDisplayName(r)}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{r.meals}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{r.deposit.toFixed(2)}</TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right font-medium",
-                      r.balance < 0 ? "text-destructive" : "text-emerald-600"
-                    )}
-                  >
-                    {r.balance.toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {!mealRows.length && (
-                <TableRow>
-                  <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
-                    No meal data yet.
                   </TableCell>
                 </TableRow>
               )}
