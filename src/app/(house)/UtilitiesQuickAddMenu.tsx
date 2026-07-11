@@ -2,8 +2,9 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Wallet } from "lucide-react";
 import { addCottageCost } from "./utilities/actions";
+import { DepositForm } from "./utilities/DepositForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +37,7 @@ export function UtilitiesQuickAddMenu({
   isSuperAdmin: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
   const [spentBy, setSpentBy] = useState<string>("");
   const [state, action, pending] = useActionState(addCottageCost, undefined);
   const wasPending = useRef(false);
@@ -66,9 +68,22 @@ export function UtilitiesQuickAddMenu({
       </SidebarMenuSubItem>
       {isSuperAdmin && (
         <SidebarMenuSubItem>
+          <SidebarMenuSubButton
+            onClick={() => {
+              setOpenMobile(false);
+              setDepositOpen(true);
+            }}
+          >
+            <Wallet />
+            Utility Deposit
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+      )}
+      {isSuperAdmin && (
+        <SidebarMenuSubItem>
           <SidebarMenuSubButton render={<Link href="/utilities/statement" onClick={() => setOpenMobile(false)} />}>
             <FileText />
-            Generate Utility Statement
+            Generate Utility
           </SidebarMenuSubButton>
         </SidebarMenuSubItem>
       )}
@@ -131,6 +146,17 @@ export function UtilitiesQuickAddMenu({
               {pending ? "Saving…" : "Add"}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={depositOpen} onOpenChange={setDepositOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Utility Deposit</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <DepositForm members={members} defaultDate={defaultDate} onSuccess={() => setDepositOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
     </SidebarMenuSub>

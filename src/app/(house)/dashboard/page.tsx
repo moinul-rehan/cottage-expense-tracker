@@ -11,6 +11,7 @@ import { getMemberMealSummary } from "@/lib/data/meal";
 import { getMyNextBazaarDuty } from "@/lib/data/bazaar-duty";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -27,12 +28,14 @@ function StatCard({
   hint,
   icon: Icon,
   tone = "blue",
+  paid = false,
 }: {
   label: string;
   value: string;
   hint?: string;
   icon: LucideIcon;
   tone?: keyof typeof statCardTones;
+  paid?: boolean;
 }) {
   return (
     <Card className="flex-row items-center gap-4 rounded-2xl p-5">
@@ -40,7 +43,10 @@ function StatCard({
         <Icon className="size-6" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
-        <p className="truncate text-sm text-muted-foreground">{label}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-sm text-muted-foreground">{label}</p>
+          {paid && <Badge className="bg-emerald-600/15 text-emerald-600">Paid</Badge>}
+        </div>
         <p className="truncate text-xl font-semibold text-foreground">{value}</p>
         {hint && <p className="truncate text-xs text-muted-foreground">{hint}</p>}
       </div>
@@ -131,6 +137,7 @@ export default async function DashboardPage() {
             label="Balance / due"
             value={`${myDue.due.toFixed(2)} tk`}
             hint="Total to pay minus already paid"
+            paid={totalToPay > 0 && myDue.due <= 0}
           />
         </div>
       </div>

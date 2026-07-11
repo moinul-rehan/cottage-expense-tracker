@@ -172,6 +172,25 @@ export async function getSettlementsForMonth(supabase: SupabaseClient, monthKey:
   return paidByUser;
 }
 
+/** Admin-recorded utility deposits per user within [start, end): reduces due the same way a settlement does. */
+export async function getUtilityDepositsForMonth(
+  supabase: SupabaseClient,
+  cottageId: string,
+  monthKey: string
+) {
+  const { data } = await supabase
+    .from("utility_deposits")
+    .select("user_id, amount")
+    .eq("cottage_id", cottageId)
+    .eq("month_key", monthKey);
+
+  const byUser = new Map<string, number>();
+  for (const row of data ?? []) {
+    byUser.set(row.user_id, (byUser.get(row.user_id) ?? 0) + Number(row.amount));
+  }
+  return byUser;
+}
+
 /**
  * How much other members owe `userId` this month: shares other members owe on
  * expenses `userId` paid for, minus settlements `userId` has already received.
@@ -255,13 +274,19 @@ export async function getCottageBalance(supabase: SupabaseClient, cottageId: str
  * month.
  */
 export async function getMonthlyDues(supabase: SupabaseClient, cottageId: string, monthKey: string) {
-  const [categoryTotals, settlements, carryIns] = await Promise.all([
+  const [categoryTotals, settlements, carryIns, deposits] = await Promise.all([
     getFullCategoryTotalsForMonth(supabase, cottageId, monthKey),
     getSettlementsForMonth(supabase, monthKey),
     getUtilityCarryIns(supabase, cottageId, monthKey),
+    getUtilityDepositsForMonth(supabase, cottageId, monthKey),
   ]);
 
-  const userIds = new Set([...categoryTotals.keys(), ...settlements.keys(), ...carryIns.keys()]);
+  const userIds = new Set([
+    ...categoryTotals.keys(),
+    ...settlements.keys(),
+    ...carryIns.keys(),
+    ...deposits.keys(),
+  ]);
   const dues = new Map<
     string,
     { rent: number; expenses: number; carryIn: number; paid: number; due: number }
@@ -275,7 +300,7 @@ export async function getMonthlyDues(supabase: SupabaseClient, cottageId: string
       if (category !== "house_rent") expenses += amount;
     }
     const carryIn = carryIns.get(userId) ?? 0;
-    const paid = settlements.get(userId) ?? 0;
+    const paid = (settlements.get(userId) ?? 0) + (deposits.get(userId) ?? 0);
     dues.set(userId, { rent, expenses, carryIn, paid, due: rent + expenses + carryIn - paid });
   }
 

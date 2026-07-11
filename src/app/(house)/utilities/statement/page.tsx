@@ -10,6 +10,7 @@ import { getUtilityCarryIns } from "@/lib/data/meal";
 import { getActiveMonthKey, formatMonthKey, previousMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { UtilityAdjustmentForm } from "./UtilityAdjustmentForm";
 import { DeleteAdjustmentButton } from "./DeleteAdjustmentButton";
 import { cn } from "@/lib/utils";
@@ -56,7 +57,7 @@ export default async function UtilityStatementPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Generate Utility Statement</h1>
+        <h1 className="text-xl font-semibold text-foreground">Generate Utility</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Prepare each member&apos;s final utility bill for {formatMonthKey(monthKey)} before
           settlement — add category costs, discounts and payments, then review the full
@@ -76,12 +77,16 @@ export default async function UtilityStatementPage() {
             const due = dues.get(m.id) ?? { rent: 0, expenses: 0, carryIn: 0, paid: 0, due: 0 };
             const totalUtilityDue = due.due + due.paid;
             const remaining = due.due;
+            const isPaid = totalUtilityDue > 0 && remaining <= 0;
 
             return (
               <Card key={m.id} className="rounded-2xl p-5">
                 <CardHeader className="px-0 pt-0 pb-2">
-                  <CardTitle className="text-base font-semibold text-foreground">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
                     {getDisplayName(m)}
+                    {isPaid && (
+                      <Badge className="bg-emerald-600/15 text-emerald-600">Paid</Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3 px-0 text-sm">

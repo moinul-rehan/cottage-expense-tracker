@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { notifyUsers } from "@/lib/data/notifications";
 import { getCurrentRents } from "@/lib/data/finance";
+import { getActiveMonthKey } from "@/lib/data/months";
 
 export type AddExpenseState = { error?: string } | undefined;
 
@@ -157,6 +158,55 @@ export async function addExpense(
   );
 
   revalidatePath("/utilities");
+  revalidatePath("/dashboard");
+  revalidatePath("/history");
+  return undefined;
+}
+
+export type AddUtilityDepositState = { error?: string } | undefined;
+
+export async function addUtilityDeposit(
+  _prevState: AddUtilityDepositState,
+  formData: FormData
+): Promise<AddUtilityDepositState> {
+  const profile = await getCurrentProfile();
+  if (profile.role !== "super_admin") {
+    return { error: "Only an admin can record utility deposits." };
+  }
+
+  const supabase = await createClient();
+  const userId = String(formData.get("user_id") ?? "");
+  const amount = Number(formData.get("amount"));
+  const depositDate = String(formData.get("deposit_date") ?? "") || undefined;
+  const note = String(formData.get("note") ?? "").trim() || null;
+
+  if (!userId) return { error: "Select a member." };
+  if (!Number.isFinite(amount) || amount <= 0) return { error: "Enter a valid amount." };
+
+  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+
+  const { error } = await supabase.from("utility_deposits").insert({
+    month_key: activeMonthKey,
+    user_id: userId,
+    amount,
+    deposit_date: depositDate,
+    note,
+    created_by: profile.id,
+  });
+
+  if (error) {
+    return { error: "Could not save the deposit." };
+  }
+
+  await notifyUsers(supabase, profile.cottage_id, [userId], {
+    type: "utility_deposit",
+    title: "Utility deposit recorded",
+    body: `${amount.toFixed(2)} added toward your utility due.`,
+    link: "/utilities",
+  });
+
+  revalidatePath("/utilities");
+  revalidatePath("/utilities/statement");
   revalidatePath("/dashboard");
   revalidatePath("/history");
   return undefined;
