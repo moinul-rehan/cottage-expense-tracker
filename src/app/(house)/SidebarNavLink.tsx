@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -20,10 +20,11 @@ export function SidebarNavLink({
 }) {
   const pathname = usePathname();
   const isActive = pathname === href || pathname.startsWith(`${href}/`);
+  const { setOpenMobile } = useSidebar();
 
   return (
     <SidebarMenuButton
-      render={<Link href={href} />}
+      render={<Link href={href} onClick={() => setOpenMobile(false)} />}
       tooltip={label}
       isActive={isActive}
       className={cn(

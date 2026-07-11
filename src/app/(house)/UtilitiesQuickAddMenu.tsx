@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar";
+import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
 import { getDisplayName } from "@/lib/data/display-name";
 
 type Member = { id: string; first_name: string; last_name: string | null };
@@ -39,6 +39,7 @@ export function UtilitiesQuickAddMenu({
   const [spentBy, setSpentBy] = useState<string>("");
   const [state, action, pending] = useActionState(addCottageCost, undefined);
   const wasPending = useRef(false);
+  const { setOpenMobile } = useSidebar();
 
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
@@ -53,14 +54,19 @@ export function UtilitiesQuickAddMenu({
   return (
     <SidebarMenuSub>
       <SidebarMenuSubItem>
-        <SidebarMenuSubButton onClick={() => setOpen(true)}>
+        <SidebarMenuSubButton
+          onClick={() => {
+            setOpenMobile(false);
+            setOpen(true);
+          }}
+        >
           <Plus />
           Add Cottage Cost
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
       {isSuperAdmin && (
         <SidebarMenuSubItem>
-          <SidebarMenuSubButton render={<Link href="/utilities/statement" />}>
+          <SidebarMenuSubButton render={<Link href="/utilities/statement" onClick={() => setOpenMobile(false)} />}>
             <FileText />
             Generate Utility Statement
           </SidebarMenuSubButton>

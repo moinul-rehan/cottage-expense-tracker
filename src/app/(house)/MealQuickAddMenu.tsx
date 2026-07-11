@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus, Wallet, ShoppingBasket, CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar";
+import { SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
 import { BazaarForm } from "./meal/BazaarForm";
 import { DailyMealForm } from "./meal/DailyMealForm";
 import { DepositForm } from "./meal/DepositForm";
@@ -25,18 +25,24 @@ export function MealQuickAddMenu({
   canAddDeposit: boolean;
 }) {
   const [open, setOpen] = useState<"meal" | "deposit" | "bazaar" | null>(null);
+  const { setOpenMobile } = useSidebar();
+
+  function openDialog(dialog: "meal" | "deposit" | "bazaar") {
+    setOpenMobile(false);
+    setOpen(dialog);
+  }
 
   return (
     <SidebarMenuSub>
       <SidebarMenuSubItem>
-        <SidebarMenuSubButton render={<Link href="/meal/month-details" />}>
+        <SidebarMenuSubButton render={<Link href="/meal/month-details" onClick={() => setOpenMobile(false)} />}>
           <CalendarDays />
           Month Details
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
       {canAddMeals && (
         <SidebarMenuSubItem>
-          <SidebarMenuSubButton onClick={() => setOpen("meal")}>
+          <SidebarMenuSubButton onClick={() => openDialog("meal")}>
             <Plus />
             Add Meal
           </SidebarMenuSubButton>
@@ -44,7 +50,7 @@ export function MealQuickAddMenu({
       )}
       {canAddDeposit && (
         <SidebarMenuSubItem>
-          <SidebarMenuSubButton onClick={() => setOpen("deposit")}>
+          <SidebarMenuSubButton onClick={() => openDialog("deposit")}>
             <Wallet />
             Add Meal Deposit
           </SidebarMenuSubButton>
@@ -52,7 +58,7 @@ export function MealQuickAddMenu({
       )}
       {canAddBazaar && (
         <SidebarMenuSubItem>
-          <SidebarMenuSubButton onClick={() => setOpen("bazaar")}>
+          <SidebarMenuSubButton onClick={() => openDialog("bazaar")}>
             <ShoppingBasket />
             Add Meal Cost
           </SidebarMenuSubButton>

@@ -16,6 +16,7 @@ import { UtilitiesQuickAddMenu } from "./UtilitiesQuickAddMenu";
 import { SidebarNavLink } from "./SidebarNavLink";
 import { NotificationTray } from "./NotificationTray";
 import { ProfileMenu } from "./ProfileMenu";
+import { MobileSidebarTrigger } from "./MobileSidebarTrigger";
 import {
   Sidebar,
   SidebarContent,
@@ -100,9 +101,20 @@ export default async function HouseLayout({
         </SidebarContent>
       </Sidebar>
       <SidebarInset className="bg-background">
-        <header className="flex items-center justify-between gap-3 px-8 py-6">
-          <div className="flex min-w-0 flex-1 flex-col leading-tight">
-            <span className="flex items-center gap-1.5 truncate text-2xl font-bold text-foreground">
+        <header className="flex flex-col gap-3 px-4 py-4 sm:px-8 sm:py-6">
+          <div className="flex items-center justify-between gap-3">
+            <MobileSidebarTrigger />
+            <div className="flex shrink-0 items-center gap-2.5 ml-auto">
+              <NotificationTray notifications={notifications} unreadCount={unreadCount} />
+              <ProfileMenu
+                name={getDisplayName(profile)}
+                avatarUrl={profile.avatar_url}
+                initial={profile.first_name[0]?.toUpperCase() ?? "?"}
+              />
+            </div>
+          </div>
+          <div className="flex min-w-0 flex-col leading-tight">
+            <span className="flex items-center gap-1.5 truncate text-xl font-bold text-foreground sm:text-2xl">
               Welcome, {getDisplayName(profile)}
               <VerifiedBadge
                 role={profile.role}
@@ -111,20 +123,12 @@ export default async function HouseLayout({
                 can_add_meals={profile.can_add_meals}
               />
             </span>
-            <span className="hidden truncate text-sm text-muted-foreground sm:block">
+            <span className="truncate text-sm text-muted-foreground">
               Here&apos;s where things stand for {formatMonthKey(activeMonthKey)}.
             </span>
           </div>
-          <div className="flex shrink-0 items-center gap-2.5">
-            <NotificationTray notifications={notifications} unreadCount={unreadCount} />
-            <ProfileMenu
-              name={getDisplayName(profile)}
-              avatarUrl={profile.avatar_url}
-              initial={profile.first_name[0]?.toUpperCase() ?? "?"}
-            />
-          </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-8 pb-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-8">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
