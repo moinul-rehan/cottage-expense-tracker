@@ -186,6 +186,7 @@ export async function addUtilityDeposit(
   const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
 
   const { error } = await supabase.from("utility_deposits").insert({
+    cottage_id: profile.cottage_id,
     month_key: activeMonthKey,
     user_id: userId,
     amount,
@@ -195,7 +196,7 @@ export async function addUtilityDeposit(
   });
 
   if (error) {
-    return { error: "Could not save the deposit." };
+    return { error: `Could not save the deposit: ${error.message}` };
   }
 
   await notifyUsers(supabase, profile.cottage_id, [userId], {
