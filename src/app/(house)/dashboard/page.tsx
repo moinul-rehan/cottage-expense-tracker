@@ -13,21 +13,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
+const statCardTones = {
+  blue: "bg-[#DDE7F8] text-[#1358D0]",
+  green: "bg-[#63B64E]/15 text-[#63B64E]",
+  orange: "bg-[#FA9033]/15 text-[#FA9033]",
+  red: "bg-[#FF4F4F]/15 text-[#FF4F4F]",
+} as const;
+
 function StatCard({
   label,
   value,
   hint,
   icon: Icon,
+  tone = "blue",
 }: {
   label: string;
   value: string;
   hint?: string;
   icon: LucideIcon;
+  tone?: keyof typeof statCardTones;
 }) {
   return (
     <Card className="flex-row items-center gap-4 rounded-2xl p-5">
-      <div className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl bg-accent">
-        <Icon className="size-6 text-accent-foreground" />
+      <div className={cn("flex size-[54px] shrink-0 items-center justify-center rounded-2xl", statCardTones[tone])}>
+        <Icon className="size-6" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
         <p className="truncate text-sm text-muted-foreground">{label}</p>
@@ -87,18 +96,21 @@ export default async function DashboardPage() {
           </Card>
           <StatCard
             icon={Wallet}
+            tone="blue"
             label="Total to pay"
             value={`${totalToPay.toFixed(2)} tk`}
             hint="All utility costs owed this month"
           />
           <StatCard
             icon={HandCoins}
+            tone="green"
             label="Already paid"
             value={`${myDue.paid.toFixed(2)} tk`}
             hint="Settled so far this month"
           />
           <StatCard
             icon={Receipt}
+            tone="orange"
             label="Balance / due"
             value={`${myDue.due.toFixed(2)} tk`}
             hint="Total to pay minus already paid"
@@ -111,12 +123,23 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             icon={UtensilsCrossed}
+            tone="blue"
             label="Meal rate"
             value={mealRate.toFixed(2)}
             hint="Total bazaar ÷ total meals"
           />
-          <StatCard icon={UtensilsCrossed} label="Total meals" value={String(totalMeals)} />
-          <StatCard icon={ShoppingBasket} label="Total bazaar" value={totalBazaar.toFixed(2)} />
+          <StatCard
+            icon={UtensilsCrossed}
+            tone="green"
+            label="Total meals"
+            value={String(totalMeals)}
+          />
+          <StatCard
+            icon={ShoppingBasket}
+            tone="orange"
+            label="Total bazaar"
+            value={totalBazaar.toFixed(2)}
+          />
         </div>
       </div>
 
