@@ -214,6 +214,24 @@ export async function getAmountOwedToUser(
   return frontedByOthers - receivedTotal;
 }
 
+export type DefaultCostRow = { id: string; user_id: string; amount: number; notes: string | null };
+
+/** Admin-configured per-member default costs (Internet, Servant, etc — same every month), grouped by category. */
+export async function getDefaultCosts(supabase: SupabaseClient, cottageId: string) {
+  const { data } = await supabase
+    .from("default_costs")
+    .select("id, category, user_id, amount, notes")
+    .eq("cottage_id", cottageId);
+
+  const byCategory = new Map<string, DefaultCostRow[]>();
+  for (const row of data ?? []) {
+    const list = byCategory.get(row.category) ?? [];
+    list.push({ id: row.id, user_id: row.user_id, amount: Number(row.amount), notes: row.notes });
+    byCategory.set(row.category, list);
+  }
+  return byCategory;
+}
+
 /** Current Cottage Balance for a cottage (sum of in/out transactions). */
 export async function getCottageBalance(supabase: SupabaseClient, cottageId: string) {
   const { data } = await supabase

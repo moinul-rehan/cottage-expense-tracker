@@ -4,6 +4,7 @@ import { useActionState, useMemo, useState } from "react";
 import { addExpense } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -145,7 +146,7 @@ export function AddExpenseForm({
             </div>
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <Label htmlFor="description">Description</Label>
-              <Input id="description" name="description" placeholder="Optional" />
+              <Textarea id="description" name="description" placeholder="Optional" />
             </div>
           </div>
 

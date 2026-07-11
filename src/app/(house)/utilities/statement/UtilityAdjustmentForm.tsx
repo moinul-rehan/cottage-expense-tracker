@@ -25,9 +25,11 @@ const CATEGORY_OPTIONS = Object.entries(UTILITY_CATEGORY_LABELS).filter(([value]
 export function UtilityAdjustmentForm({
   members,
   monthKey,
+  defaultCosts = {},
 }: {
   members: Member[];
   monthKey: string;
+  defaultCosts?: Record<string, Record<string, number>>;
 }) {
   const [state, action, pending] = useActionState(addUtilityAdjustment, undefined);
 
@@ -38,6 +40,26 @@ export function UtilityAdjustmentForm({
   const [splitMode, setSplitMode] = useState<"equal" | "custom">("equal");
   const [targetUserId, setTargetUserId] = useState("");
   const [customShares, setCustomShares] = useState<Record<string, string>>({});
+
+  function handleCategoryChange(value: string) {
+    setCategory(value);
+    const defaults = defaultCosts[value];
+    if (!defaults) return;
+
+    const shares: Record<string, string> = {};
+    let total = 0;
+    for (const m of members) {
+      const share = defaults[m.id] ?? 0;
+      if (share > 0) shares[m.id] = String(share);
+      total += share;
+    }
+    if (total <= 0) return;
+
+    setApplyTo("all");
+    setSplitMode("custom");
+    setCustomShares(shares);
+    setAmount(String(Math.round(total * 100) / 100));
+  }
 
   const totalAmount = Number(amount) || 0;
   const customTotal = useMemo(
@@ -59,7 +81,7 @@ export function UtilityAdjustmentForm({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label>Category</Label>
-              <Select name="category" value={category} onValueChange={(v) => setCategory(v ?? "electricity")}>
+              <Select name="category" value={category} onValueChange={(v) => handleCategoryChange(v ?? "electricity")}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>

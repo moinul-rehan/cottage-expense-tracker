@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/data/dal";
 import { Button } from "@/components/ui/button";
 
 const memberLinks = [{ href: "/settings/profile", label: "Profile" }];
-const adminLinks = [{ href: "/settings/rent", label: "Rent" }];
+const adminLinks = [{ href: "/settings/rent", label: "Default Cost" }];
 const trailingLinks = [{ href: "/settings/security", label: "Security" }];
 
 export default async function SettingsLayout({

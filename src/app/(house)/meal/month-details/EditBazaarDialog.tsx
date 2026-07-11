@@ -5,6 +5,7 @@ import { Pencil } from "lucide-react";
 import { updateBazaarEntry } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -53,7 +54,7 @@ export function EditBazaarDialog({
             </div>
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <Label htmlFor={`description_${id}`}>Description</Label>
-              <Input id={`description_${id}`} name="description" defaultValue={description ?? ""} placeholder="Optional" />
+              <Textarea id={`description_${id}`} name="description" defaultValue={description ?? ""} placeholder="Optional" />
             </div>
           </div>
           {state?.error && <p className="text-sm text-destructive">{state.error}</p>}

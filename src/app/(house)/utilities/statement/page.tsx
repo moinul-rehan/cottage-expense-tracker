@@ -4,6 +4,7 @@ import {
   getExpenseSharesByCategoryForMonth,
   getMemberCategoryBreakdown,
   getMonthlyDues,
+  getDefaultCosts,
 } from "@/lib/data/finance";
 import { getUtilityCarryIns } from "@/lib/data/meal";
 import { getActiveMonthKey, formatMonthKey, previousMonthKey } from "@/lib/data/months";
@@ -18,7 +19,7 @@ export default async function UtilityStatementPage() {
   const supabase = await createClient();
   const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
 
-  const [{ data: members }, expenseTotals, dues, carryIns, adjustmentsQuery] = await Promise.all([
+  const [{ data: members }, expenseTotals, dues, carryIns, adjustmentsQuery, defaultCosts] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, first_name, last_name")
@@ -33,7 +34,15 @@ export default async function UtilityStatementPage() {
       .eq("cottage_id", profile.cottage_id)
       .eq("month_key", monthKey)
       .order("created_at"),
+    getDefaultCosts(supabase, profile.cottage_id),
   ]);
+
+  const defaultCostsByCategory = Object.fromEntries(
+    Array.from(defaultCosts.entries()).map(([category, rows]) => [
+      category,
+      Object.fromEntries(rows.map((r) => [r.user_id, r.amount])),
+    ])
+  );
 
   const adjustmentsByUser = new Map<string, { id: string; category: string; amount: number }[]>();
   for (const row of adjustmentsQuery.data ?? []) {
@@ -55,7 +64,7 @@ export default async function UtilityStatementPage() {
         </p>
       </div>
 
-      <UtilityAdjustmentForm members={members ?? []} monthKey={monthKey} />
+      <UtilityAdjustmentForm members={members ?? []} monthKey={monthKey} defaultCosts={defaultCostsByCategory} />
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-foreground">Member statements</h2>

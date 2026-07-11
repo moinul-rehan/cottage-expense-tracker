@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { recordSettlement } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -71,7 +72,7 @@ export function SettleForm({
             </Select>
             <Input name="amount" type="number" step="0.01" min="0.01" placeholder="Amount" required />
             <Input name="settled_on" type="date" defaultValue={defaultDate} />
-            <Input name="note" placeholder="Note (optional)" className="sm:col-span-2" />
+            <Textarea name="note" placeholder="Note (optional)" className="sm:col-span-2" />
           </div>
           {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
           <Button type="submit" disabled={pending} className="self-start">

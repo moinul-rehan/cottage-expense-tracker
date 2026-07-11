@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { addMealDeposit } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -65,7 +66,7 @@ export function DepositForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="note">Note</Label>
-          <Input id="note" name="note" placeholder="Optional" />
+          <Textarea id="note" name="note" placeholder="Optional" />
         </div>
       </div>
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
