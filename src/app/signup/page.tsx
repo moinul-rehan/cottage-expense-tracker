@@ -27,7 +27,7 @@ export default function SignupPage() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 120% at 20% 10%, #4A82E0 0%, #1358D0 45%, #0A2C68 100%)",
+              "radial-gradient(120% 120% at 20% 10%, #F0A98C 0%, #DE7356 45%, #6B2A18 100%)",
           }}
         />
         <div className="relative flex flex-col gap-6 text-white">

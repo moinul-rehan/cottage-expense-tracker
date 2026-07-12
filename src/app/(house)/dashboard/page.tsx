@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 const statCardTones = {
-  blue: "bg-[#DDE7F8] text-[#1358D0]",
+  blue: "bg-[#FBEAE5] text-[#DE7356]",
   green: "bg-[#63B64E]/15 text-[#63B64E]",
   orange: "bg-[#FA9033]/15 text-[#FA9033]",
   red: "bg-[#FF4F4F]/15 text-[#FF4F4F]",
@@ -95,12 +95,12 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       {myBazaarDuty && (
-        <Card className="flex-row items-center gap-4 rounded-2xl border-none bg-[#DDE7F8] p-5">
-          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl bg-white/60 text-[#1358D0]">
+        <Card className="flex-row items-center gap-4 rounded-2xl border-none bg-[#FBEAE5] p-5">
+          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl bg-white/60 text-[#DE7356]">
             <ShoppingBasket className="size-6" />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-sm font-medium text-[#1358D0]">Your bazaar duty</p>
+            <p className="text-sm font-medium text-[#DE7356]">Your bazaar duty</p>
             <p className="text-lg font-semibold text-foreground">
               {formatDutyRange(myBazaarDuty.start_date, myBazaarDuty.end_date)}
             </p>

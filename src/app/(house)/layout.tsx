@@ -105,7 +105,7 @@ export default async function HouseLayout({
         </SidebarContent>
       </Sidebar>
       <SidebarInset className="bg-background">
-        <header className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-6">
+        <header className="sticky top-0 z-20 flex flex-col gap-3 border-b border-border bg-background px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-6">
           <div className="flex items-center justify-between gap-3 sm:hidden">
             <MobileSidebarTrigger />
             <div className="flex shrink-0 items-center gap-2.5">
