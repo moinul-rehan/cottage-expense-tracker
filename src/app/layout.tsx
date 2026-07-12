@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,23 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Cottage",
   description: "Shared-house expense manager for every Cottage",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cottage",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2454E0",
 };
 
 export default function RootLayout({
