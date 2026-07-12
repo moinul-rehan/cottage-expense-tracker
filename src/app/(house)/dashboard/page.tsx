@@ -7,6 +7,7 @@ import { getMemberMealSummary } from "@/lib/data/meal";
 import { getMyNextBazaarDuty } from "@/lib/data/bazaar-duty";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -23,12 +24,14 @@ function StatCard({
   hint,
   icon: Icon,
   tone = "blue",
+  paid = false,
 }: {
   label: string;
   value: string;
   hint?: string;
   icon: LucideIcon;
   tone?: keyof typeof statCardTones;
+  paid?: boolean;
 }) {
   return (
     <Card className="flex-row items-center gap-4 rounded-2xl p-5">
@@ -36,7 +39,10 @@ function StatCard({
         <Icon className="size-6" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
-        <p className="truncate text-sm text-muted-foreground">{label}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-sm text-muted-foreground">{label}</p>
+          {paid && <Badge className="bg-emerald-600/15 text-emerald-600">Paid</Badge>}
+        </div>
         <p className="truncate text-xl font-semibold text-foreground">{value}</p>
         {hint && <p className="truncate text-xs text-muted-foreground">{hint}</p>}
       </div>
@@ -63,6 +69,8 @@ export default async function DashboardPage() {
 
   const outstandingFromMembers = Array.from(dues.values()).reduce((sum, d) => sum + Math.max(0, d.due), 0);
   const collectedThisMonth = Array.from(dues.values()).reduce((sum, d) => sum + d.paid, 0);
+  const myDue = dues.get(profile.id) ?? { rent: 0, expenses: 0, paid: 0, due: 0 };
+  const myAssignedCost = myDue.rent + myDue.expenses;
   const { rows: mealRows, mealRate, totalBazaar, totalMeals } = await getMemberMealSummary(
     supabase,
     monthKey,
@@ -116,6 +124,34 @@ export default async function DashboardPage() {
             label="Collected This Month"
             value={`${collectedThisMonth.toFixed(2)} tk`}
             hint="Member Utility Deposits received"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold text-foreground">Your utility summary</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard
+            icon={Receipt}
+            tone="blue"
+            label="Assigned Cost"
+            value={`${myAssignedCost.toFixed(2)} tk`}
+            hint="Your utility costs this month"
+          />
+          <StatCard
+            icon={HandCoins}
+            tone="green"
+            label="Paid"
+            value={`${myDue.paid.toFixed(2)} tk`}
+            hint="Deposits credited toward your due"
+          />
+          <StatCard
+            icon={Wallet}
+            tone={myDue.due > 0 ? "red" : "orange"}
+            label={myDue.due < 0 ? "Advance Balance" : "Remaining Due"}
+            value={`${Math.abs(myDue.due).toFixed(2)} tk`}
+            hint="Assigned Cost minus Paid"
+            paid={myAssignedCost > 0 && myDue.due <= 0}
           />
         </div>
       </div>

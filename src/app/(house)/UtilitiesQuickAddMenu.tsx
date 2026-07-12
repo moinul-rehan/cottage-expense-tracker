@@ -32,14 +32,14 @@ export function UtilitiesQuickAddMenu({
       <SidebarMenuSubItem>
         <SidebarMenuSubButton render={<Link href="/utilities" onClick={() => setOpenMobile(false)} />}>
           <ListTree />
-          Utility Details
+          <span className="truncate">Utility Details</span>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
       {isSuperAdmin && (
         <SidebarMenuSubItem>
           <SidebarMenuSubButton render={<Link href="/utilities/statement" onClick={() => setOpenMobile(false)} />}>
             <FileText />
-            Member Utility Statements
+            <span className="truncate">Utility Statements</span>
           </SidebarMenuSubButton>
         </SidebarMenuSubItem>
       )}
@@ -47,7 +47,7 @@ export function UtilitiesQuickAddMenu({
         <SidebarMenuSubItem>
           <SidebarMenuSubButton onClick={() => go("member-deposit")}>
             <Wallet />
-            Member Utility Deposit
+            <span className="truncate">Member Deposit</span>
           </SidebarMenuSubButton>
         </SidebarMenuSubItem>
       )}
@@ -55,14 +55,14 @@ export function UtilitiesQuickAddMenu({
         <SidebarMenuSubItem>
           <SidebarMenuSubButton onClick={() => go("cottage-deposit")}>
             <HandCoins />
-            Cottage Deposit
+            <span className="truncate">Cottage Deposit</span>
           </SidebarMenuSubButton>
         </SidebarMenuSubItem>
       )}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton render={<Link href="/utilities/history" onClick={() => setOpenMobile(false)} />}>
           <History />
-          Utility History
+          <span className="truncate">Utility History</span>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
 
