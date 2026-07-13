@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { SignupForm } from "./SignupForm";
 import { Logo } from "@/components/logo";
 
@@ -47,11 +48,19 @@ export default async function SignupPage({
         </div>
       </div>
       <div className="relative hidden overflow-hidden bg-primary lg:flex lg:w-[55%] lg:flex-col lg:justify-end lg:p-16">
+        <Image
+          src="/auth-preview.png"
+          alt=""
+          fill
+          priority
+          sizes="55vw"
+          className="object-cover object-top"
+        />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 120% at 20% 10%, #F0A98C 0%, #DE7356 45%, #6B2A18 100%)",
+              "linear-gradient(180deg, rgba(107,42,24,0.05) 0%, rgba(107,42,24,0.35) 45%, rgba(107,42,24,0.92) 82%, #6B2A18 100%)",
           }}
         />
         <div className="relative flex flex-col gap-6 text-white">
