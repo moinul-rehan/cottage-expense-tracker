@@ -53,14 +53,12 @@ export default async function HouseLayout({
     <SidebarProvider className="min-h-0 flex-1 bg-background">
       <Sidebar collapsible="icon" className="border-none">
         <SidebarHeader className="gap-14 px-3 py-8">
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
+          <div className="flex items-center justify-between px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
               <Logo size={32} />
-              <span className="text-2xl font-bold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
-                Cottage
-              </span>
+              <span className="text-2xl font-bold tracking-tight text-foreground">Cottage</span>
             </div>
-            <SidebarTrigger className="group-data-[collapsible=icon]:hidden" />
+            <SidebarTrigger />
           </div>
         </SidebarHeader>
         <SidebarContent className="gap-10 px-3">

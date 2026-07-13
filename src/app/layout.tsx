@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { InstallPrompt } from "@/components/InstallPrompt";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -37,7 +39,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <InstallPrompt />
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }
