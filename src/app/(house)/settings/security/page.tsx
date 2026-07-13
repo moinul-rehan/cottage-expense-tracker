@@ -1,6 +1,13 @@
+import { createClient } from "@/lib/supabase/server";
 import { PasswordForm } from "./PasswordForm";
 
-export default function SettingsSecurityPage() {
+export default async function SettingsSecurityPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const hasPassword = user?.identities?.some((i) => i.provider === "email") ?? false;
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -8,7 +15,7 @@ export default function SettingsSecurityPage() {
         <p className="mt-1 text-sm text-muted-foreground">Manage your account security.</p>
       </div>
 
-      <PasswordForm />
+      <PasswordForm hasPassword={hasPassword} />
     </div>
   );
 }
