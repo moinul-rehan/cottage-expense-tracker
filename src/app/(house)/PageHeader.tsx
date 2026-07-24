@@ -5,6 +5,7 @@ import { MobileSidebarTrigger } from "./MobileSidebarTrigger";
 import { NotificationTray } from "./NotificationTray";
 import { ProfileMenu } from "./ProfileMenu";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 type Profile = {
@@ -14,6 +15,7 @@ type Profile = {
   can_add_expenses: boolean;
   can_add_bazaar: boolean;
   can_add_meals: boolean;
+  can_add_deposit: boolean;
 };
 
 type Notification = {
@@ -51,6 +53,7 @@ export function PageHeader({
           <MobileSidebarTrigger />
           {isDashboard && (
             <div className="flex shrink-0 items-center gap-2.5">
+              <ThemeToggle />
               <NotificationTray notifications={notifications} unreadCount={unreadCount} />
               <ProfileMenu
                 name={displayName}
@@ -70,6 +73,7 @@ export function PageHeader({
                 can_add_expenses={profile.can_add_expenses}
                 can_add_bazaar={profile.can_add_bazaar}
                 can_add_meals={profile.can_add_meals}
+                can_add_deposit={profile.can_add_deposit}
               />
             </span>
             <span className="truncate text-sm text-muted-foreground">
@@ -81,6 +85,7 @@ export function PageHeader({
 
       {isDashboard && (
         <div className="hidden shrink-0 items-center gap-2.5 sm:flex">
+          <ThemeToggle />
           <NotificationTray notifications={notifications} unreadCount={unreadCount} />
           <ProfileMenu
             name={displayName}

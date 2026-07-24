@@ -1,11 +1,10 @@
-import { Pencil } from "lucide-react";
 import { requireSuperAdmin, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getDefaultCosts } from "@/lib/data/finance";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { DefaultCostForm } from "./DefaultCostForm";
+import { EditDefaultCostButton } from "./EditDefaultCostButton";
 import { DeleteDefaultCostButton } from "./DeleteDefaultCostButton";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function RentPage() {
@@ -46,16 +45,7 @@ export default async function RentPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm">{categoryLabel}</CardTitle>
               <div className="flex items-center gap-2">
-                <DefaultCostForm
-                  members={members ?? []}
-                  editing={{ category, amounts }}
-                  trigger={(open) => (
-                    <Button size="sm" variant="outline" onClick={open}>
-                      <Pencil />
-                      Edit
-                    </Button>
-                  )}
-                />
+                <EditDefaultCostButton members={members ?? []} category={category} amounts={amounts} />
                 <DeleteDefaultCostButton category={category} categoryLabel={categoryLabel} />
               </div>
             </CardHeader>

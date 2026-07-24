@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getMonthlyExpenseHistory, getUtilityDepositHistory } from "@/lib/data/finance";
-import { getActiveMonthKey } from "@/lib/data/months";
+import { getActiveMonthKey, formatMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { Card } from "@/components/ui/card";
 import {
@@ -46,24 +46,28 @@ export default async function UtilityHistoryPage({
   const memberDeposits = deposits.filter((d) => d.source_type === "member");
   const cottageDeposits = deposits.filter((d) => d.source_type === "addition");
 
+  const canDownloadHistory = profile.role === "super_admin" || profile.can_add_expenses;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Utility History — {monthKey}</h1>
+          <h1 className="text-xl font-semibold text-foreground">Utility History — {formatMonthKey(monthKey)}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Read-only record of every utility expense and deposit. No calculations happen here.
           </p>
         </div>
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={<a href="/utilities/history/pdf" download />}
-          className="shrink-0 gap-1.5"
-        >
-          <Download className="size-4" />
-          Download PDF
-        </Button>
+        {canDownloadHistory && (
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<a href="/utilities/history/pdf" download />}
+            className="shrink-0 gap-1.5"
+          >
+            <Download className="size-4" />
+            Download PDF
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-1 text-sm">
@@ -112,7 +116,7 @@ export default async function UtilityHistoryPage({
               {!expenses.length && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
-                    No utility expenses for {monthKey} yet.
+                    No utility expenses for {formatMonthKey(monthKey)} yet.
                   </TableCell>
                 </TableRow>
               )}
@@ -147,7 +151,7 @@ export default async function UtilityHistoryPage({
               {!memberDeposits.length && (
                 <TableRow>
                   <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
-                    No Member Utility Deposits for {monthKey} yet.
+                    No Member Utility Deposits for {formatMonthKey(monthKey)} yet.
                   </TableCell>
                 </TableRow>
               )}
@@ -177,7 +181,7 @@ export default async function UtilityHistoryPage({
               {!cottageDeposits.length && (
                 <TableRow>
                   <TableCell colSpan={3} className="py-6 text-center text-muted-foreground">
-                    No Cottage Deposits for {monthKey} yet.
+                    No Cottage Deposits for {formatMonthKey(monthKey)} yet.
                   </TableCell>
                 </TableRow>
               )}
