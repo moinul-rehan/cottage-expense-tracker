@@ -28,9 +28,11 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-const topLinks = [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }];
-const bottomLinks = [
+const topLinks = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/notice-board", label: "Notice Board", icon: Pin },
+];
+const bottomLinks = [
   { href: "/members", label: "Members", icon: Users },
   { href: "/months", label: "Months", icon: CalendarRange },
   { href: "/contacts", label: "Contact", icon: Contact },
