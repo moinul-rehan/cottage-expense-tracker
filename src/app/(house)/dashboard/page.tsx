@@ -1,16 +1,21 @@
 import { Wallet, Receipt, HandCoins, UtensilsCrossed, ShoppingBasket } from "lucide-react";
-import { getDisplayName, getCurrentProfile } from "@/lib/data/dal";
+import { getDisplayName, getFullName, getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getCottageBalance, getMonthlyDues, getMonthlyExpenseTotal } from "@/lib/data/finance";
 import { getActiveMonthKey } from "@/lib/data/months";
 import { getMemberMealSummary } from "@/lib/data/meal";
 import { getMyNextBazaarDuty } from "@/lib/data/bazaar-duty";
+import { getNotices } from "@/lib/data/notice-board";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { formatDate } from "@/lib/format-date";
+import { formatMonthKey } from "@/lib/format-month";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UtilityBreakdownDialog } from "./UtilityBreakdownDialog";
+import { NoticeCard } from "../notice-board/NoticeCard";
+import { computeStatus, isEffectivelyPinned, isVisibleTo, sortForDisplay } from "@/lib/notice-types";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -58,7 +63,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
 
-  const [dues, cottageBalance, totalUtilityExpense, { data: members }, myBazaarDuty, myAdjustmentsQuery] =
+  const [dues, cottageBalance, totalUtilityExpense, { data: members }, myBazaarDuty, notices, myAdjustmentsQuery, myDepositsQuery] =
     await Promise.all([
       getMonthlyDues(supabase, profile.cottage_id, monthKey),
       getCottageBalance(supabase, profile.cottage_id),
@@ -69,13 +74,22 @@ export default async function DashboardPage() {
         .eq("is_active", true)
         .order("last_name"),
       getMyNextBazaarDuty(supabase, profile.id),
+      getNotices(supabase, profile.cottage_id),
       supabase
         .from("utility_adjustments")
-        .select("id, category, amount")
+        .select("id, category, amount, created_at")
         .eq("cottage_id", profile.cottage_id)
         .eq("month_key", monthKey)
         .eq("user_id", profile.id)
         .order("created_at"),
+      supabase
+        .from("utility_deposits")
+        .select("id, deposit_date, amount, note")
+        .eq("cottage_id", profile.cottage_id)
+        .eq("month_key", monthKey)
+        .eq("user_id", profile.id)
+        .eq("source_type", "member")
+        .order("deposit_date", { ascending: false }),
     ]);
 
   const outstandingFromMembers = Array.from(dues.values()).reduce((sum, d) => sum + Math.max(0, d.due), 0);
@@ -87,25 +101,61 @@ export default async function DashboardPage() {
     label: UTILITY_CATEGORY_LABELS[a.category] ?? a.category,
     amount: Number(a.amount),
   }));
+  const myAdjustmentLines = (myAdjustmentsQuery.data ?? []).map((a) => ({
+    date: a.created_at,
+    label: UTILITY_CATEGORY_LABELS[a.category] ?? a.category,
+    amount: Number(a.amount),
+  }));
+  const myDepositLines = (myDepositsQuery.data ?? []).map((d) => ({
+    date: d.deposit_date,
+    note: d.note,
+    amount: Number(d.amount),
+  }));
   const { rows: mealRows, mealRate, totalBazaar, totalMeals } = await getMemberMealSummary(
     supabase,
     monthKey,
     members ?? []
   );
 
+  const membersById = new Map((members ?? []).map((m) => [m.id, m]));
+  const pinnedNotices = sortForDisplay(
+    notices.filter(
+      (n) => computeStatus(n) === "published" && isEffectivelyPinned(n) && isVisibleTo(n, profile)
+    )
+  );
+  const shownNotices = pinnedNotices.slice(0, 3);
+
   return (
     <div className="flex flex-col gap-8">
+      {!!shownNotices.length && (
+        <div>
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="text-lg font-semibold text-foreground">📌 Pinned Notices</h2>
+            {pinnedNotices.length > 3 && (
+              <Link href="/notice-board" className="text-xs font-semibold text-accent-foreground hover:underline">
+                View all notices ({pinnedNotices.length}) →
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {shownNotices.map((n) => (
+              <NoticeCard key={n.id} notice={n} membersById={membersById} profile={profile} context="dashboard" />
+            ))}
+          </div>
+        </div>
+      )}
+
       {myBazaarDuty && (
-        <Card className="flex-row items-center gap-4 rounded-2xl border-none bg-[#FBEAE5] p-5">
-          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl bg-white/60 text-[#DE7356]">
+        <Card className="flex-row items-center gap-4 rounded-2xl border-none bg-accent p-5">
+          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl bg-background/60 text-accent-foreground">
             <ShoppingBasket className="size-6" />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-sm font-medium text-[#DE7356]">Your bazaar duty</p>
+            <p className="text-sm font-medium text-foreground">Your bazaar duty</p>
             <p className="text-lg font-semibold text-foreground">
               {formatDutyRange(myBazaarDuty.start_date, myBazaarDuty.end_date)}
             </p>
-            {myBazaarDuty.note && <p className="text-sm text-muted-foreground">{myBazaarDuty.note}</p>}
+            {myBazaarDuty.note && <p className="text-sm text-foreground">{myBazaarDuty.note}</p>}
           </div>
         </Card>
       )}
@@ -152,6 +202,16 @@ export default async function DashboardPage() {
             assignedCost={myAssignedCost}
             paid={myDue.paid}
             due={myDue.due}
+            adjustmentLines={myAdjustmentLines}
+            depositLines={myDepositLines}
+            invoiceMeta={{
+              memberName: getFullName(profile) || getDisplayName(profile),
+              email: profile.email,
+              phone: profile.mobile_number,
+              address: profile.address,
+              avatarUrl: profile.avatar_url,
+              monthLabel: formatMonthKey(monthKey),
+            }}
           />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -207,7 +267,7 @@ export default async function DashboardPage() {
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-foreground">Member meal summary</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {mealRows.map((r) => (
             <Card key={r.id} className="rounded-2xl p-5">
               <CardHeader className="px-0 pt-0 pb-2">

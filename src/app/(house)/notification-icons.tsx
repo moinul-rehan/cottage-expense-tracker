@@ -10,10 +10,12 @@ import {
   RotateCw,
   RotateCcw,
   Trash2,
+  Pin,
   type LucideIcon,
 } from "lucide-react";
 
 export const NOTIFICATION_ICONS: Record<string, LucideIcon> = {
+  notice_posted: Pin,
   utility_adjustment: Receipt,
   utility_adjustment_removed: Trash2,
   utility_expense_credit: Receipt,

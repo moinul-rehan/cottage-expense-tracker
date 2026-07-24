@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   UtensilsCrossed,
   Zap,
+  Pin,
   Users,
   CalendarRange,
   Contact,
@@ -29,6 +30,7 @@ import {
 
 const topLinks = [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }];
 const bottomLinks = [
+  { href: "/notice-board", label: "Notice Board", icon: Pin },
   { href: "/members", label: "Members", icon: Users },
   { href: "/months", label: "Months", icon: CalendarRange },
   { href: "/contacts", label: "Contact", icon: Contact },

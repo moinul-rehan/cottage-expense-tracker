@@ -43,7 +43,7 @@ export function VerifiedBadge({
       <path
         d="M8 12.5l2.5 2.5L16 9"
         fill="none"
-        stroke="#fff"
+        stroke="var(--background)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
