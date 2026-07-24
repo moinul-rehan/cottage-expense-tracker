@@ -6,6 +6,7 @@ import { NotificationTray } from "./NotificationTray";
 import { ProfileMenu } from "./ProfileMenu";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LocalClock } from "@/components/LocalClock";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 type Profile = {
@@ -85,6 +86,7 @@ export function PageHeader({
 
       {isDashboard && (
         <div className="hidden shrink-0 items-center gap-2.5 sm:flex">
+          <LocalClock />
           <ThemeToggle />
           <NotificationTray notifications={notifications} unreadCount={unreadCount} />
           <ProfileMenu
