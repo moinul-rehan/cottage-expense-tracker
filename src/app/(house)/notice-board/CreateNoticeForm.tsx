@@ -50,6 +50,26 @@ export function CreateNoticeForm({
   const [pinDuration, setPinDuration] = useState<PinDuration>("until_manual");
   const [isAnonymous, setIsAnonymous] = useState(false);
 
+  const [publishDate, setPublishDate] = useState("");
+  const [publishTime, setPublishTime] = useState("09:00");
+  const [expireDate, setExpireDate] = useState("");
+  const [expireTime, setExpireTime] = useState("23:59");
+
+  // Built from local <input type="date"/"time"> values here in the browser,
+  // where `new Date(...)` correctly resolves against the visitor's own
+  // timezone — computing this server-side would use the server's timezone
+  // instead and silently publish/expire notices at the wrong wall-clock time.
+  const publishAtIso = useMemo(() => {
+    if (!publishDate) return "";
+    const d = new Date(`${publishDate}T${publishTime || "00:00"}`);
+    return Number.isNaN(d.getTime()) ? "" : d.toISOString();
+  }, [publishDate, publishTime]);
+  const expiresAtIso = useMemo(() => {
+    if (!expireDate) return "";
+    const d = new Date(`${expireDate}T${expireTime || "23:59"}`);
+    return Number.isNaN(d.getTime()) ? "" : d.toISOString();
+  }, [expireDate, expireTime]);
+
   if (!allowedTypes.length) {
     return (
       <Card className="p-4 text-sm text-muted-foreground">
@@ -258,24 +278,29 @@ export function CreateNoticeForm({
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="publish-date">Publish date</Label>
-              <Input id="publish-date" name="publish_date" type="date" />
+              <Input id="publish-date" type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="publish-time">Publish time</Label>
-              <Input id="publish-time" name="publish_time" type="time" defaultValue="09:00" />
+              <Input id="publish-time" type="time" value={publishTime} onChange={(e) => setPublishTime(e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="expire-date">Expire date</Label>
-              <Input id="expire-date" name="expire_date" type="date" />
+              <Input id="expire-date" type="date" value={expireDate} onChange={(e) => setExpireDate(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="expire-time">Expire time</Label>
-              <Input id="expire-time" name="expire_time" type="time" defaultValue="23:59" />
+              <Input id="expire-time" type="time" value={expireTime} onChange={(e) => setExpireTime(e.target.value)} />
             </div>
           </div>
-          <p className="-mt-2 text-xs text-muted-foreground">Leave publish blank to post immediately. Leave expire blank to expire in 7 days.</p>
+          <p className="-mt-2 text-xs text-muted-foreground">Leave publish blank to post immediately. Leave expire blank to expire in 7 days. Times use your device's local timezone.</p>
+          <input type="hidden" name="publish_at" value={publishAtIso} />
+          <input type="hidden" name="expires_at" value={expiresAtIso} />
+          {(publishDate && !publishAtIso) || (expireDate && !expiresAtIso) ? (
+            <p className="text-sm text-destructive">That date/time isn&apos;t valid.</p>
+          ) : null}
 
           {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
 

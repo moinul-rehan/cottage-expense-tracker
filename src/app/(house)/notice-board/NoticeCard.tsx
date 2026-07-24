@@ -127,7 +127,7 @@ export function NoticeCard({
 
       {canManage && (
         <div className="[&_button]:border-black/20 [&_button]:bg-white/50 [&_button]:text-[var(--paper-ink)] [&_button:hover]:bg-white/80">
-          <NoticeCardActions id={notice.id} isPinned={notice.is_pinned} isArchived={status === "archived"} />
+          <NoticeCardActions id={notice.id} isPinned={notice.is_pinned} isScheduled={status === "scheduled"} isArchived={status === "archived"} />
         </div>
       )}
     </div>

@@ -21,14 +21,6 @@ const PRIORITIES: NoticePriority[] = ["critical", "high", "normal", "low"];
 const VISIBILITIES: NoticeVisibility[] = ["everyone", "specific", "selected", "admins"];
 const PIN_DURATIONS: PinDuration[] = ["none", "until_manual", "1d", "3d", "until_date", "until_expires"];
 
-function combineDateTime(date: string, time: string, fallback: Date) {
-  if (!date) return fallback;
-  const [h = "0", m = "0"] = (time || "00:00").split(":");
-  const d = new Date(date + "T00:00:00");
-  d.setHours(Number(h), Number(m), 0, 0);
-  return d;
-}
-
 export async function createNotice(_prevState: CreateNoticeState, formData: FormData): Promise<CreateNoticeState> {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
@@ -43,10 +35,12 @@ export async function createNotice(_prevState: CreateNoticeState, formData: Form
   const pinDuration = (isPinned ? String(formData.get("pin_duration") ?? "until_manual") : "none") as PinDuration;
   const pinUntilDate = String(formData.get("pin_until_date") ?? "") || null;
   const isAnonymous = formData.get("is_anonymous") === "on";
-  const publishDate = String(formData.get("publish_date") ?? "");
-  const publishTime = String(formData.get("publish_time") ?? "");
-  const expireDate = String(formData.get("expire_date") ?? "");
-  const expireTime = String(formData.get("expire_time") ?? "");
+  // Built client-side from the visitor's own local date/time inputs (see
+  // CreateNoticeForm) — the server must not reinterpret these against its
+  // own timezone, or "2pm" typed by the member silently shifts to 2pm
+  // server-time and the notice publishes hours later/earlier than intended.
+  const publishAtRaw = String(formData.get("publish_at") ?? "");
+  const expiresAtRaw = String(formData.get("expires_at") ?? "");
   const dueAmount = formData.get("due_amount") ? Number(formData.get("due_amount")) : null;
   const dueDate = String(formData.get("due_date") ?? "") || null;
   const mealLunch = String(formData.get("meal_lunch") ?? "").trim() || null;
@@ -73,8 +67,11 @@ export async function createNotice(_prevState: CreateNoticeState, formData: Form
   }
 
   const now = new Date();
-  const publishAt = combineDateTime(publishDate, publishTime, now);
-  const expiresAt = combineDateTime(expireDate, expireTime, new Date(publishAt.getTime() + 7 * 24 * 3600 * 1000));
+  const publishAt = publishAtRaw ? new Date(publishAtRaw) : now;
+  const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : new Date(publishAt.getTime() + 7 * 24 * 3600 * 1000);
+  if (Number.isNaN(publishAt.getTime()) || Number.isNaN(expiresAt.getTime())) {
+    return { error: "That date/time isn't valid." };
+  }
   if (expiresAt <= publishAt) return { error: "Expiration must be after the publish time." };
 
   if (targetMemberIds.length) {
@@ -148,6 +145,26 @@ export async function setNoticePinned(id: string, isPinned: boolean) {
       pin_until_date: null,
       updated_at: new Date().toISOString(),
     })
+    .eq("id", id);
+
+  revalidatePath("/notice-board");
+  revalidatePath("/dashboard");
+}
+
+/** Bring a scheduled notice's publish time to now — the fix for notices
+ * scheduled before the publish_at timezone bug (server-time instead of the
+ * creator's local time) that left them stuck as "scheduled" past their
+ * intended time. */
+export async function publishNoticeNow(id: string) {
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+
+  const { data: notice } = await supabase.from("notices").select("created_by").eq("id", id).single();
+  if (!notice || !canManageNotice(profile, notice)) return;
+
+  await supabase
+    .from("notices")
+    .update({ publish_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", id);
 
   revalidatePath("/notice-board");

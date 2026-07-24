@@ -1,24 +1,39 @@
 "use client";
 
 import { useTransition } from "react";
-import { Pin, PinOff, Archive } from "lucide-react";
-import { setNoticePinned, archiveNotice } from "./actions";
+import { Pin, PinOff, Archive, Send } from "lucide-react";
+import { setNoticePinned, archiveNotice, publishNoticeNow } from "./actions";
 import { Button } from "@/components/ui/button";
 
 export function NoticeCardActions({
   id,
   isPinned,
+  isScheduled = false,
   isArchived,
 }: {
   id: string;
   isPinned: boolean;
+  isScheduled?: boolean;
   isArchived: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   if (isArchived) return null;
 
   return (
-    <div className="flex gap-2 border-t border-border pt-3">
+    <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+      {isScheduled && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={() => startTransition(() => publishNoticeNow(id))}
+          className="gap-1.5"
+        >
+          <Send className="size-3.5" />
+          Publish now
+        </Button>
+      )}
       <Button
         type="button"
         variant="outline"
