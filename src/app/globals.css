@@ -81,6 +81,18 @@
   --sidebar-accent-foreground: #DE7356;
   --sidebar-border: #E4E5E8;
   --sidebar-ring: #DE7356;
+
+  /* Notice Board sticky notes: fixed paper colors + a single dark ink,
+   * same in both themes on purpose — these represent physical paper pinned
+   * to a board, not app chrome, so they don't invert with the theme.
+   * --paper-ink clears WCAG AAA (7:1+) against every paper tint below. */
+  --paper-utility: #FFEDB8;
+  --paper-meal: #D8F3D0;
+  --paper-general: #D3E9FA;
+  --paper-emergency: #FFE1DE;
+  --paper-personal: #E9DFFB;
+  --paper-maintenance: #D6F5EE;
+  --paper-ink: #2A2117;
 }
 
 /*

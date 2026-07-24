@@ -8,13 +8,13 @@ export type NoticeStatus = "scheduled" | "published" | "expired" | "archived";
 
 export const NOTICE_TYPE_META: Record<
   NoticeType,
-  { label: string; icon: LucideIcon; chip: string; pin: string; visibilities: NoticeVisibility[]; memberCreatable: boolean }
+  { label: string; icon: LucideIcon; chip: string; paper: string; visibilities: NoticeVisibility[]; memberCreatable: boolean }
 > = {
   utility: {
     label: "Utility Reminder",
     icon: Wallet,
     chip: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-    pin: "bg-amber-500",
+    paper: "bg-[var(--paper-utility)]",
     visibilities: ["specific", "selected"],
     memberCreatable: false,
   },
@@ -22,7 +22,7 @@ export const NOTICE_TYPE_META: Record<
     label: "Meal Plan",
     icon: UtensilsCrossed,
     chip: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
-    pin: "bg-emerald-500",
+    paper: "bg-[var(--paper-meal)]",
     visibilities: ["everyone", "selected"],
     memberCreatable: true,
   },
@@ -30,7 +30,7 @@ export const NOTICE_TYPE_META: Record<
     label: "General Notice",
     icon: Megaphone,
     chip: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
-    pin: "bg-sky-500",
+    paper: "bg-[var(--paper-general)]",
     visibilities: ["everyone", "selected"],
     memberCreatable: true,
   },
@@ -38,7 +38,7 @@ export const NOTICE_TYPE_META: Record<
     label: "Emergency",
     icon: TriangleAlert,
     chip: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
-    pin: "bg-red-600",
+    paper: "bg-[var(--paper-emergency)]",
     visibilities: ["everyone", "admins"],
     memberCreatable: false,
   },
@@ -46,7 +46,7 @@ export const NOTICE_TYPE_META: Record<
     label: "Personal Reminder",
     icon: StickyNote,
     chip: "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
-    pin: "bg-violet-500",
+    paper: "bg-[var(--paper-personal)]",
     visibilities: ["specific", "selected"],
     memberCreatable: true,
   },
@@ -54,18 +54,25 @@ export const NOTICE_TYPE_META: Record<
     label: "Maintenance",
     icon: Wrench,
     chip: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300",
-    pin: "bg-teal-500",
+    paper: "bg-[var(--paper-maintenance)]",
     visibilities: ["everyone", "selected"],
     memberCreatable: true,
   },
 };
 
-export const PRIORITY_META: Record<NoticePriority, { label: string; order: number; pill: string }> = {
-  critical: { label: "Critical", order: 0, pill: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" },
-  high: { label: "High", order: 1, pill: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" },
-  normal: { label: "Normal", order: 2, pill: "bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300" },
-  low: { label: "Low", order: 3, pill: "bg-muted text-muted-foreground" },
+export const PRIORITY_META: Record<NoticePriority, { label: string; order: number; pill: string; pin: string }> = {
+  critical: { label: "Critical", order: 0, pill: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300", pin: "bg-red-600" },
+  high: { label: "High", order: 1, pill: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300", pin: "bg-amber-500" },
+  normal: { label: "Normal", order: 2, pill: "bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300", pin: "bg-sky-500" },
+  low: { label: "Low", order: 3, pill: "bg-muted text-muted-foreground", pin: "bg-slate-400" },
 };
+
+/** Deterministic -3..3deg tilt per notice id — stable across re-renders, no layout jitter. */
+export function noticeTilt(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return (Math.abs(h) % 7) - 3;
+}
 
 export const VISIBILITY_LABEL: Record<NoticeVisibility, string> = {
   everyone: "Everyone",
