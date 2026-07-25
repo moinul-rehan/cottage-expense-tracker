@@ -50,14 +50,34 @@ export function PageHeader({
         <SidebarTrigger className="hidden shrink-0 md:inline-flex" />
 
         {isDashboard && (
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2.5 sm:hidden">
-            <ThemeToggle />
-            <NotificationTray notifications={notifications} unreadCount={unreadCount} />
-            <ProfileMenu
-              name={displayName}
-              avatarUrl={profile.avatar_url}
-              initial={profile.first_name[0]?.toUpperCase() ?? "?"}
-            />
+          <div className="flex min-w-0 flex-1 flex-col gap-3 sm:hidden">
+            <div className="flex items-center justify-between gap-3">
+              <LocalClock />
+              <div className="flex items-center gap-2.5">
+                <ThemeToggle />
+                <NotificationTray notifications={notifications} unreadCount={unreadCount} />
+                <ProfileMenu
+                  name={displayName}
+                  avatarUrl={profile.avatar_url}
+                  initial={profile.first_name[0]?.toUpperCase() ?? "?"}
+                />
+              </div>
+            </div>
+            <div className="flex min-w-0 flex-col leading-tight">
+              <span className="flex items-center gap-1.5 truncate text-lg font-bold text-foreground">
+                Welcome, {displayName}
+                <VerifiedBadge
+                  role={profile.role}
+                  can_add_expenses={profile.can_add_expenses}
+                  can_add_bazaar={profile.can_add_bazaar}
+                  can_add_meals={profile.can_add_meals}
+                  can_add_deposit={profile.can_add_deposit}
+                />
+              </span>
+              <span className="truncate text-sm text-muted-foreground">
+                Here&apos;s where things stand for {monthLabel}.
+              </span>
+            </div>
           </div>
         )}
 

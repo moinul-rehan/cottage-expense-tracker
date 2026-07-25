@@ -116,12 +116,14 @@ export function MobileBottomNav({
           label="Home"
           href="/dashboard"
           active={!anySheetOpen && pathname === "/dashboard"}
+          onClick={() => setActiveSheet(null)}
         />
         <NavTab
           icon={Pin}
           label="Notices"
           href="/notice-board"
           active={!anySheetOpen && pathname === "/notice-board"}
+          onClick={() => setActiveSheet(null)}
         />
         <NavTab
           icon={UtensilsCrossed}

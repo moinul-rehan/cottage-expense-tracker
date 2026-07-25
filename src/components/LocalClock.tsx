@@ -34,13 +34,13 @@ export function LocalClock() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   if (!snapshot) {
-    return <span className="hidden h-[42px] w-[104px] shrink-0 rounded-2xl border border-transparent sm:block" aria-hidden />;
+    return <span className="block h-[42px] w-[104px] shrink-0 rounded-2xl border border-transparent" aria-hidden />;
   }
 
   const [time, day] = snapshot.split("|");
 
   return (
-    <div className="hidden shrink-0 flex-col items-center justify-center rounded-2xl border border-border bg-card px-3.5 py-1.5 sm:flex">
+    <div className="flex shrink-0 flex-col items-center justify-center rounded-2xl border border-border bg-card px-3.5 py-1.5">
       <span className="flex items-center gap-1.5 text-sm font-medium text-foreground tabular-nums">
         <Clock className="size-4 text-muted-foreground" />
         {time}

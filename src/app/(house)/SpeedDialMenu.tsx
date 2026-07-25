@@ -13,9 +13,17 @@ export type SpeedDialItem = {
   onClick?: () => void;
 };
 
+const EXPAND_DURATION_MS = 280;
+const COLLAPSE_DURATION_MS = 200;
+const STAGGER_MS = 50;
+const EASE_OUT_BACK = "cubic-bezier(0.34, 1.56, 0.64, 1)"; // slight overshoot on expand
+const EASE_IN_CUBIC = "cubic-bezier(0.32, 0, 0.67, 0)";
+
 /** Radial "speed dial" pop-out for a bottom-nav tab — a stack of pill
  * buttons (icon + label) that cascade in above the tab that triggered
- * them, closest item first, instead of a full bottom sheet. */
+ * them, closest item first, instead of a full bottom sheet. Expand
+ * overshoots slightly (easeOutBack) and staggers 50ms/item; collapse is a
+ * single quick easeInCubic fade with no stagger. */
 export function SpeedDialMenu({
   open,
   onClose,
@@ -31,9 +39,10 @@ export function SpeedDialMenu({
     <>
       <div
         className={cn(
-          "fixed inset-0 z-50 bg-black/10 transition-opacity duration-200 md:hidden",
+          "fixed inset-0 z-50 bg-black/10 transition-opacity md:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
+        style={{ transitionDuration: `${open ? EXPAND_DURATION_MS : COLLAPSE_DURATION_MS}ms` }}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -47,10 +56,14 @@ export function SpeedDialMenu({
       >
         {items.map((item, i) => {
           const rowClassName = cn(
-            "flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg transition-all duration-200 ease-out",
+            "flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg transition-[transform,opacity]",
             open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-3 scale-75 opacity-0"
           );
-          const style = { transitionDelay: open ? `${i * 35}ms` : "0ms" };
+          const style = {
+            transitionDuration: `${open ? EXPAND_DURATION_MS : COLLAPSE_DURATION_MS}ms`,
+            transitionTimingFunction: open ? EASE_OUT_BACK : EASE_IN_CUBIC,
+            transitionDelay: open ? `${i * STAGGER_MS}ms` : "0ms",
+          };
           const content = (
             <>
               <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-full", item.colorClass)}>
