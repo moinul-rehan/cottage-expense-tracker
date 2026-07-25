@@ -48,7 +48,9 @@ export const NOTICE_TYPE_META: Record<
     chip: "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
     paper: "bg-[var(--paper-personal)]",
     visibilities: ["specific", "selected"],
-    memberCreatable: true,
+    // Super-admin-only: a Personal Reminder is admin-to-member ("pay your
+    // share today"), never member-to-member.
+    memberCreatable: false,
   },
   maintenance: {
     label: "Maintenance",
@@ -56,7 +58,7 @@ export const NOTICE_TYPE_META: Record<
     chip: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300",
     paper: "bg-[var(--paper-maintenance)]",
     visibilities: ["everyone", "selected"],
-    memberCreatable: true,
+    memberCreatable: false,
   },
 };
 
