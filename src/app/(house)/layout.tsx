@@ -127,7 +127,14 @@ export default async function HouseLayout({
         />
         <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-24 sm:px-8 sm:pb-8 xl:px-12">{children}</main>
       </SidebarInset>
-      <MobileBottomNav />
+      <MobileBottomNav
+        members={members ?? []}
+        defaultDate={defaultDate}
+        canAddBazaar={profile.role === "super_admin" || profile.can_add_bazaar}
+        canAddMeals={profile.role === "super_admin" || profile.can_add_meals}
+        canAddDeposit={profile.role === "super_admin" || profile.can_add_deposit}
+        isSuperAdmin={profile.role === "super_admin"}
+      />
     </SidebarProvider>
   );
 }
