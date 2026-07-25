@@ -5,7 +5,7 @@ import { getNotices } from "@/lib/data/notice-board";
 import { NOTICE_TYPE_META, PRIORITY_META, VISIBILITY_LABEL, canCreateAnyNotice, computeStatus, sortForDisplay } from "@/lib/notice-types";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDateTime } from "@/lib/format-date";
+import { LocalDateTime } from "@/components/LocalDateTime";
 import { cn } from "@/lib/utils";
 import { NoticeFeedList } from "./NoticeFeedList";
 import { NoticeCard } from "./NoticeCard";
@@ -133,8 +133,8 @@ export default async function NoticeBoardPage({
                       {creator}
                       {n.is_anonymous && <span className="ml-1 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">anon</span>}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDateTime(n.publish_at)}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDateTime(n.expires_at)}</TableCell>
+                    <TableCell className="text-muted-foreground"><LocalDateTime iso={n.publish_at} /></TableCell>
+                    <TableCell className="text-muted-foreground"><LocalDateTime iso={n.expires_at} /></TableCell>
                     <TableCell className="text-muted-foreground">{VISIBILITY_LABEL[n.visibility]}</TableCell>
                     <TableCell>
                       <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold uppercase", PRIORITY_META[n.priority].pill)}>

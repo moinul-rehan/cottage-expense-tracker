@@ -38,6 +38,14 @@ function plusDaysLocal(days: number) {
   d.setDate(d.getDate() + days);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+function previewLocal(ms: number) {
+  const d = new Date(ms);
+  return (
+    d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) +
+    ", " +
+    d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+  );
+}
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -98,6 +106,19 @@ export function CreateNoticeForm({
     const d = new Date(`${expireDate}T${expireTime || "23:59"}`);
     return Number.isNaN(d.getTime()) ? "" : d.toISOString();
   }, [expireMode, expireDate, expireTime]);
+
+  // Live preview so the creator can see exactly what will be submitted,
+  // in their own local time, before publishing — catches mismatched
+  // dates/times immediately instead of discovering them on the board.
+  const effectivePublishMs = publishMode === "now" ? Date.now() : publishAtIso ? new Date(publishAtIso).getTime() : NaN;
+  const effectiveExpireMs =
+    expireMode === "custom"
+      ? expiresAtIso
+        ? new Date(expiresAtIso).getTime()
+        : NaN
+      : Number.isFinite(effectivePublishMs)
+        ? effectivePublishMs + 7 * 24 * 3600 * 1000
+        : NaN;
 
   if (!allowedTypes.length) {
     return (
@@ -322,7 +343,21 @@ export function CreateNoticeForm({
                 </div>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">Times use your device&apos;s local timezone.</p>
+            <div className="rounded-lg bg-muted/50 p-2.5 text-xs text-muted-foreground">
+              {Number.isFinite(effectivePublishMs) && (
+                <p>
+                  Will publish <b className="text-foreground">{publishMode === "now" ? "immediately" : previewLocal(effectivePublishMs)}</b>
+                  {Number.isFinite(effectiveExpireMs) && (
+                    <>
+                      {" "}
+                      and expire <b className="text-foreground">{previewLocal(effectiveExpireMs)}</b>
+                    </>
+                  )}
+                  {" "}
+                  — your device&apos;s local time.
+                </p>
+              )}
+            </div>
             <input type="hidden" name="publish_at" value={publishAtIso} />
             <input type="hidden" name="expires_at" value={expiresAtIso} />
             {(publishMode === "later" && publishDate && !publishAtIso) ||

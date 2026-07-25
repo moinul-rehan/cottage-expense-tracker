@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
+import { TriangleAlert } from "lucide-react";
 import { getDisplayName } from "@/lib/data/display-name";
-import { formatDate, formatDateTime } from "@/lib/format-date";
+import { formatDate } from "@/lib/format-date";
+import { LocalDateTime } from "@/components/LocalDateTime";
 import { cn } from "@/lib/utils";
 import {
   NOTICE_TYPE_META,
@@ -42,6 +44,7 @@ export function NoticeCard({
 
   const tilt = pinned ? noticeTilt(notice.id) : 0;
   const ink = "text-[var(--paper-ink)]";
+  const isCritical = notice.priority === "critical";
 
   return (
     <div
@@ -49,14 +52,22 @@ export function NoticeCard({
         "relative flex flex-col gap-2.5 rounded-sm p-4 pt-5 text-[var(--paper-ink)] shadow-[0_10px_18px_-10px_rgba(20,10,0,.45),0_2px_4px_rgba(20,10,0,.18)] transition-transform [transform:rotate(var(--tilt))] hover:z-10 hover:[transform:translateY(-2px)_rotate(0deg)]",
         meta.paper,
         status === "scheduled" && "opacity-60 saturate-[.6]",
-        notice.type === "emergency" && "border-t-4 border-t-red-600"
+        notice.type === "emergency" && "border-t-4 border-t-red-600",
+        isCritical && "pt-9 ring-2 ring-red-600 ring-offset-2 ring-offset-background"
       )}
       style={{ "--tilt": `${tilt}deg` } as CSSProperties}
     >
+      {isCritical && (
+        <div className="absolute inset-x-0 top-0 flex items-center justify-center gap-1 bg-red-600 py-1 text-[10px] font-extrabold tracking-wider text-white uppercase">
+          <TriangleAlert className="size-3" />
+          Critical
+        </div>
+      )}
+
       {/* folded corner */}
       <span className="absolute right-0 bottom-0 size-0 border-r-[16px] border-b-[16px] border-r-transparent border-b-black/15" aria-hidden />
 
-      {pinned && (
+      {pinned && !isCritical && (
         <span
           className="absolute -top-2 left-1/2 size-4 -translate-x-1/2 rounded-full after:absolute after:top-full after:left-1/2 after:h-1.5 after:w-px after:-translate-x-1/2 after:bg-black/25"
           title={`${PRIORITY_META[notice.priority].label} priority — pinned to dashboard`}
@@ -110,10 +121,14 @@ export function NoticeCard({
         <span>{creatorName}</span>
         <span aria-hidden>·</span>
         <span>
-          {status === "scheduled" ? `publishes ${formatDateTime(notice.publish_at)}` : formatDateTime(notice.created_at)}
+          {status === "scheduled" ? "publishes " : "published "}
+          <LocalDateTime iso={notice.publish_at} />
         </span>
         <span aria-hidden>·</span>
-        <span>{status === "expired" ? `Expired ${formatDateTime(notice.expires_at)}` : `Expires ${formatDateTime(notice.expires_at)}`}</span>
+        <span>
+          {status === "expired" ? "Expired " : "Expires "}
+          <LocalDateTime iso={notice.expires_at} />
+        </span>
         {notice.visibility !== "everyone" && (
           <>
             <span aria-hidden>·</span>
