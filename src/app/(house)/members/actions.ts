@@ -53,6 +53,7 @@ export async function inviteMember(
       can_add_bazaar: false,
       can_add_meals: false,
       can_add_deposit: false,
+      can_add_notice: false,
     })
     .eq("id", data.user.id);
 
@@ -93,6 +94,14 @@ export async function setCanAddDeposit(userId: string, canAddDeposit: boolean) {
   const supabase = await createClient();
   await supabase.from("profiles").update({ can_add_deposit: canAddDeposit }).eq("id", userId);
   revalidatePath("/members");
+}
+
+export async function setCanAddNotice(userId: string, canAddNotice: boolean) {
+  await requireSuperAdmin();
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ can_add_notice: canAddNotice }).eq("id", userId);
+  revalidatePath("/members");
+  revalidatePath("/notice-board");
 }
 
 export type AssignBazaarDutyState = { error?: string; success?: string } | undefined;

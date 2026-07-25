@@ -6,6 +6,7 @@ type BadgeProfile = {
   can_add_bazaar?: boolean;
   can_add_meals?: boolean;
   can_add_deposit?: boolean;
+  can_add_notice?: boolean;
 };
 
 /** Whether a member (not the super admin) has been granted any manager-style permission. */
@@ -14,12 +15,14 @@ export function hasElevatedAccess(permissions: {
   can_add_bazaar?: boolean;
   can_add_meals?: boolean;
   can_add_deposit?: boolean;
+  can_add_notice?: boolean;
 }) {
   return Boolean(
     permissions.can_add_expenses ||
       permissions.can_add_bazaar ||
       permissions.can_add_meals ||
-      permissions.can_add_deposit
+      permissions.can_add_deposit ||
+      permissions.can_add_notice
   );
 }
 

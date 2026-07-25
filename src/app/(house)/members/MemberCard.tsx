@@ -9,6 +9,7 @@ import {
   setCanAddBazaar,
   setCanAddMeals,
   setCanAddDeposit,
+  setCanAddNotice,
   assignBazaarDuty,
   removeBazaarDuty,
   removeMember,
@@ -53,6 +54,7 @@ type Member = {
   can_add_bazaar: boolean;
   can_add_meals: boolean;
   can_add_deposit: boolean;
+  can_add_notice: boolean;
 };
 
 type Duty = { id: string; start_date: string; end_date: string; note: string | null };
@@ -87,6 +89,7 @@ export function MemberCard({
                 can_add_bazaar={member.can_add_bazaar}
                 can_add_meals={member.can_add_meals}
                 can_add_deposit={member.can_add_deposit}
+                can_add_notice={member.can_add_notice}
               />
             </span>
             <span className="text-xs text-muted-foreground">
@@ -194,6 +197,12 @@ export function MemberCard({
                 onCheckedChange={(v) => startTransition(() => setCanAddDeposit(member.id, v))}
               >
                 Add meal deposit
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={member.can_add_notice}
+                onCheckedChange={(v) => startTransition(() => setCanAddNotice(member.id, v))}
+              >
+                Create notices
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
