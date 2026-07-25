@@ -1,18 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { ListTree, FileText, Wallet, HandCoins, History } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { SheetActionRow } from "./SheetActionRow";
+import { SpeedDialMenu, type SpeedDialItem } from "./SpeedDialMenu";
 import { MemberDepositForm } from "./utilities/MemberDepositForm";
 import { CottageDepositForm } from "./utilities/CottageDepositForm";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 
 /** Bottom-nav "Utilities" destination on mobile — mirrors
- * UtilitiesQuickAddMenu's sidebar entry as a tappable bottom sheet. */
+ * UtilitiesQuickAddMenu's sidebar entry as a speed-dial pop-out. */
 export function MobileUtilitiesSheet({
   open,
   onOpenChange,
@@ -26,7 +24,6 @@ export function MobileUtilitiesSheet({
   defaultDate: string;
   isSuperAdmin: boolean;
 }) {
-  const pathname = usePathname();
   const [dialog, setDialog] = useState<"member-deposit" | "cottage-deposit" | null>(null);
 
   function openDialog(next: typeof dialog) {
@@ -34,49 +31,51 @@ export function MobileUtilitiesSheet({
     setDialog(next);
   }
 
+  const items: SpeedDialItem[] = [
+    {
+      key: "utility-history",
+      href: "/utilities/history",
+      label: "Utility History",
+      icon: History,
+      colorClass: "bg-accent text-accent-foreground",
+    },
+    ...(isSuperAdmin
+      ? [
+          {
+            key: "cottage-deposit",
+            label: "Cottage Deposit",
+            icon: HandCoins,
+            colorClass: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300",
+            onClick: () => openDialog("cottage-deposit"),
+          },
+          {
+            key: "member-deposit",
+            label: "Member Deposit",
+            icon: Wallet,
+            colorClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+            onClick: () => openDialog("member-deposit"),
+          },
+          {
+            key: "utility-statements",
+            href: "/utilities/statement",
+            label: "Utility Statements",
+            icon: FileText,
+            colorClass: "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
+          },
+        ]
+      : []),
+    {
+      key: "utility-details",
+      href: "/utilities",
+      label: "Utility Details",
+      icon: ListTree,
+      colorClass: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+    },
+  ];
+
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="bottom"
-          className="rounded-t-2xl data-[side=bottom]:bottom-[calc(5.75rem+env(safe-area-inset-bottom))]"
-        >
-          <SheetHeader>
-            <SheetTitle>Utilities</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col gap-1 px-4 pb-6">
-            <SheetActionRow
-              icon={ListTree}
-              label="Utility Details"
-              href="/utilities"
-              active={pathname === "/utilities"}
-              onClick={() => onOpenChange(false)}
-            />
-            {isSuperAdmin && (
-              <SheetActionRow
-                icon={FileText}
-                label="Utility Statements"
-                href="/utilities/statement"
-                active={pathname === "/utilities/statement"}
-                onClick={() => onOpenChange(false)}
-              />
-            )}
-            {isSuperAdmin && (
-              <SheetActionRow icon={Wallet} label="Member Deposit" onClick={() => openDialog("member-deposit")} />
-            )}
-            {isSuperAdmin && (
-              <SheetActionRow icon={HandCoins} label="Cottage Deposit" onClick={() => openDialog("cottage-deposit")} />
-            )}
-            <SheetActionRow
-              icon={History}
-              label="Utility History"
-              href="/utilities/history"
-              active={pathname === "/utilities/history"}
-              onClick={() => onOpenChange(false)}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="end" />
 
       <Dialog open={dialog === "member-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
         <DialogContent>
