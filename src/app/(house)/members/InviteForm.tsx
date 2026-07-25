@@ -75,11 +75,13 @@ export function InviteForm() {
                 </Select>
               </div>
             </div>
-            {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-            {state?.success && <p className="text-sm text-emerald-600">{state.success}</p>}
-            <Button type="submit" disabled={pending} className="self-start">
-              {pending ? "Sending invite…" : "Send invite"}
-            </Button>
+            <div className="flex flex-col gap-2 border-t border-border pt-4">
+              {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+              {state?.success && <p className="text-sm text-emerald-600">{state.success}</p>}
+              <Button type="submit" disabled={pending} className="self-start">
+                {pending ? "Sending invite…" : "Send invite"}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

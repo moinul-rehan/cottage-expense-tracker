@@ -5,9 +5,10 @@ import { Plus } from "lucide-react";
 import { saveDefaultCost } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { FormSection } from "@/components/ui/form-section";
 import { getDisplayName } from "@/lib/data/display-name";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 
@@ -52,12 +53,11 @@ export function DefaultCostForm({
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Default Cost" : "Add Default Cost"}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-4 p-4 pt-2">
-            <form action={action} className="flex flex-col gap-4">
+          <form action={action} className="flex flex-col">
+            <div className="flex flex-col gap-5 px-4 pt-1 pb-4">
               <input type="hidden" name="member_ids" value={members.map((m) => m.id).join(",")} />
 
-              <div className="flex flex-col gap-1.5">
-                <Label>Category</Label>
+              <FormSection title="Category">
                 {editing ? (
                   <>
                     <input type="hidden" name="category" value={category} />
@@ -79,34 +79,39 @@ export function DefaultCostForm({
                     </SelectContent>
                   </Select>
                 )}
-              </div>
+              </FormSection>
 
-              <div className="flex flex-col gap-3">
-                <Label>Split among members</Label>
-                {members.map((m) => (
-                  <div key={m.id} className="grid grid-cols-2 items-center gap-3">
-                    <span className="text-sm text-foreground">{getDisplayName(m)}</span>
-                    <Input
-                      name={`amount_${m.id}`}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      defaultValue={editing?.amounts[m.id] ?? ""}
-                    />
-                  </div>
-                ))}
-                {!members.length && (
-                  <p className="text-sm text-muted-foreground">No active members yet.</p>
-                )}
-              </div>
+              <Separator />
 
+              <FormSection title="Split among members">
+                <div className="flex flex-col gap-3">
+                  {members.map((m) => (
+                    <div key={m.id} className="grid grid-cols-2 items-center gap-3">
+                      <span className="text-sm text-foreground">{getDisplayName(m)}</span>
+                      <Input
+                        name={`amount_${m.id}`}
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        defaultValue={editing?.amounts[m.id] ?? ""}
+                      />
+                    </div>
+                  ))}
+                  {!members.length && (
+                    <p className="text-sm text-muted-foreground">No active members yet.</p>
+                  )}
+                </div>
+              </FormSection>
+            </div>
+
+            <div className="flex flex-col gap-2 border-t border-border p-4">
               {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
               <Button type="submit" disabled={pending || !members.length} className="self-start">
                 {pending ? "Saving…" : "Save default cost"}
               </Button>
-            </form>
-          </div>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </>

@@ -32,26 +32,30 @@ export function CreateContactDialog() {
             <DialogTitle>Create Contact</DialogTitle>
           </DialogHeader>
           <form action={action} className="flex flex-col gap-4 p-4 pt-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="contact-name">Name</Label>
-              <Input id="contact-name" name="name" required />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="contact-name">Name</Label>
+                <Input id="contact-name" name="name" required />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="contact-level">Level</Label>
+                <Input id="contact-level" name="level" placeholder="e.g. Landlord, Electrician" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="contact-mobile">Mobile number</Label>
+                <Input id="contact-mobile" name="mobile_number" placeholder="Optional" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="contact-email">Email</Label>
+                <Input id="contact-email" name="email" type="email" placeholder="Optional" />
+              </div>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="contact-level">Level</Label>
-              <Input id="contact-level" name="level" placeholder="e.g. Landlord, Electrician" />
+            <div className="flex flex-col gap-2 border-t border-border pt-4">
+              {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+              <Button type="submit" disabled={pending} className="self-start">
+                {pending ? "Saving…" : "Save contact"}
+              </Button>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="contact-mobile">Mobile number</Label>
-              <Input id="contact-mobile" name="mobile_number" placeholder="Optional" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="contact-email">Email</Label>
-              <Input id="contact-email" name="email" type="email" placeholder="Optional" />
-            </div>
-            {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-            <Button type="submit" disabled={pending} className="self-start">
-              {pending ? "Saving…" : "Save contact"}
-            </Button>
           </form>
         </DialogContent>
       </Dialog>

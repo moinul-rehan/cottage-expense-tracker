@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormSection } from "@/components/ui/form-section";
 import { getDisplayName } from "@/lib/data/display-name";
 import { cn } from "@/lib/utils";
 import {
@@ -44,18 +45,6 @@ function previewLocal(ms: number) {
     d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) +
     ", " +
     d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
-  );
-}
-
-function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <div>
-        <h4 className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase">{title}</h4>
-        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
-      </div>
-      {children}
-    </div>
   );
 }
 
@@ -153,7 +142,7 @@ export function CreateNoticeForm({
   return (
     <form action={action} className="flex flex-col">
       <div className="flex max-h-[64vh] flex-col gap-5 overflow-y-auto px-4 pt-1 pb-4">
-        <Section title="Notice type">
+        <FormSection title="Notice type">
           <div className="grid grid-cols-3 gap-2">
             {allowedTypes.map((t) => {
               const meta = NOTICE_TYPE_META[t];
@@ -180,11 +169,11 @@ export function CreateNoticeForm({
             })}
           </div>
           <input type="hidden" name="type" value={type ?? ""} />
-        </Section>
+        </FormSection>
 
         <Separator />
 
-        <Section title="Details">
+        <FormSection title="Details">
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="notice-title">Title</Label>
@@ -221,11 +210,11 @@ export function CreateNoticeForm({
               </div>
             )}
           </div>
-        </Section>
+        </FormSection>
 
         <Separator />
 
-        <Section title="Priority">
+        <FormSection title="Priority">
           <div className="grid grid-cols-4 gap-2">
             {ALL_PRIORITIES.map((p) => (
               <button
@@ -243,11 +232,11 @@ export function CreateNoticeForm({
             ))}
           </div>
           <input type="hidden" name="priority" value={priority} />
-        </Section>
+        </FormSection>
 
         <Separator />
 
-        <Section title="Audience" hint={!type ? "Pick a notice type first." : undefined}>
+        <FormSection title="Audience" hint={!type ? "Pick a notice type first." : undefined}>
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
               {targetOptions.map((v) => (
@@ -282,11 +271,11 @@ export function CreateNoticeForm({
               </div>
             )}
           </div>
-        </Section>
+        </FormSection>
 
         <Separator />
 
-        <Section title="Schedule">
+        <FormSection title="Schedule">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <span className="text-xs text-muted-foreground">Publish</span>
@@ -365,11 +354,11 @@ export function CreateNoticeForm({
               <p className="text-sm text-destructive">That date/time isn&apos;t valid.</p>
             ) : null}
           </div>
-        </Section>
+        </FormSection>
 
         <Separator />
 
-        <Section title="Options">
+        <FormSection title="Options">
           <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
             <label htmlFor="pin-toggle" className="flex cursor-pointer items-center justify-between gap-3 p-3">
               <div>
@@ -410,7 +399,7 @@ export function CreateNoticeForm({
           </div>
           <input type="hidden" name="is_pinned" value={isPinned ? "on" : ""} />
           <input type="hidden" name="is_anonymous" value={isAnonymous ? "on" : ""} />
-        </Section>
+        </FormSection>
       </div>
 
       <div className="flex flex-col gap-2 border-t border-border p-4">
