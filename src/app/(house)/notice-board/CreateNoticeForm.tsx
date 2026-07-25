@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getDisplayName } from "@/lib/data/display-name";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,28 @@ const ALL_TYPES = Object.keys(NOTICE_TYPE_META) as NoticeType[];
 const ALL_PRIORITIES = Object.keys(PRIORITY_META) as NoticePriority[];
 const ALL_PIN_DURATIONS = Object.keys(PIN_DURATION_LABEL) as PinDuration[];
 
+function todayLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function plusDaysLocal(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <h4 className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase">{title}</h4>
+        {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function CreateNoticeForm({
   profile,
   members,
@@ -41,43 +64,40 @@ export function CreateNoticeForm({
 
   useEffect(() => {
     if (state?.success) onSuccess?.();
-    // Only fire when a fresh success comes back from the server action —
-    // onSuccess itself must not be a dependency, or a parent passing a new
-    // callback identity on every render would re-fire this immediately.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  const allowedTypes = useMemo(
-    () => ALL_TYPES.filter((t) => canCreateNoticeType(profile, t)),
-    [profile]
-  );
+  const allowedTypes = useMemo(() => ALL_TYPES.filter((t) => canCreateNoticeType(profile, t)), [profile]);
 
   const [type, setType] = useState<NoticeType | null>(null);
   const [visibility, setVisibility] = useState<NoticeVisibility | null>(null);
   const [targetIds, setTargetIds] = useState<string[]>([]);
+  const [priority, setPriority] = useState<NoticePriority>("normal");
   const [isPinned, setIsPinned] = useState(false);
   const [pinDuration, setPinDuration] = useState<PinDuration>("until_manual");
   const [isAnonymous, setIsAnonymous] = useState(false);
 
+  const [publishMode, setPublishMode] = useState<"now" | "later">("now");
+  const [expireMode, setExpireMode] = useState<"default" | "custom">("default");
   const [publishDate, setPublishDate] = useState("");
   const [publishTime, setPublishTime] = useState("09:00");
   const [expireDate, setExpireDate] = useState("");
   const [expireTime, setExpireTime] = useState("23:59");
 
-  // Built from local <input type="date"/"time"> values here in the browser,
-  // where `new Date(...)` correctly resolves against the visitor's own
-  // timezone — computing this server-side would use the server's timezone
-  // instead and silently publish/expire notices at the wrong wall-clock time.
+  // Built client-side from local <input type="date"/"time"> values — where
+  // `new Date(...)` resolves against the visitor's own timezone. Doing this
+  // server-side would use the server's timezone instead and silently
+  // publish/expire notices at the wrong wall-clock time.
   const publishAtIso = useMemo(() => {
-    if (!publishDate) return "";
+    if (publishMode === "now" || !publishDate) return "";
     const d = new Date(`${publishDate}T${publishTime || "00:00"}`);
     return Number.isNaN(d.getTime()) ? "" : d.toISOString();
-  }, [publishDate, publishTime]);
+  }, [publishMode, publishDate, publishTime]);
   const expiresAtIso = useMemo(() => {
-    if (!expireDate) return "";
+    if (expireMode === "default" || !expireDate) return "";
     const d = new Date(`${expireDate}T${expireTime || "23:59"}`);
     return Number.isNaN(d.getTime()) ? "" : d.toISOString();
-  }, [expireDate, expireTime]);
+  }, [expireMode, expireDate, expireTime]);
 
   if (!allowedTypes.length) {
     return (
@@ -110,87 +130,104 @@ export function CreateNoticeForm({
   }
 
   return (
-    <div className="p-4">
-      <form action={action} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <Label>Notice type</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {allowedTypes.map((t) => {
-                const meta = NOTICE_TYPE_META[t];
-                const Icon = meta.icon;
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => pickType(t)}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 rounded-lg border border-border px-2 py-3 text-xs font-medium text-muted-foreground transition-colors",
-                      type === t && "border-primary bg-accent text-accent-foreground"
-                    )}
-                  >
+    <form action={action} className="flex flex-col">
+      <div className="flex max-h-[64vh] flex-col gap-5 overflow-y-auto px-4 pt-1 pb-4">
+        <Section title="Notice type">
+          <div className="grid grid-cols-3 gap-2">
+            {allowedTypes.map((t) => {
+              const meta = NOTICE_TYPE_META[t];
+              const Icon = meta.icon;
+              const selected = type === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => pickType(t)}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center text-[11px] leading-tight font-medium transition-colors",
+                    selected
+                      ? "border-primary bg-accent text-accent-foreground"
+                      : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                  )}
+                >
+                  <span className={cn("flex size-8 items-center justify-center rounded-full", meta.chip)}>
                     <Icon className="size-4" />
-                    {meta.label}
-                  </button>
-                );
-              })}
+                  </span>
+                  {meta.label}
+                </button>
+              );
+            })}
+          </div>
+          <input type="hidden" name="type" value={type ?? ""} />
+        </Section>
+
+        <Separator />
+
+        <Section title="Details">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="notice-title">Title</Label>
+              <Input id="notice-title" name="title" required placeholder="e.g. Water supply interruption, 2–4 PM" />
             </div>
-            <input type="hidden" name="type" value={type ?? ""} />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="notice-title">Title</Label>
-            <Input id="notice-title" name="title" required placeholder="e.g. Water supply interruption, 2–4 PM" />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="notice-desc">Description</Label>
-            <Textarea id="notice-desc" name="description" placeholder="Keep it scannable — one idea, plainly stated." />
-          </div>
-
-          {type === "meal" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="meal-lunch">Lunch</Label>
-                <Input id="meal-lunch" name="meal_lunch" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="meal-dinner">Dinner</Label>
-                <Input id="meal-dinner" name="meal_dinner" />
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="notice-desc">Description</Label>
+              <Textarea id="notice-desc" name="description" placeholder="Keep it scannable — one idea, plainly stated." />
             </div>
-          )}
 
-          {type === "utility" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="due-amount">Due amount (BDT)</Label>
-                <Input id="due-amount" name="due_amount" type="number" step="0.01" min="0" />
+            {type === "meal" && (
+              <div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="meal-lunch" className="text-xs text-muted-foreground">Lunch</Label>
+                  <Input id="meal-lunch" name="meal_lunch" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="meal-dinner" className="text-xs text-muted-foreground">Dinner</Label>
+                  <Input id="meal-dinner" name="meal_dinner" />
+                </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="due-date">Due date</Label>
-                <Input id="due-date" name="due_date" type="date" />
-              </div>
-            </div>
-          )}
+            )}
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Priority</Label>
-            <Select name="priority" defaultValue="normal">
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ALL_PRIORITIES.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {PRIORITY_META[p].label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {type === "utility" && (
+              <div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="due-amount" className="text-xs text-muted-foreground">Due amount (BDT)</Label>
+                  <Input id="due-amount" name="due_amount" type="number" step="0.01" min="0" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="due-date" className="text-xs text-muted-foreground">Due date</Label>
+                  <Input id="due-date" name="due_date" type="date" />
+                </div>
+              </div>
+            )}
           </div>
+        </Section>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Visibility</Label>
+        <Separator />
+
+        <Section title="Priority">
+          <div className="grid grid-cols-4 gap-2">
+            {ALL_PRIORITIES.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPriority(p)}
+                className={cn(
+                  "rounded-full py-1.5 text-xs font-bold transition-opacity",
+                  PRIORITY_META[p].pill,
+                  priority === p ? "opacity-100 ring-2 ring-ring ring-offset-1 ring-offset-popover" : "opacity-45 hover:opacity-75"
+                )}
+              >
+                {PRIORITY_META[p].label}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" name="priority" value={priority} />
+        </Section>
+
+        <Separator />
+
+        <Section title="Audience" hint={!type ? "Pick a notice type first." : undefined}>
+          <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
               {targetOptions.map((v) => (
                 <button
@@ -198,121 +235,155 @@ export function CreateNoticeForm({
                   type="button"
                   onClick={() => pickVisibility(v)}
                   className={cn(
-                    "rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors",
-                    visibility === v && "border-primary bg-accent text-accent-foreground"
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    visibility === v
+                      ? "border-primary bg-accent text-accent-foreground"
+                      : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                   )}
                 >
                   {VISIBILITY_LABEL[v]}
                 </button>
               ))}
-              {!type && <p className="text-xs text-muted-foreground">Pick a notice type first.</p>}
             </div>
             <input type="hidden" name="visibility" value={visibility ?? ""} />
-          </div>
 
-          {needsTargets && (
-            <div className="flex flex-col gap-1.5">
-              <Label>Target members</Label>
-              <div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-lg border border-border p-2.5">
+            {needsTargets && (
+              <div className="flex max-h-36 flex-col gap-2 overflow-y-auto rounded-lg border border-border p-2.5">
                 {members.map((m) => (
                   <label key={m.id} className="flex items-center gap-2 text-sm">
-                    <Checkbox
-                      checked={targetIds.includes(m.id)}
-                      onCheckedChange={(c) => toggleTarget(m.id, c === true)}
-                    />
+                    <Checkbox checked={targetIds.includes(m.id)} onCheckedChange={(c) => toggleTarget(m.id, c === true)} />
                     {getDisplayName(m)}
                   </label>
                 ))}
+                {targetIds.map((id) => (
+                  <input key={id} type="hidden" name="target_member_ids" value={id} />
+                ))}
               </div>
-              {targetIds.map((id) => (
-                <input key={id} type="hidden" name="target_member_ids" value={id} />
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="pin-toggle" className="mb-0">
-              Pin to dashboard
-            </Label>
-            <Checkbox
-              id="pin-toggle"
-              checked={isPinned}
-              onCheckedChange={(c) => setIsPinned(c === true)}
-            />
+            )}
           </div>
-          <input type="hidden" name="is_pinned" value={isPinned ? "on" : ""} />
+        </Section>
 
-          {profile.role === "super_admin" && (
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <Label htmlFor="anon-toggle" className="mb-0">
-                  Post as &quot;Cottage&quot;
-                </Label>
-                <p className="text-xs text-muted-foreground">Hides your name — members see it as a house announcement.</p>
-              </div>
-              <Checkbox
-                id="anon-toggle"
-                checked={isAnonymous}
-                onCheckedChange={(c) => setIsAnonymous(c === true)}
-              />
-            </div>
-          )}
-          <input type="hidden" name="is_anonymous" value={isAnonymous ? "on" : ""} />
+        <Separator />
 
-          {isPinned && (
+        <Section title="Schedule">
+          <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Pin duration</Label>
-              <Select name="pin_duration" value={pinDuration} onValueChange={(v) => setPinDuration((v as PinDuration) ?? "until_manual")}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ALL_PIN_DURATIONS.filter((d) => d !== "none").map((d) => (
-                    <SelectItem key={d} value={d}>
-                      {PIN_DURATION_LABEL[d]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {pinDuration === "until_date" && (
-                <Input name="pin_until_date" type="date" required />
+              <span className="text-xs text-muted-foreground">Publish</span>
+              <div className="inline-flex w-fit overflow-hidden rounded-full border border-border p-0.5">
+                {(["now", "later"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      setPublishMode(m);
+                      if (m === "later" && !publishDate) setPublishDate(todayLocal());
+                    }}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                      publishMode === m ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {m === "now" ? "Now" : "Schedule for later"}
+                  </button>
+                ))}
+              </div>
+              {publishMode === "later" && (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <Input type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
+                  <Input type="time" value={publishTime} onChange={(e) => setPublishTime(e.target.value)} />
+                </div>
               )}
             </div>
-          )}
 
-          <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="publish-date">Publish date</Label>
-              <Input id="publish-date" type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
+              <span className="text-xs text-muted-foreground">Expire</span>
+              <div className="inline-flex w-fit overflow-hidden rounded-full border border-border p-0.5">
+                {(["default", "custom"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      setExpireMode(m);
+                      if (m === "custom" && !expireDate) setExpireDate(plusDaysLocal(7));
+                    }}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                      expireMode === m ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {m === "default" ? "In 7 days" : "Custom date"}
+                  </button>
+                ))}
+              </div>
+              {expireMode === "custom" && (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <Input type="date" value={expireDate} onChange={(e) => setExpireDate(e.target.value)} />
+                  <Input type="time" value={expireTime} onChange={(e) => setExpireTime(e.target.value)} />
+                </div>
+              )}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="publish-time">Publish time</Label>
-              <Input id="publish-time" type="time" value={publishTime} onChange={(e) => setPublishTime(e.target.value)} />
-            </div>
+            <p className="text-xs text-muted-foreground">Times use your device&apos;s local timezone.</p>
+            <input type="hidden" name="publish_at" value={publishAtIso} />
+            <input type="hidden" name="expires_at" value={expiresAtIso} />
+            {(publishMode === "later" && publishDate && !publishAtIso) ||
+            (expireMode === "custom" && expireDate && !expiresAtIso) ? (
+              <p className="text-sm text-destructive">That date/time isn&apos;t valid.</p>
+            ) : null}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="expire-date">Expire date</Label>
-              <Input id="expire-date" type="date" value={expireDate} onChange={(e) => setExpireDate(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="expire-time">Expire time</Label>
-              <Input id="expire-time" type="time" value={expireTime} onChange={(e) => setExpireTime(e.target.value)} />
-            </div>
+        </Section>
+
+        <Separator />
+
+        <Section title="Options">
+          <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
+            <label htmlFor="pin-toggle" className="flex cursor-pointer items-center justify-between gap-3 p-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Pin to dashboard</p>
+                <p className="text-xs text-muted-foreground">Shows this notice in Pinned Notices for everyone it&apos;s visible to.</p>
+              </div>
+              <Checkbox id="pin-toggle" checked={isPinned} onCheckedChange={(c) => setIsPinned(c === true)} />
+            </label>
+            {isPinned && (
+              <div className="p-3">
+                <Select name="pin_duration" value={pinDuration} onValueChange={(v) => setPinDuration((v as PinDuration) ?? "until_manual")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ALL_PIN_DURATIONS.filter((d) => d !== "none").map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {PIN_DURATION_LABEL[d]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {pinDuration === "until_date" && (
+                  <Input name="pin_until_date" type="date" required className="mt-2" />
+                )}
+              </div>
+            )}
+
+            {profile.role === "super_admin" && (
+              <label htmlFor="anon-toggle" className="flex cursor-pointer items-center justify-between gap-3 p-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Post as &quot;Cottage&quot;</p>
+                  <p className="text-xs text-muted-foreground">Hides your name — members see it as a house announcement.</p>
+                </div>
+                <Checkbox id="anon-toggle" checked={isAnonymous} onCheckedChange={(c) => setIsAnonymous(c === true)} />
+              </label>
+            )}
           </div>
-          <p className="-mt-2 text-xs text-muted-foreground">Leave publish blank to post immediately. Leave expire blank to expire in 7 days. Times use your device's local timezone.</p>
-          <input type="hidden" name="publish_at" value={publishAtIso} />
-          <input type="hidden" name="expires_at" value={expiresAtIso} />
-          {(publishDate && !publishAtIso) || (expireDate && !expiresAtIso) ? (
-            <p className="text-sm text-destructive">That date/time isn&apos;t valid.</p>
-          ) : null}
+          <input type="hidden" name="is_pinned" value={isPinned ? "on" : ""} />
+          <input type="hidden" name="is_anonymous" value={isAnonymous ? "on" : ""} />
+        </Section>
+      </div>
 
-          {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-
-          <Button type="submit" disabled={pending || !type || !visibility} className="self-start">
-            {pending ? "Publishing…" : "Publish notice"}
-          </Button>
-      </form>
-    </div>
+      <div className="flex flex-col gap-2 border-t border-border p-4">
+        {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+        <Button type="submit" disabled={pending || !type || !visibility} className="self-start">
+          {pending ? "Publishing…" : "Publish notice"}
+        </Button>
+      </div>
+    </form>
   );
 }

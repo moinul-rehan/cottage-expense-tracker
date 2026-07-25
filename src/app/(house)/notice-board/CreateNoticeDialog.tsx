@@ -34,8 +34,8 @@ export function CreateNoticeDialog({
           if (!next) setFormKey((k) => k + 1);
         }}
       >
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
+        <DialogContent className="max-h-[85vh] max-w-xl overflow-hidden">
+          <DialogHeader className="pb-3">
             <DialogTitle>Create notice</DialogTitle>
           </DialogHeader>
           <CreateNoticeForm
