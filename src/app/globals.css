@@ -147,4 +147,22 @@
   html {
     @apply font-sans;
   }
+
+  /* Standard mobile tap behavior for every interactive element, app-wide —
+   * without this, a tap on a wide/edge-adjacent target can get
+   * miscategorized by the browser as the start of a scroll/pan gesture over
+   * whatever scrollable ancestor it sits in and get silently swallowed
+   * instead of firing (see the speed-dial pill bug this was pulled from).
+   * Also drops the default grey/blue tap-highlight flash on Android Chrome —
+   * every interactive element here already has its own focus/active state
+   * (ring, translate, background), so the browser's overlay is redundant. */
+  button,
+  a,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  summary {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
