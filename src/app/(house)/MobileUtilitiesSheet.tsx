@@ -39,7 +39,7 @@ export function MobileUtilitiesSheet({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          className="rounded-t-2xl data-[side=bottom]:bottom-[calc(4rem+env(safe-area-inset-bottom))]"
+          className="rounded-t-2xl data-[side=bottom]:bottom-[calc(5.75rem+env(safe-area-inset-bottom))]"
         >
           <SheetHeader>
             <SheetTitle>Utilities</SheetTitle>

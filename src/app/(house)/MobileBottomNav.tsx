@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Pin, UtensilsCrossed, Zap, Menu } from "lucide-react";
+import { LayoutDashboard, Pin, UtensilsCrossed, Zap, Menu, type LucideIcon } from "lucide-react";
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
 import { MobileMenuSheet } from "./MobileMenuSheet";
@@ -16,28 +16,51 @@ const MEAL_PREFIX = "/meal";
 const UTILITIES_PREFIX = "/utilities";
 const MENU_PREFIXES = ["/members", "/months", "/contacts", "/settings"];
 
-function TabButton({
+/** One tab: a plain outline icon at rest, or — when active — the same icon
+ * pops up into a filled circle that overlaps the bar's top edge, with a
+ * ring matching the page background so it reads as a cutout in the bar. */
+function NavTab({
   icon: Icon,
   label,
   active,
+  href,
   onClick,
 }: {
-  icon: typeof LayoutDashboard;
+  icon: LucideIcon;
   label: string;
   active: boolean;
-  onClick: () => void;
+  href?: string;
+  onClick?: () => void;
 }) {
+  const inner = (
+    <>
+      <span
+        className={cn(
+          "flex items-center justify-center rounded-full transition-all duration-200",
+          active
+            ? "-mt-8 size-14 bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
+            : "size-9 text-neutral-400"
+        )}
+      >
+        <Icon className={active ? "size-6" : "size-5"} />
+      </span>
+      <span className="sr-only">{label}</span>
+    </>
+  );
+
+  const className = "relative flex h-full flex-1 items-center justify-center";
+
+  if (href) {
+    return (
+      <Link href={href} className={className} onClick={onClick} aria-label={label}>
+        {inner}
+      </Link>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium",
-        active ? "text-primary" : "text-muted-foreground"
-      )}
-    >
-      <Icon className="size-5" />
-      {label}
+    <button type="button" className={className} onClick={onClick} aria-label={label}>
+      {inner}
     </button>
   );
 }
@@ -84,42 +107,35 @@ export function MobileBottomNav({
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-[60] flex h-16 items-stretch border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed inset-x-3 bottom-3 z-[60] flex h-16 items-center justify-around overflow-visible rounded-[28px] bg-neutral-900 shadow-xl md:hidden"
         aria-label="Primary"
+        style={{ marginBottom: "env(safe-area-inset-bottom)" }}
       >
-        <Link
+        <NavTab
+          icon={LayoutDashboard}
+          label="Home"
           href="/dashboard"
-          className={cn(
-            "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium",
-            !anySheetOpen && pathname === "/dashboard" ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          <LayoutDashboard className="size-5" />
-          Home
-        </Link>
-        <Link
+          active={!anySheetOpen && pathname === "/dashboard"}
+        />
+        <NavTab
+          icon={Pin}
+          label="Notices"
           href="/notice-board"
-          className={cn(
-            "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium",
-            !anySheetOpen && pathname === "/notice-board" ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          <Pin className="size-5" />
-          Notices
-        </Link>
-        <TabButton
+          active={!anySheetOpen && pathname === "/notice-board"}
+        />
+        <NavTab
           icon={UtensilsCrossed}
           label="Meal"
           active={mealActive || activeSheet === "meal"}
           onClick={() => toggleSheet("meal")}
         />
-        <TabButton
+        <NavTab
           icon={Zap}
           label="Utilities"
           active={utilitiesActive || activeSheet === "utilities"}
           onClick={() => toggleSheet("utilities")}
         />
-        <TabButton
+        <NavTab
           icon={Menu}
           label="Menu"
           active={menuActive || activeSheet === "menu"}
