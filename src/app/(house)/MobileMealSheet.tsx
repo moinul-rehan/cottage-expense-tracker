@@ -43,7 +43,10 @@ export function MobileMealSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
+        <SheetContent
+          side="bottom"
+          className="rounded-t-2xl data-[side=bottom]:bottom-[calc(4rem+env(safe-area-inset-bottom))]"
+        >
           <SheetHeader>
             <SheetTitle>Meal</SheetTitle>
           </SheetHeader>

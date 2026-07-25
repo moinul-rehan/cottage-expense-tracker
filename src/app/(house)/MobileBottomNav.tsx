@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Pin, UtensilsCrossed, Zap, Menu } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
+import { MobileMenuSheet } from "./MobileMenuSheet";
 import { cn } from "@/lib/utils";
 
 type Member = { id: string; first_name: string; last_name: string | null };
@@ -42,10 +42,11 @@ function TabButton({
 }
 
 /** Mobile-only bottom tab bar that replaces the hamburger + slide-out
- * sidebar as the primary nav surface on small screens. Meal and Utilities
- * open a bottom sheet of that section's sub-destinations (matching the
- * sidebar's nested quick-add menus) instead of jumping straight to one
- * page. "Menu" reuses the existing Sidebar sheet for everything else. */
+ * sidebar as the primary nav surface on small screens. Every tab that
+ * needs sub-options (Meal, Utilities, Menu) opens a bottom sheet anchored
+ * just above this bar — z-40, higher than the sheets' z-50 overlay but the
+ * bar itself sits fixed at the very bottom, so it stays visible the whole
+ * time instead of being covered like the old full-screen sidebar sheet. */
 export function MobileBottomNav({
   members,
   defaultDate,
@@ -62,11 +63,11 @@ export function MobileBottomNav({
   isSuperAdmin: boolean;
 }) {
   const pathname = usePathname();
-  const { toggleSidebar, openMobile } = useSidebar();
   const [mealOpen, setMealOpen] = useState(false);
   const [utilitiesOpen, setUtilitiesOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const anySheetOpen = openMobile || mealOpen || utilitiesOpen;
+  const anySheetOpen = mealOpen || utilitiesOpen || menuOpen;
   const mealActive = !anySheetOpen && (pathname === MEAL_PREFIX || pathname.startsWith(`${MEAL_PREFIX}/`));
   const utilitiesActive =
     !anySheetOpen && (pathname === UTILITIES_PREFIX || pathname.startsWith(`${UTILITIES_PREFIX}/`));
@@ -75,7 +76,7 @@ export function MobileBottomNav({
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex items-stretch border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-[60] flex h-16 items-stretch border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
         aria-label="Primary"
       >
         <Link
@@ -100,7 +101,7 @@ export function MobileBottomNav({
         </Link>
         <TabButton icon={UtensilsCrossed} label="Meal" active={mealActive || mealOpen} onClick={() => setMealOpen(true)} />
         <TabButton icon={Zap} label="Utilities" active={utilitiesActive || utilitiesOpen} onClick={() => setUtilitiesOpen(true)} />
-        <TabButton icon={Menu} label="Menu" active={menuActive || openMobile} onClick={toggleSidebar} />
+        <TabButton icon={Menu} label="Menu" active={menuActive || menuOpen} onClick={() => setMenuOpen(true)} />
       </nav>
 
       <MobileMealSheet
@@ -119,6 +120,7 @@ export function MobileBottomNav({
         defaultDate={defaultDate}
         isSuperAdmin={isSuperAdmin}
       />
+      <MobileMenuSheet open={menuOpen} onOpenChange={setMenuOpen} />
     </>
   );
 }
