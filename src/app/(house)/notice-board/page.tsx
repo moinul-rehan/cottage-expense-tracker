@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { NoticeFeedList } from "./NoticeFeedList";
 import { NoticeCard } from "./NoticeCard";
 import { CreateNoticeDialog } from "./CreateNoticeDialog";
+import { ScheduleWatcher } from "./ScheduleWatcher";
 
 const TABS = [
   { value: "feed", label: "Notice Feed" },
@@ -40,8 +41,20 @@ export default async function NoticeBoardPage({
   const scheduledNotices = sortForDisplay(notices.filter((n) => computeStatus(n) === "scheduled"));
   const historyNotices = sortForDisplay(notices);
 
+  // The moment any visible notice should next flip status (scheduled ->
+  // published, published -> expired) — refreshes the page live when it does.
+  const wakeAt = notices
+    .filter((n) => !n.archived_at)
+    .flatMap((n) => {
+      const status = computeStatus(n);
+      if (status === "scheduled") return [n.publish_at];
+      if (status === "published") return [n.expires_at];
+      return [];
+    });
+
   return (
     <div className="flex flex-col gap-6">
+      <ScheduleWatcher wakeAt={wakeAt} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Notice Board</h1>

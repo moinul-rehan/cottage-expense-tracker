@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UtilityBreakdownDialog } from "./UtilityBreakdownDialog";
 import { NoticeCard } from "../notice-board/NoticeCard";
+import { ScheduleWatcher } from "../notice-board/ScheduleWatcher";
 import { computeStatus, isEffectivelyPinned, isVisibleTo, sortForDisplay } from "@/lib/notice-types";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -125,8 +126,21 @@ export default async function DashboardPage() {
   );
   const shownNotices = pinnedNotices.slice(0, 3);
 
+  // The moment a pinned notice visible to this member should next flip
+  // status (e.g. a scheduled one publishes, or a published one expires) —
+  // refreshes the dashboard live instead of waiting for the next reload.
+  const noticeWakeAt = notices
+    .filter((n) => !n.archived_at && n.is_pinned && isVisibleTo(n, profile))
+    .flatMap((n) => {
+      const status = computeStatus(n);
+      if (status === "scheduled") return [n.publish_at];
+      if (status === "published") return [n.expires_at];
+      return [];
+    });
+
   return (
     <div className="flex flex-col gap-8">
+      <ScheduleWatcher wakeAt={noticeWakeAt} />
       {!!shownNotices.length && (
         <div>
           <div className="mb-3 flex items-baseline justify-between gap-3">
