@@ -16,6 +16,7 @@ import { MealQuickAddMenu } from "./MealQuickAddMenu";
 import { UtilitiesQuickAddMenu } from "./UtilitiesQuickAddMenu";
 import { SidebarNavLink } from "./SidebarNavLink";
 import { PageHeader } from "./PageHeader";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { Logo } from "@/components/logo";
 import {
   Sidebar,
@@ -124,8 +125,9 @@ export default async function HouseLayout({
           notifications={notifications}
           unreadCount={unreadCount}
         />
-        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-8 sm:px-8 xl:px-12">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-24 sm:px-8 sm:pb-8 xl:px-12">{children}</main>
       </SidebarInset>
+      <MobileBottomNav />
     </SidebarProvider>
   );
 }

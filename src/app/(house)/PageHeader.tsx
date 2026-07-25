@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { MobileSidebarTrigger } from "./MobileSidebarTrigger";
 import { NotificationTray } from "./NotificationTray";
 import { ProfileMenu } from "./ProfileMenu";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -50,20 +49,17 @@ export function PageHeader({
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger className="hidden shrink-0 md:inline-flex" />
 
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3 sm:hidden">
-          <MobileSidebarTrigger />
-          {isDashboard && (
-            <div className="flex shrink-0 items-center gap-2.5">
-              <ThemeToggle />
-              <NotificationTray notifications={notifications} unreadCount={unreadCount} />
-              <ProfileMenu
-                name={displayName}
-                avatarUrl={profile.avatar_url}
-                initial={profile.first_name[0]?.toUpperCase() ?? "?"}
-              />
-            </div>
-          )}
-        </div>
+        {isDashboard && (
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2.5 sm:hidden">
+            <ThemeToggle />
+            <NotificationTray notifications={notifications} unreadCount={unreadCount} />
+            <ProfileMenu
+              name={displayName}
+              avatarUrl={profile.avatar_url}
+              initial={profile.first_name[0]?.toUpperCase() ?? "?"}
+            />
+          </div>
+        )}
 
         {isDashboard && (
           <div className="hidden min-w-0 flex-col leading-tight sm:flex">
