@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ListTree, FileText, Wallet, HandCoins, History } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { SpeedDialMenu, type SpeedDialItem } from "./SpeedDialMenu";
+import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { MemberDepositForm } from "./utilities/MemberDepositForm";
 import { CottageDepositForm } from "./utilities/CottageDepositForm";
 
@@ -14,12 +14,14 @@ type Member = { id: string; first_name: string; last_name: string | null };
 export function MobileUtilitiesSheet({
   open,
   onOpenChange,
+  origin,
   members,
   defaultDate,
   isSuperAdmin,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  origin: SpeedDialOrigin | null;
   members: Member[];
   defaultDate: string;
   isSuperAdmin: boolean;
@@ -75,7 +77,7 @@ export function MobileUtilitiesSheet({
 
   return (
     <>
-      <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="end" />
+      <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="end" origin={origin} />
 
       <Dialog open={dialog === "member-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
         <DialogContent>

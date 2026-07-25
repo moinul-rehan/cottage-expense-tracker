@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,28 +14,56 @@ export type SpeedDialItem = {
   onClick?: () => void;
 };
 
-const EXPAND_DURATION_MS = 280;
-const COLLAPSE_DURATION_MS = 200;
-const STAGGER_MS = 50;
-const EASE_OUT_BACK = "cubic-bezier(0.34, 1.56, 0.64, 1)"; // slight overshoot on expand
-const EASE_IN_CUBIC = "cubic-bezier(0.32, 0, 0.67, 0)";
+export type SpeedDialOrigin = { x: number; y: number };
 
-/** Radial "speed dial" pop-out for a bottom-nav tab — a stack of pill
- * buttons (icon + label) that cascade in above the tab that triggered
- * them, closest item first, instead of a full bottom sheet. Expand
- * overshoots slightly (easeOutBack) and staggers 50ms/item; collapse is a
- * single quick easeInCubic fade with no stagger. */
+export const SPEED_DIAL_EXPAND_MS = 320;
+export const SPEED_DIAL_COLLAPSE_MS = 260;
+export const SPEED_DIAL_STAGGER_MS = 50;
+export const SPEED_DIAL_EASE_OUT_BACK = "cubic-bezier(0.34, 1.56, 0.64, 1)"; // slight overshoot on expand
+export const SPEED_DIAL_EASE_IN_CUBIC = "cubic-bezier(0.32, 0, 0.67, 0)";
+
+/** Radial "speed dial" pop-out for a bottom-nav tab. Each pill originates
+ * from the trigger button's actual on-screen position (measured via
+ * getBoundingClientRect, passed in as `origin`) and translates+scales+fades
+ * to its resting spot in the stack, staggered closest-first on expand and
+ * reversed (top item first) on collapse — so every item reads as physically
+ * emerging from, and retracting back into, the button that opened it. */
 export function SpeedDialMenu({
   open,
   onClose,
   items,
   align = "center",
+  origin,
 }: {
   open: boolean;
   onClose: () => void;
   items: SpeedDialItem[];
   align?: "start" | "center" | "end";
+  origin: SpeedDialOrigin | null;
 }) {
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
+  // Each pill's resting center, measured ONCE while at rest (mount time,
+  // when transform is always translate(0,0) — see the `offset` fallback
+  // below). getBoundingClientRect reflects whatever transform is currently
+  // applied, so measuring at any other time — e.g. re-measuring on every
+  // open — would read the pill's already-displaced position from the
+  // previous close and compound errors on every subsequent open. Centers
+  // don't move once laid out, so measuring once and reusing is also just
+  // cheaper.
+  const [restingCenters, setRestingCenters] = useState<SpeedDialOrigin[]>([]);
+
+  useLayoutEffect(() => {
+    setRestingCenters(
+      items.map((_, i) => {
+        const el = itemRefs.current[i];
+        if (!el) return { x: 0, y: 0 };
+        const rect = el.getBoundingClientRect();
+        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
+
   return (
     <>
       <div
@@ -42,7 +71,7 @@ export function SpeedDialMenu({
           "fixed inset-0 z-50 bg-black/10 transition-opacity md:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
-        style={{ transitionDuration: `${open ? EXPAND_DURATION_MS : COLLAPSE_DURATION_MS}ms` }}
+        style={{ transitionDuration: `${open ? SPEED_DIAL_EXPAND_MS : SPEED_DIAL_COLLAPSE_MS}ms` }}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -55,14 +84,23 @@ export function SpeedDialMenu({
         )}
       >
         {items.map((item, i) => {
-          const rowClassName = cn(
-            "flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg transition-[transform,opacity]",
-            open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-3 scale-75 opacity-0"
-          );
-          const style = {
-            transitionDuration: `${open ? EXPAND_DURATION_MS : COLLAPSE_DURATION_MS}ms`,
-            transitionTimingFunction: open ? EASE_OUT_BACK : EASE_IN_CUBIC,
-            transitionDelay: open ? `${i * STAGGER_MS}ms` : "0ms",
+          const center = restingCenters[i];
+          const offset = origin && center ? { x: origin.x - center.x, y: origin.y - center.y } : { x: 0, y: 0 };
+          const reverseIndex = items.length - 1 - i;
+          const delay = (open ? i : reverseIndex) * SPEED_DIAL_STAGGER_MS;
+
+          const style: CSSProperties = {
+            transitionProperty: "transform, opacity",
+            transitionDuration: `${open ? SPEED_DIAL_EXPAND_MS : SPEED_DIAL_COLLAPSE_MS}ms`,
+            transitionTimingFunction: open ? SPEED_DIAL_EASE_OUT_BACK : SPEED_DIAL_EASE_IN_CUBIC,
+            transitionDelay: `${delay}ms`,
+            transform: open ? "translate(0px, 0px) scale(1)" : `translate(${offset.x}px, ${offset.y}px) scale(0.3)`,
+            opacity: open ? 1 : 0,
+            pointerEvents: open ? "auto" : "none",
+          };
+          const rowClassName = "flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
+          const setRef = (el: HTMLElement | null) => {
+            itemRefs.current[i] = el;
           };
           const content = (
             <>
@@ -75,13 +113,13 @@ export function SpeedDialMenu({
 
           if (item.href) {
             return (
-              <Link key={item.key} href={item.href} className={rowClassName} style={style} onClick={onClose}>
+              <Link key={item.key} ref={setRef} href={item.href} className={rowClassName} style={style} onClick={onClose}>
                 {content}
               </Link>
             );
           }
           return (
-            <button key={item.key} type="button" className={rowClassName} style={style} onClick={item.onClick}>
+            <button key={item.key} ref={setRef} type="button" className={rowClassName} style={style} onClick={item.onClick}>
               {content}
             </button>
           );

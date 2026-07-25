@@ -7,6 +7,13 @@ import { LayoutDashboard, Pin, UtensilsCrossed, Zap, Menu, type LucideIcon } fro
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
 import { MobileMenuSheet } from "./MobileMenuSheet";
+import {
+  SPEED_DIAL_EXPAND_MS,
+  SPEED_DIAL_COLLAPSE_MS,
+  SPEED_DIAL_EASE_OUT_BACK,
+  SPEED_DIAL_EASE_IN_CUBIC,
+  type SpeedDialOrigin,
+} from "./SpeedDialMenu";
 import { cn } from "@/lib/utils";
 
 type Member = { id: string; first_name: string; last_name: string | null };
@@ -18,7 +25,9 @@ const MENU_PREFIXES = ["/members", "/months", "/contacts", "/settings"];
 
 /** One tab: a plain outline icon at rest, or — when active — the same icon
  * pops up into a filled circle that overlaps the bar's top edge, with a
- * ring matching the page background so it reads as a cutout in the bar. */
+ * ring matching the page background so it reads as a cutout in the bar.
+ * Uses the same easing/duration as the speed-dial pills so the trigger
+ * button visibly moves in sync with whatever it's opening/closing. */
 function NavTab({
   icon: Icon,
   label,
@@ -30,17 +39,22 @@ function NavTab({
   label: string;
   active: boolean;
   href?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }) {
   const inner = (
     <>
       <span
         className={cn(
-          "flex items-center justify-center rounded-full transition-all duration-200",
+          "flex items-center justify-center rounded-full",
           active
             ? "-mt-8 size-14 bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
             : "size-9 text-neutral-400"
         )}
+        style={{
+          transitionProperty: "margin, width, height, box-shadow",
+          transitionDuration: `${active ? SPEED_DIAL_EXPAND_MS : SPEED_DIAL_COLLAPSE_MS}ms`,
+          transitionTimingFunction: active ? SPEED_DIAL_EASE_OUT_BACK : SPEED_DIAL_EASE_IN_CUBIC,
+        }}
       >
         <Icon className={active ? "size-6" : "size-5"} />
       </span>
@@ -67,11 +81,12 @@ function NavTab({
 
 /** Mobile-only bottom tab bar that replaces the hamburger + slide-out
  * sidebar as the primary nav surface on small screens. Every tab that
- * needs sub-options (Meal, Utilities, Menu) opens a bottom sheet anchored
- * just above this bar. `activeSheet` is a single value rather than three
- * booleans so at most one sheet — and one highlighted tab — can ever be
- * open at a time; tapping the already-open tab closes it instead of
- * reopening the same sheet. */
+ * needs sub-options (Meal, Utilities, Menu) opens a speed-dial pop-out
+ * anchored just above this bar, originating from that tab's own on-screen
+ * position (captured on tap via getBoundingClientRect). `activeSheet` is a
+ * single value rather than three booleans so at most one dial — and one
+ * highlighted tab — can ever be open at a time; tapping the already-open
+ * tab closes it instead of reopening the same dial. */
 export function MobileBottomNav({
   members,
   defaultDate,
@@ -89,8 +104,11 @@ export function MobileBottomNav({
 }) {
   const pathname = usePathname();
   const [activeSheet, setActiveSheet] = useState<SheetKey | null>(null);
+  const [origin, setOrigin] = useState<SpeedDialOrigin | null>(null);
 
-  function toggleSheet(key: SheetKey) {
+  function toggleSheet(key: SheetKey, e: React.MouseEvent<HTMLElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
     setActiveSheet((prev) => (prev === key ? null : key));
   }
 
@@ -129,25 +147,26 @@ export function MobileBottomNav({
           icon={UtensilsCrossed}
           label="Meal"
           active={mealActive || activeSheet === "meal"}
-          onClick={() => toggleSheet("meal")}
+          onClick={(e) => toggleSheet("meal", e)}
         />
         <NavTab
           icon={Zap}
           label="Utilities"
           active={utilitiesActive || activeSheet === "utilities"}
-          onClick={() => toggleSheet("utilities")}
+          onClick={(e) => toggleSheet("utilities", e)}
         />
         <NavTab
           icon={Menu}
           label="Menu"
           active={menuActive || activeSheet === "menu"}
-          onClick={() => toggleSheet("menu")}
+          onClick={(e) => toggleSheet("menu", e)}
         />
       </nav>
 
       <MobileMealSheet
         open={activeSheet === "meal"}
         onOpenChange={(open) => (open ? setActiveSheet("meal") : closeSheet("meal"))}
+        origin={origin}
         members={members}
         defaultDate={defaultDate}
         canAddBazaar={canAddBazaar}
@@ -157,6 +176,7 @@ export function MobileBottomNav({
       <MobileUtilitiesSheet
         open={activeSheet === "utilities"}
         onOpenChange={(open) => (open ? setActiveSheet("utilities") : closeSheet("utilities"))}
+        origin={origin}
         members={members}
         defaultDate={defaultDate}
         isSuperAdmin={isSuperAdmin}
@@ -164,6 +184,7 @@ export function MobileBottomNav({
       <MobileMenuSheet
         open={activeSheet === "menu"}
         onOpenChange={(open) => (open ? setActiveSheet("menu") : closeSheet("menu"))}
+        origin={origin}
       />
     </>
   );

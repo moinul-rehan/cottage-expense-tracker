@@ -1,7 +1,7 @@
 "use client";
 
 import { Users, CalendarRange, Contact, Settings as SettingsIcon } from "lucide-react";
-import { SpeedDialMenu, type SpeedDialItem } from "./SpeedDialMenu";
+import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 
 const ITEMS: SpeedDialItem[] = [
   { key: "settings", href: "/settings/profile", label: "Settings", icon: SettingsIcon, colorClass: "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300" },
@@ -13,6 +13,14 @@ const ITEMS: SpeedDialItem[] = [
 /** Bottom-nav "Menu" destination on mobile — everything that doesn't get
  * its own tab (Members, Months, Contact, Settings), as a speed-dial
  * pop-out instead of the full-screen sidebar sheet. */
-export function MobileMenuSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  return <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={ITEMS} align="end" />;
+export function MobileMenuSheet({
+  open,
+  onOpenChange,
+  origin,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  origin: SpeedDialOrigin | null;
+}) {
+  return <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={ITEMS} align="end" origin={origin} />;
 }

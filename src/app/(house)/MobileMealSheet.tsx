@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CalendarDays, Plus, Wallet, ShoppingBasket } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { SpeedDialMenu, type SpeedDialItem } from "./SpeedDialMenu";
+import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { DailyMealForm } from "./meal/DailyMealForm";
 import { DepositForm } from "./meal/DepositForm";
 import { BazaarForm } from "./meal/BazaarForm";
@@ -16,6 +16,7 @@ type Member = { id: string; first_name: string; last_name: string | null };
 export function MobileMealSheet({
   open,
   onOpenChange,
+  origin,
   members,
   defaultDate,
   canAddBazaar,
@@ -24,6 +25,7 @@ export function MobileMealSheet({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  origin: SpeedDialOrigin | null;
   members: Member[];
   defaultDate: string;
   canAddBazaar: boolean;
@@ -82,7 +84,7 @@ export function MobileMealSheet({
 
   return (
     <>
-      <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="center" />
+      <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="center" origin={origin} />
 
       <Dialog open={dialog === "meal"} onOpenChange={(v) => !v && setDialog(null)}>
         <DialogContent>
