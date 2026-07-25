@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { createNotice, type CreateNoticeState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getDisplayName } from "@/lib/data/display-name";
 import { cn } from "@/lib/utils";
@@ -32,11 +31,21 @@ const ALL_PIN_DURATIONS = Object.keys(PIN_DURATION_LABEL) as PinDuration[];
 export function CreateNoticeForm({
   profile,
   members,
+  onSuccess,
 }: {
   profile: { id: string; role: "super_admin" | "member"; can_add_notice: boolean };
   members: Member[];
+  onSuccess?: () => void;
 }) {
   const [state, action, pending] = useActionState<CreateNoticeState, FormData>(createNotice, undefined);
+
+  useEffect(() => {
+    if (state?.success) onSuccess?.();
+    // Only fire when a fresh success comes back from the server action —
+    // onSuccess itself must not be a dependency, or a parent passing a new
+    // callback identity on every render would re-fire this immediately.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const allowedTypes = useMemo(
     () => ALL_TYPES.filter((t) => canCreateNoticeType(profile, t)),
@@ -72,9 +81,9 @@ export function CreateNoticeForm({
 
   if (!allowedTypes.length) {
     return (
-      <Card className="p-4 text-sm text-muted-foreground">
+      <p className="p-4 text-sm text-muted-foreground">
         You don&apos;t have permission to create notices yet — ask your admin to grant it in Members.
-      </Card>
+      </p>
     );
   }
 
@@ -101,12 +110,8 @@ export function CreateNoticeForm({
   }
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle className="text-sm">Create notice</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={action} className="flex flex-col gap-5">
+    <div className="p-4">
+      <form action={action} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <Label>Notice type</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -307,8 +312,7 @@ export function CreateNoticeForm({
           <Button type="submit" disabled={pending || !type || !visibility} className="self-start">
             {pending ? "Publishing…" : "Publish notice"}
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+      </form>
+    </div>
   );
 }

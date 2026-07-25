@@ -14,7 +14,7 @@ import {
   type PinDuration,
 } from "@/lib/notice-types";
 
-export type CreateNoticeState = { error?: string } | undefined;
+export type CreateNoticeState = { error?: string; success?: boolean } | undefined;
 
 const NOTICE_TYPES = Object.keys(NOTICE_TYPE_META) as NoticeType[];
 const PRIORITIES: NoticePriority[] = ["critical", "high", "normal", "low"];
@@ -127,7 +127,7 @@ export async function createNotice(_prevState: CreateNoticeState, formData: Form
 
   revalidatePath("/notice-board");
   revalidatePath("/dashboard");
-  return undefined;
+  return { success: true };
 }
 
 export async function setNoticePinned(id: string, isPinned: boolean) {

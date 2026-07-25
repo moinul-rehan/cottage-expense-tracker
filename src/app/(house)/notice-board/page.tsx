@@ -9,11 +9,10 @@ import { formatDateTime } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import { NoticeFeedList } from "./NoticeFeedList";
 import { NoticeCard } from "./NoticeCard";
-import { CreateNoticeForm } from "./CreateNoticeForm";
+import { CreateNoticeDialog } from "./CreateNoticeDialog";
 
 const TABS = [
   { value: "feed", label: "Notice Feed" },
-  { value: "create", label: "Create Notice" },
   { value: "scheduled", label: "Scheduled Notices" },
   { value: "history", label: "Notice History" },
 ] as const;
@@ -43,11 +42,14 @@ export default async function NoticeBoardPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">Notice Board</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The house&apos;s communication hub — independent of Meal, Utilities and Cottage Balance.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Notice Board</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The house&apos;s communication hub — independent of Meal, Utilities and Cottage Balance.
+          </p>
+        </div>
+        {canManage && <CreateNoticeDialog profile={profile} members={members ?? []} />}
       </div>
 
       <div className="flex flex-wrap gap-1 text-sm">
@@ -71,8 +73,6 @@ export default async function NoticeBoardPage({
         ) : (
           <Card className="p-6 text-center text-sm text-muted-foreground">No active notices right now.</Card>
         ))}
-
-      {tab === "create" && canManage && <CreateNoticeForm profile={profile} members={members ?? []} />}
 
       {tab === "scheduled" && canManage && (
         <div className="flex flex-col gap-3">
