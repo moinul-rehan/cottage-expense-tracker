@@ -40,7 +40,7 @@ export const NOTICE_TYPE_META: Record<
     chip: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
     paper: "bg-[var(--paper-emergency)]",
     visibilities: ["everyone", "admins"],
-    memberCreatable: false,
+    memberCreatable: true,
   },
   personal: {
     label: "Personal Reminder",
@@ -58,7 +58,7 @@ export const NOTICE_TYPE_META: Record<
     chip: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300",
     paper: "bg-[var(--paper-maintenance)]",
     visibilities: ["everyone", "selected"],
-    memberCreatable: false,
+    memberCreatable: true,
   },
 };
 
