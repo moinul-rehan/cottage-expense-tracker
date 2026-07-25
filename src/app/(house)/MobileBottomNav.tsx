@@ -10,6 +10,7 @@ import { MobileMenuSheet } from "./MobileMenuSheet";
 import { cn } from "@/lib/utils";
 
 type Member = { id: string; first_name: string; last_name: string | null };
+type SheetKey = "meal" | "utilities" | "menu";
 
 const MEAL_PREFIX = "/meal";
 const UTILITIES_PREFIX = "/utilities";
@@ -44,9 +45,10 @@ function TabButton({
 /** Mobile-only bottom tab bar that replaces the hamburger + slide-out
  * sidebar as the primary nav surface on small screens. Every tab that
  * needs sub-options (Meal, Utilities, Menu) opens a bottom sheet anchored
- * just above this bar — z-40, higher than the sheets' z-50 overlay but the
- * bar itself sits fixed at the very bottom, so it stays visible the whole
- * time instead of being covered like the old full-screen sidebar sheet. */
+ * just above this bar. `activeSheet` is a single value rather than three
+ * booleans so at most one sheet — and one highlighted tab — can ever be
+ * open at a time; tapping the already-open tab closes it instead of
+ * reopening the same sheet. */
 export function MobileBottomNav({
   members,
   defaultDate,
@@ -63,11 +65,17 @@ export function MobileBottomNav({
   isSuperAdmin: boolean;
 }) {
   const pathname = usePathname();
-  const [mealOpen, setMealOpen] = useState(false);
-  const [utilitiesOpen, setUtilitiesOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<SheetKey | null>(null);
 
-  const anySheetOpen = mealOpen || utilitiesOpen || menuOpen;
+  function toggleSheet(key: SheetKey) {
+    setActiveSheet((prev) => (prev === key ? null : key));
+  }
+
+  function closeSheet(key: SheetKey) {
+    setActiveSheet((prev) => (prev === key ? null : prev));
+  }
+
+  const anySheetOpen = activeSheet !== null;
   const mealActive = !anySheetOpen && (pathname === MEAL_PREFIX || pathname.startsWith(`${MEAL_PREFIX}/`));
   const utilitiesActive =
     !anySheetOpen && (pathname === UTILITIES_PREFIX || pathname.startsWith(`${UTILITIES_PREFIX}/`));
@@ -99,14 +107,29 @@ export function MobileBottomNav({
           <Pin className="size-5" />
           Notices
         </Link>
-        <TabButton icon={UtensilsCrossed} label="Meal" active={mealActive || mealOpen} onClick={() => setMealOpen(true)} />
-        <TabButton icon={Zap} label="Utilities" active={utilitiesActive || utilitiesOpen} onClick={() => setUtilitiesOpen(true)} />
-        <TabButton icon={Menu} label="Menu" active={menuActive || menuOpen} onClick={() => setMenuOpen(true)} />
+        <TabButton
+          icon={UtensilsCrossed}
+          label="Meal"
+          active={mealActive || activeSheet === "meal"}
+          onClick={() => toggleSheet("meal")}
+        />
+        <TabButton
+          icon={Zap}
+          label="Utilities"
+          active={utilitiesActive || activeSheet === "utilities"}
+          onClick={() => toggleSheet("utilities")}
+        />
+        <TabButton
+          icon={Menu}
+          label="Menu"
+          active={menuActive || activeSheet === "menu"}
+          onClick={() => toggleSheet("menu")}
+        />
       </nav>
 
       <MobileMealSheet
-        open={mealOpen}
-        onOpenChange={setMealOpen}
+        open={activeSheet === "meal"}
+        onOpenChange={(open) => (open ? setActiveSheet("meal") : closeSheet("meal"))}
         members={members}
         defaultDate={defaultDate}
         canAddBazaar={canAddBazaar}
@@ -114,13 +137,16 @@ export function MobileBottomNav({
         canAddDeposit={canAddDeposit}
       />
       <MobileUtilitiesSheet
-        open={utilitiesOpen}
-        onOpenChange={setUtilitiesOpen}
+        open={activeSheet === "utilities"}
+        onOpenChange={(open) => (open ? setActiveSheet("utilities") : closeSheet("utilities"))}
         members={members}
         defaultDate={defaultDate}
         isSuperAdmin={isSuperAdmin}
       />
-      <MobileMenuSheet open={menuOpen} onOpenChange={setMenuOpen} />
+      <MobileMenuSheet
+        open={activeSheet === "menu"}
+        onOpenChange={(open) => (open ? setActiveSheet("menu") : closeSheet("menu"))}
+      />
     </>
   );
 }
