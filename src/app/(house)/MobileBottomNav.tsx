@@ -125,7 +125,7 @@ export function MobileBottomNav({
   return (
     <>
       <nav
-        className="fixed inset-x-3 bottom-3 z-[60] flex h-16 items-center justify-around overflow-visible rounded-[28px] bg-neutral-900 shadow-xl md:hidden"
+        className="fixed inset-x-3 bottom-3 z-[60] flex h-16 touch-manipulation items-center justify-around overflow-visible rounded-[28px] bg-neutral-900 shadow-xl md:hidden"
         aria-label="Primary"
         style={{ marginBottom: "env(safe-area-inset-bottom)" }}
       >
