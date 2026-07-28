@@ -9,7 +9,6 @@ import {
   setCanAddBazaar,
   setCanAddMeals,
   setCanAddDeposit,
-  setCanAddNotice,
   assignBazaarDuty,
   removeBazaarDuty,
   removeMember,
@@ -197,12 +196,6 @@ export function MemberCard({
                 onCheckedChange={(v) => startTransition(() => setCanAddDeposit(member.id, v))}
               >
                 Add meal deposit
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={member.can_add_notice}
-                onCheckedChange={(v) => startTransition(() => setCanAddNotice(member.id, v))}
-              >
-                Create notices
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
