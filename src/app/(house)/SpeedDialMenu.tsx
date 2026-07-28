@@ -68,7 +68,7 @@ export function SpeedDialMenu({
     <>
       <div
         className={cn(
-          "fixed inset-0 z-50 bg-black/10 transition-opacity md:hidden",
+          "fixed inset-0 z-[62] bg-black/10 transition-opacity md:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         style={{ transitionDuration: `${open ? SPEED_DIAL_EXPAND_MS : SPEED_DIAL_COLLAPSE_MS}ms` }}
@@ -77,7 +77,7 @@ export function SpeedDialMenu({
       />
       <div
         className={cn(
-          "fixed bottom-[5.75rem] z-[55] flex flex-col-reverse gap-2 md:hidden",
+          "fixed bottom-[6.5rem] z-[65] flex flex-col-reverse gap-2 md:hidden",
           align === "start" && "left-3",
           align === "center" && "left-1/2 -translate-x-1/2",
           align === "end" && "right-3"
