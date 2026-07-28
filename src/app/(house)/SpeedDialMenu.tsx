@@ -98,39 +98,35 @@ export function SpeedDialMenu({
             opacity: open ? 1 : 0,
             pointerEvents: open ? "auto" : "none",
           };
-          // touch-manipulation matters here specifically: without it, a tap
-          // landing on the wide label area (vs. the small icon circle) can
-          // get miscategorized by the browser as the start of a scroll/pan
-          // gesture over the scrollable page behind this fixed-position
-          // pill, silently cancelling the click. select-none matters too --
-          // without it, a tap that lands on the label's plain text can get
-          // captured as the start of a text-selection gesture instead of a
-          // click, which is exactly what made the icon tappable but the
-          // label dead.
-          const rowClassName = "flex touch-manipulation select-none items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
           const setRef = (el: HTMLElement | null) => {
             itemRefs.current[i] = el;
           };
-          const content = (
-            <>
-              <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-full", item.colorClass)}>
-                <item.icon className="size-4" />
-              </span>
-              <span className="text-sm font-medium whitespace-nowrap text-foreground">{item.label}</span>
-            </>
+          // The icon circle is the one and only tap target — a plain label
+          // span next to it, not part of any interactive element, so there's
+          // no ambiguity left about whether text vs. icon registers a tap.
+          const iconButtonClassName = cn(
+            "flex size-14 shrink-0 touch-manipulation select-none items-center justify-center rounded-full shadow-lg",
+            item.colorClass
+          );
+          const label = (
+            <span className="select-none rounded-full border border-border bg-card px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-foreground shadow-md">
+              {item.label}
+            </span>
           );
 
-          if (item.href) {
-            return (
-              <Link key={item.key} ref={setRef} href={item.href} className={rowClassName} style={style} onClick={onClose}>
-                {content}
-              </Link>
-            );
-          }
           return (
-            <button key={item.key} ref={setRef} type="button" className={rowClassName} style={style} onClick={item.onClick}>
-              {content}
-            </button>
+            <div key={item.key} ref={setRef} className="flex items-center justify-end gap-2.5 will-change-transform" style={style}>
+              {label}
+              {item.href ? (
+                <Link href={item.href} onClick={onClose} aria-label={item.label} className={iconButtonClassName}>
+                  <item.icon className="size-6" />
+                </Link>
+              ) : (
+                <button type="button" onClick={item.onClick} aria-label={item.label} className={iconButtonClassName}>
+                  <item.icon className="size-6" />
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
