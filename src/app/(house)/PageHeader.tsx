@@ -54,7 +54,7 @@ export function PageHeader({
         {isDashboard && (
           <div className="flex min-w-0 flex-1 flex-col gap-3 sm:hidden">
             <div className="flex items-center justify-between gap-3">
-              <Logo size={28} />
+              <Logo size={42} />
               <div className="flex items-center gap-2.5">
                 <ThemeToggle />
                 <NotificationTray notifications={notifications} unreadCount={unreadCount} />
