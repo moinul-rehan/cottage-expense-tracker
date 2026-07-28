@@ -37,6 +37,19 @@ export async function inviteMember(
   });
 
   if (error || !data.user) {
+    // This email already has an auth account (from this cottage or another
+    // one) -- inviteUserByEmail can't create a second one. Look up their
+    // existing profile (bypassing RLS, since it may belong to a different
+    // cottage) and decide whether they're free to be added here.
+    if (error?.code === "email_exists") {
+      return handleExistingEmail(admin, email, {
+        cottageId: admin_.cottage_id,
+        firstName,
+        lastName,
+        roomLabel,
+        role,
+      });
+    }
     return { error: error?.message ?? "Could not invite member." };
   }
 
@@ -59,6 +72,63 @@ export async function inviteMember(
 
   revalidatePath("/members");
   return { success: `Invite sent to ${email}.` };
+}
+
+/**
+ * A person can only ever belong to one cottage's roster at a time. If their
+ * existing account was removed from wherever it used to live (removed_at
+ * set), they're free to be attached to this cottage instead; otherwise they
+ * still belong somewhere else and this invite must be rejected.
+ */
+async function handleExistingEmail(
+  admin: ReturnType<typeof createAdminClient>,
+  email: string,
+  opts: { cottageId: string; firstName: string; lastName: string; roomLabel: string; role: "super_admin" | "member" }
+): Promise<InviteMemberState> {
+  const { data: existing } = await admin
+    .from("profiles")
+    .select("id, cottage_id, removed_at, is_active")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (!existing) {
+    return { error: "A user with this email address has already been registered, but no profile could be found for them." };
+  }
+
+  if (!existing.removed_at && existing.cottage_id !== opts.cottageId) {
+    return { error: "This person is already involved in another Cottage." };
+  }
+
+  if (!existing.removed_at && existing.cottage_id === opts.cottageId) {
+    return { error: "This person is already a member of this Cottage." };
+  }
+
+  // Free to (re)attach: either removed from this cottage before, or removed
+  // from a different one. Re-point them at this cottage with a clean slate.
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      cottage_id: opts.cottageId,
+      first_name: opts.firstName,
+      last_name: opts.lastName || null,
+      room_label: opts.roomLabel || null,
+      role: opts.role,
+      is_active: true,
+      removed_at: null,
+      can_add_expenses: false,
+      can_add_bazaar: false,
+      can_add_meals: false,
+      can_add_deposit: false,
+      can_add_notice: false,
+    })
+    .eq("id", existing.id);
+
+  if (error) return { error: "Could not add this member to the Cottage." };
+
+  await admin.auth.admin.updateUserById(existing.id, { ban_duration: "none" });
+
+  revalidatePath("/members");
+  return { success: `${email} has been added to the Cottage.` };
 }
 
 export async function setMemberActive(userId: string, isActive: boolean) {
