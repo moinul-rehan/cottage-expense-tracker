@@ -251,6 +251,9 @@ export default function LandingPage() {
             Cottage
           </div>
           <p>Shared-house expense manager for every Cottage.</p>
+          <Link href="/privacy" className="font-medium text-foreground hover:text-primary hover:underline">
+            Privacy Policy
+          </Link>
         </div>
       </footer>
     </div>
