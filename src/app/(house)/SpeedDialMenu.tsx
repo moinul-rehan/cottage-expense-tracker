@@ -102,8 +102,12 @@ export function SpeedDialMenu({
           // landing on the wide label area (vs. the small icon circle) can
           // get miscategorized by the browser as the start of a scroll/pan
           // gesture over the scrollable page behind this fixed-position
-          // pill, silently cancelling the click.
-          const rowClassName = "flex touch-manipulation items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
+          // pill, silently cancelling the click. select-none matters too --
+          // without it, a tap that lands on the label's plain text can get
+          // captured as the start of a text-selection gesture instead of a
+          // click, which is exactly what made the icon tappable but the
+          // label dead.
+          const rowClassName = "flex touch-manipulation select-none items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
           const setRef = (el: HTMLElement | null) => {
             itemRefs.current[i] = el;
           };
