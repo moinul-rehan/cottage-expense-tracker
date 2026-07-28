@@ -14,7 +14,7 @@ export default async function MembersPage() {
     supabase
       .from("profiles")
       .select(
-        "id, first_name, last_name, avatar_url, role, room_label, is_active, email, mobile_number, hometown, address, can_add_expenses, can_add_bazaar, can_add_meals, can_add_deposit"
+        "id, first_name, last_name, avatar_url, role, room_label, is_active, email, mobile_number, hometown, address, can_add_expenses, can_add_bazaar, can_add_meals, can_add_deposit, can_add_notice"
       )
       .is("removed_at", null)
       .order("last_name"),

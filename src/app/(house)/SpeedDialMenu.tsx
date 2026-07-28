@@ -98,7 +98,12 @@ export function SpeedDialMenu({
             opacity: open ? 1 : 0,
             pointerEvents: open ? "auto" : "none",
           };
-          const rowClassName = "flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
+          // touch-manipulation matters here specifically: without it, a tap
+          // landing on the wide label area (vs. the small icon circle) can
+          // get miscategorized by the browser as the start of a scroll/pan
+          // gesture over the scrollable page behind this fixed-position
+          // pill, silently cancelling the click.
+          const rowClassName = "flex touch-manipulation items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
           const setRef = (el: HTMLElement | null) => {
             itemRefs.current[i] = el;
           };
