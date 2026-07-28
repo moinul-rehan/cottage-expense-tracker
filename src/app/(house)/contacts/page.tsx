@@ -27,7 +27,7 @@ export default async function ContactsPage() {
             Necessary people for the Cottage — landlord, electrician, and the like.
           </p>
         </div>
-        {isSuperAdmin && <CreateContactDialog />}
+        <CreateContactDialog />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireSuperAdmin } from "@/lib/data/dal";
+import { getCurrentProfile, requireSuperAdmin } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 
 export type AddContactState = { error?: string } | undefined;
@@ -10,7 +10,7 @@ export async function addContact(
   _prevState: AddContactState,
   formData: FormData
 ): Promise<AddContactState> {
-  const profile = await requireSuperAdmin();
+  const profile = await getCurrentProfile();
   const supabase = await createClient();
 
   const name = String(formData.get("name") ?? "").trim();

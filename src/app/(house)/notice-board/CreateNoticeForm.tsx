@@ -141,7 +141,7 @@ export function CreateNoticeForm({
 
   return (
     <form action={action} className="flex flex-col">
-      <div className="flex max-h-[64vh] flex-col gap-5 overflow-y-auto px-4 pt-1 pb-4">
+      <div className="flex max-h-[64dvh] flex-col gap-5 overflow-y-auto overscroll-contain px-4 pt-1 pb-4">
         <FormSection title="Notice type">
           <div className="grid grid-cols-3 gap-2">
             {allowedTypes.map((t) => {
@@ -258,7 +258,7 @@ export function CreateNoticeForm({
             <input type="hidden" name="visibility" value={visibility ?? ""} />
 
             {needsTargets && (
-              <div className="flex max-h-36 flex-col gap-2 overflow-y-auto rounded-lg border border-border p-2.5">
+              <div className="flex max-h-36 flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg border border-border p-2.5">
                 {members.map((m) => (
                   <label key={m.id} className="flex items-center gap-2 text-sm">
                     <Checkbox checked={targetIds.includes(m.id)} onCheckedChange={(c) => toggleTarget(m.id, c === true)} />

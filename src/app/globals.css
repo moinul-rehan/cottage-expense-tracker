@@ -159,8 +159,9 @@
   button,
   a,
   [role="button"],
-  input[type="checkbox"],
-  input[type="radio"],
+  input,
+  textarea,
+  select,
   summary {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
