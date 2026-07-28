@@ -134,7 +134,7 @@ export function NoticeCard({
             <span aria-hidden>·</span>
             <span>
               {VISIBILITY_LABEL[notice.visibility]}
-              {targetNames.length ? `: ${targetNames.join(", ")}` : ""}
+              {profile.role === "super_admin" && targetNames.length ? `: ${targetNames.join(", ")}` : ""}
             </span>
           </>
         )}
