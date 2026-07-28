@@ -109,14 +109,13 @@ export function SpeedDialMenu({
             item.colorClass
           );
           const label = (
-            <span className="select-none rounded-full border border-border bg-card px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-foreground shadow-md">
+            <span className="pointer-events-none select-none rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-foreground shadow-md">
               {item.label}
             </span>
           );
 
           return (
             <div key={item.key} ref={setRef} className="flex items-center justify-end gap-2.5 will-change-transform" style={style}>
-              {label}
               {item.href ? (
                 <Link href={item.href} onClick={onClose} aria-label={item.label} className={iconButtonClassName}>
                   <item.icon className="size-6" />
@@ -126,6 +125,7 @@ export function SpeedDialMenu({
                   <item.icon className="size-6" />
                 </button>
               )}
+              {label}
             </div>
           );
         })}
