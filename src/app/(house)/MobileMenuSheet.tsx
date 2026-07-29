@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, CalendarRange, Contact, Pin, Settings as SettingsIcon } from "lucide-react";
+import { Users, CalendarRange, Contact, Pin, Settings as SettingsIcon, MessageSquareWarning } from "lucide-react";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 
 /** Bottom-nav "Menu" destination on mobile - everything that doesn't get
@@ -26,6 +26,7 @@ export function MobileMenuSheet({
     { key: "contacts", href: "/contacts", label: "Contact", icon: Contact, colorClass: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300" },
     { key: "months", href: "/months", label: "Months", icon: CalendarRange, colorClass: "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300" },
     { key: "members", href: "/members", label: "Members", icon: Users, colorClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" },
+    { key: "feedback", href: "/feedback", label: "Feedback", icon: MessageSquareWarning, colorClass: "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300" },
   ];
 
   return <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="end" origin={origin} />;

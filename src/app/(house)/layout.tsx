@@ -8,6 +8,7 @@ import {
   CalendarRange,
   Contact,
   Settings as SettingsIcon,
+  MessageSquareWarning,
 } from "lucide-react";
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
@@ -36,6 +37,7 @@ const bottomLinks = [
   { href: "/members", label: "Members", icon: Users },
   { href: "/months", label: "Months", icon: CalendarRange },
   { href: "/contacts", label: "Contact", icon: Contact },
+  { href: "/feedback", label: "Feedback", icon: MessageSquareWarning },
 ];
 
 export default async function HouseLayout({

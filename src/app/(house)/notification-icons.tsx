@@ -14,6 +14,7 @@ import {
   Inbox,
   CheckCircle2,
   XCircle,
+  MessageSquareWarning,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,6 +39,7 @@ export const NOTIFICATION_ICONS: Record<string, LucideIcon> = {
   month_activated: RotateCw,
   utility_month_reset: RotateCcw,
   meal_month_reset: RotateCcw,
+  feedback_submitted: MessageSquareWarning,
 };
 
 export function getNotificationIcon(type: string): LucideIcon {
