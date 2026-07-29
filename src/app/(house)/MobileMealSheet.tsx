@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, Plus, Wallet, ShoppingBasket } from "lucide-react";
+import { CalendarDays, Plus, Wallet, ShoppingBasket, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { DailyMealForm } from "./meal/DailyMealForm";
 import { DepositForm } from "./meal/DepositForm";
 import { BazaarForm } from "./meal/BazaarForm";
+import { RequestMealForm } from "./meal/RequestMealForm";
+import { RequestMealCostForm } from "./meal/RequestMealCostForm";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 
-/** Bottom-nav "Meal" destination on mobile — a speed-dial pop-out listing
+/** Bottom-nav "Meal" destination on mobile - a speed-dial pop-out listing
  * Month Details plus whichever quick-add actions this member can use,
  * mirroring MealQuickAddMenu's sidebar entry. */
 export function MobileMealSheet({
@@ -32,7 +34,7 @@ export function MobileMealSheet({
   canAddMeals: boolean;
   canAddDeposit: boolean;
 }) {
-  const [dialog, setDialog] = useState<"meal" | "deposit" | "bazaar" | null>(null);
+  const [dialog, setDialog] = useState<"meal" | "deposit" | "bazaar" | "request" | "cost-request" | null>(null);
 
   function openDialog(next: typeof dialog) {
     onOpenChange(false);
@@ -57,7 +59,15 @@ export function MobileMealSheet({
             onClick: () => openDialog("bazaar"),
           },
         ]
-      : []),
+      : [
+          {
+            key: "request-cost",
+            label: "Request Meal Cost",
+            icon: Send,
+            colorClass: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+            onClick: () => openDialog("cost-request"),
+          },
+        ]),
     ...(canAddDeposit
       ? [
           {
@@ -79,7 +89,15 @@ export function MobileMealSheet({
             onClick: () => openDialog("meal"),
           },
         ]
-      : []),
+      : [
+          {
+            key: "request-meal",
+            label: "Request Meal",
+            icon: Send,
+            colorClass: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
+            onClick: () => openDialog("request"),
+          },
+        ]),
   ];
 
   return (
@@ -115,6 +133,28 @@ export function MobileMealSheet({
           </DialogHeader>
           <div className="p-4 pt-2">
             <BazaarForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "request"} onOpenChange={(v) => !v && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Meal</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <RequestMealForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "cost-request"} onOpenChange={(v) => !v && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Meal Cost</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <RequestMealCostForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
           </div>
         </DialogContent>
       </Dialog>

@@ -3,7 +3,7 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Privacy Policy — Cottage",
+  title: "Privacy Policy - Cottage",
   description: "How Cottage collects, uses, and protects your information.",
 };
 
@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
               Cottage is a shared-house expense manager built for roommates to track meals, utilities, and
               deposits together. This policy explains what information we collect when you use Cottage, how
               it&apos;s used, and who can see it. We don&apos;t sell your data, and we don&apos;t run
-              advertising or analytics trackers of any kind — Cottage only collects what it needs to function.
+              advertising or analytics trackers of any kind - Cottage only collects what it needs to function.
             </p>
           </Section>
 
@@ -58,8 +58,8 @@ export default function PrivacyPolicyPage() {
             </p>
             <p>
               <strong className="text-foreground">Household records.</strong> Anything you or another member
-              of your cottage enters — meals, bazaar (grocery) costs, utility expenses, deposits, notices,
-              rent assignments, and settlements — is stored so the app can calculate balances and statements
+              of your cottage enters - meals, bazaar (grocery) costs, utility expenses, deposits, notices,
+              rent assignments, and settlements - is stored so the app can calculate balances and statements
               for everyone in that cottage.
             </p>
             <p>
@@ -86,7 +86,7 @@ export default function PrivacyPolicyPage() {
           <Section title="Who can see your information">
             <p>
               Your name, financial records, and household activity are visible only to the other members of
-              your own cottage — never to members of a different cottage. Your cottage&apos;s super admin can
+              your own cottage - never to members of a different cottage. Your cottage&apos;s super admin can
               see everyone&apos;s records within that cottage in order to manage settlements and permissions.
               Optional profile fields like phone number and address are visible to your cottage members so
               roommates can reach each other.
@@ -106,7 +106,7 @@ export default function PrivacyPolicyPage() {
           <Section title="Data retention and deletion">
             <p>
               Financial and household records (meals, expenses, deposits, statements) are kept indefinitely
-              once created, even if a member is later removed from a cottage — this preserves an accurate
+              once created, even if a member is later removed from a cottage - this preserves an accurate
               shared history for the household. Removing a member locks their login and hides their profile
               from new activity, but does not delete their past records. If you&apos;d like your personal
               account information deleted entirely, contact us using the details below.

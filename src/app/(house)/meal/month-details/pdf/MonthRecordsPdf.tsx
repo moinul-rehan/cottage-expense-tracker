@@ -60,7 +60,7 @@ type SummaryRow = {
 type MemberRef = { first_name: string; last_name: string | null } | null;
 
 function name(m: MemberRef) {
-  if (!m) return "—";
+  if (!m) return "-";
   return [m.first_name, m.last_name].filter(Boolean).join(" ");
 }
 
@@ -98,10 +98,10 @@ export function MonthRecordsPdf({
 }) {
   return (
     <Document>
-      {/* Page 1 — Summary + Meal Records */}
+      {/* Page 1 - Summary + Meal Records */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Month Records — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Month Records - {formatMonthKey(monthKey)}</Text>
         <Text style={styles.subtitle}>
           Meal rate: {mealRate.toFixed(2)} tk/meal · Generated for every member of the cottage
         </Text>
@@ -144,7 +144,7 @@ export function MonthRecordsPdf({
                 <Text style={styles.cell}>{formatDate(row.date)}</Text>
                 {row.counts.map((c, i) => (
                   <Text style={styles.cellRight} key={memberNames[i]}>
-                    {c || "—"}
+                    {c || "-"}
                   </Text>
                 ))}
               </View>
@@ -170,10 +170,10 @@ export function MonthRecordsPdf({
         />
       </Page>
 
-      {/* Page 2 — Deposit Records */}
+      {/* Page 2 - Deposit Records */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Deposit Records — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Deposit Records - {formatMonthKey(monthKey)}</Text>
         <View style={styles.section}>
           <View style={styles.table}>
             <View style={styles.headerRow}>
@@ -186,7 +186,7 @@ export function MonthRecordsPdf({
               <View style={styles.row} key={r.id}>
                 <Text style={styles.cell}>{formatDate(r.deposit_date)}</Text>
                 <Text style={styles.cell}>{name(r.member)}</Text>
-                <Text style={styles.cell}>{r.note ?? "—"}</Text>
+                <Text style={styles.cell}>{r.note ?? "-"}</Text>
                 <Text style={styles.cellRight}>{Number(r.amount).toFixed(2)} tk</Text>
               </View>
             ))}
@@ -200,10 +200,10 @@ export function MonthRecordsPdf({
         />
       </Page>
 
-      {/* Page 3 — Meal Cost (Bazaar) Records */}
+      {/* Page 3 - Meal Cost (Bazaar) Records */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Meal Cost Records — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Meal Cost Records - {formatMonthKey(monthKey)}</Text>
         <View style={styles.section}>
           <View style={styles.table}>
             <View style={styles.headerRow}>
@@ -216,7 +216,7 @@ export function MonthRecordsPdf({
               <View style={styles.row} key={r.id}>
                 <Text style={styles.cell}>{formatDate(r.entry_date)}</Text>
                 <Text style={styles.cell}>{name(r.member)}</Text>
-                <Text style={styles.cell}>{r.description ?? "—"}</Text>
+                <Text style={styles.cell}>{r.description ?? "-"}</Text>
                 <Text style={styles.cellRight}>{Number(r.amount).toFixed(2)} tk</Text>
               </View>
             ))}

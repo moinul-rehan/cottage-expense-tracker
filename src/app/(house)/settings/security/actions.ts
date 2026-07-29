@@ -13,7 +13,7 @@ async function userHasPassword(supabase: Awaited<ReturnType<typeof createClient>
 }
 
 /** First-time password set for accounts that signed up via Google and have
- * never had a password — there's nothing to verify against, so this skips
+ * never had a password - there's nothing to verify against, so this skips
  * the current-password re-auth step. Re-checks server-side that the account
  * genuinely has no password yet, so this can't be used to bypass re-auth
  * for an account that already has one. */
@@ -39,7 +39,7 @@ export async function setInitialPassword(
   const supabase = await createClient();
 
   if (await userHasPassword(supabase)) {
-    return { error: "This account already has a password — use Change password instead." };
+    return { error: "This account already has a password - use Change password instead." };
   }
 
   const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
@@ -71,7 +71,7 @@ export async function changePassword(
   }
   const supabase = await createClient();
 
-  // profiles.email can be stale/empty on older accounts — fall back to the
+  // profiles.email can be stale/empty on older accounts - fall back to the
   // authenticated session's own email, which is always accurate.
   const email = profile.email ?? (await supabase.auth.getUser()).data.user?.email ?? null;
   if (!email) {

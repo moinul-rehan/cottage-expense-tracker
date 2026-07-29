@@ -42,7 +42,7 @@ export default async function NoticeBoardPage({
   const historyNotices = sortForDisplay(notices);
 
   // The moment any visible notice should next flip status (scheduled ->
-  // published, published -> expired) — refreshes the page live when it does.
+  // published, published -> expired) - refreshes the page live when it does.
   const wakeAt = notices
     .filter((n) => !n.archived_at)
     .flatMap((n) => {
@@ -59,7 +59,7 @@ export default async function NoticeBoardPage({
         <div>
           <h1 className="text-xl font-semibold text-foreground">Notice Board</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            The house&apos;s communication hub — independent of Meal, Utilities and Cottage Balance.
+            The house&apos;s communication hub - independent of Meal, Utilities and Cottage Balance.
           </p>
         </div>
         {canManage && <CreateNoticeDialog profile={profile} members={members ?? []} />}
@@ -141,7 +141,7 @@ export default async function NoticeBoardPage({
                         {PRIORITY_META[n.priority].label}
                       </span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{n.is_pinned ? "Yes" : "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{n.is_pinned ? "Yes" : "-"}</TableCell>
                     <TableCell className="text-muted-foreground capitalize">{status}</TableCell>
                   </TableRow>
                 );

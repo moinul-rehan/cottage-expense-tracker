@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ export const SPEED_DIAL_EASE_IN_CUBIC = "cubic-bezier(0.32, 0, 0.67, 0)";
  * from the trigger button's actual on-screen position (measured via
  * getBoundingClientRect, passed in as `origin`) and translates+scales+fades
  * to its resting spot in the stack, staggered closest-first on expand and
- * reversed (top item first) on collapse — so every item reads as physically
+ * reversed (top item first) on collapse - so every item reads as physically
  * emerging from, and retracting back into, the button that opened it. */
 export function SpeedDialMenu({
   open,
@@ -41,12 +41,13 @@ export function SpeedDialMenu({
   align?: "start" | "center" | "end";
   origin: SpeedDialOrigin | null;
 }) {
+  const router = useRouter();
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   // Each pill's resting center, measured ONCE while at rest (mount time,
-  // when transform is always translate(0,0) — see the `offset` fallback
+  // when transform is always translate(0,0) - see the `offset` fallback
   // below). getBoundingClientRect reflects whatever transform is currently
-  // applied, so measuring at any other time — e.g. re-measuring on every
-  // open — would read the pill's already-displaced position from the
+  // applied, so measuring at any other time - e.g. re-measuring on every
+  // open - would read the pill's already-displaced position from the
   // previous close and compound errors on every subsequent open. Centers
   // don't move once laid out, so measuring once and reusing is also just
   // cheaper.
@@ -68,7 +69,7 @@ export function SpeedDialMenu({
     <>
       <div
         className={cn(
-          "fixed inset-0 z-50 bg-black/10 transition-opacity md:hidden",
+          "fixed inset-0 z-[62] bg-black/10 transition-opacity md:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         style={{ transitionDuration: `${open ? SPEED_DIAL_EXPAND_MS : SPEED_DIAL_COLLAPSE_MS}ms` }}
@@ -77,7 +78,7 @@ export function SpeedDialMenu({
       />
       <div
         className={cn(
-          "fixed bottom-[5.75rem] z-[55] flex flex-col-reverse gap-2 md:hidden",
+          "fixed bottom-[6.5rem] z-[65] flex flex-col-reverse gap-2 md:hidden",
           align === "start" && "left-3",
           align === "center" && "left-1/2 -translate-x-1/2",
           align === "end" && "right-3"
@@ -98,35 +99,41 @@ export function SpeedDialMenu({
             opacity: open ? 1 : 0,
             pointerEvents: open ? "auto" : "none",
           };
-          // touch-manipulation matters here specifically: without it, a tap
-          // landing on the wide label area (vs. the small icon circle) can
-          // get miscategorized by the browser as the start of a scroll/pan
-          // gesture over the scrollable page behind this fixed-position
-          // pill, silently cancelling the click.
-          const rowClassName = "flex touch-manipulation items-center gap-2.5 rounded-full border border-border bg-card py-2 pr-4 pl-2 shadow-lg will-change-transform";
           const setRef = (el: HTMLElement | null) => {
             itemRefs.current[i] = el;
           };
-          const content = (
-            <>
-              <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-full", item.colorClass)}>
-                <item.icon className="size-4" />
-              </span>
-              <span className="text-sm font-medium whitespace-nowrap text-foreground">{item.label}</span>
-            </>
+          // The icon circle is the one and only tap target - a plain label
+          // span next to it, not part of any interactive element, so there's
+          // no ambiguity left about whether text vs. icon registers a tap.
+          const iconButtonClassName = cn(
+            "flex size-14 shrink-0 touch-manipulation select-none items-center justify-center rounded-full shadow-lg",
+            item.colorClass
+          );
+          const label = (
+            <span className="pointer-events-none select-none rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-foreground shadow-md">
+              {item.label}
+            </span>
           );
 
-          if (item.href) {
-            return (
-              <Link key={item.key} ref={setRef} href={item.href} className={rowClassName} style={style} onClick={onClose}>
-                {content}
-              </Link>
-            );
-          }
+          // Plain button + router.push for nav items too, rather than
+          // next/link -- a next/link's own click interception didn't
+          // reliably win out over onClose closing/unmounting this pill
+          // mid-click inside the animated overlay, so navigation silently
+          // failed while onClick-only items (which never had that race)
+          // worked fine.
+          const handleClick = () => {
+            onClose();
+            if (item.href) router.push(item.href);
+            else item.onClick?.();
+          };
+
           return (
-            <button key={item.key} ref={setRef} type="button" className={rowClassName} style={style} onClick={item.onClick}>
-              {content}
-            </button>
+            <div key={item.key} ref={setRef} className="flex items-center justify-end gap-2.5 will-change-transform" style={style}>
+              <button type="button" onClick={handleClick} aria-label={item.label} className={iconButtonClassName}>
+                <item.icon className="size-6" />
+              </button>
+              {label}
+            </div>
           );
         })}
       </div>

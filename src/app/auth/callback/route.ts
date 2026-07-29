@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
     if (!error) {
       // Password recovery: the code exchange above is the whole point (it's
-      // what actually persists the session cookie — a Server Component
+      // what actually persists the session cookie - a Server Component
       // can't set cookies, so exchanging the code inside /reset-password's
       // page itself would silently fail to keep the session past that
       // first render). No profile/cottage logic applies here.

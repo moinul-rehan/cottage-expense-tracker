@@ -27,7 +27,7 @@ export default async function SignupPage({
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Start a Cottage</h1>
             <p className="text-sm text-muted-foreground">
-              Sign up for a new Cottage — you&apos;ll be its admin.
+              Sign up for a new Cottage - you&apos;ll be its admin.
             </p>
           </div>
           {errorMessage && (
@@ -72,10 +72,10 @@ export default async function SignupPage({
             />
           </svg>
           <p className="max-w-md text-3xl font-semibold tracking-tight">
-            Set it up once — meals, utilities and settle-ups take care of themselves after that.
+            Set it up once - meals, utilities and settle-ups take care of themselves after that.
           </p>
           <div className="flex w-fit items-center justify-center rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur-md">
-            Cottage — Shared-house expense manager
+            Cottage - Shared-house expense manager
           </div>
         </div>
       </div>

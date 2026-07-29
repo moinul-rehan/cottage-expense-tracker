@@ -26,31 +26,31 @@ const FEATURES = [
     icon: Zap,
     title: "Utilities & shared costs",
     description:
-      "Rent, electricity, internet and every other shared bill — split equally or custom, paid by a member or the Cottage Balance.",
+      "Rent, electricity, internet and every other shared bill - split equally or custom, paid by a member or the Cottage Balance.",
   },
   {
     icon: CalendarRange,
     title: "Monthly statements",
     description:
-      "Generate a full category-by-category utility statement per member before settling up — transparent, never a single mystery total.",
+      "Generate a full category-by-category utility statement per member before settling up - transparent, never a single mystery total.",
   },
   {
     icon: Users,
     title: "Members & permissions",
     description:
-      "Invite roommates, assign who can add meals, costs or deposits, and track bazaar duty — all from one place.",
+      "Invite roommates, assign who can add meals, costs or deposits, and track bazaar duty - all from one place.",
   },
   {
     icon: Bell,
     title: "Real-time notifications",
     description:
-      "Everyone stays in sync automatically when a bill, meal or settlement gets added — no group chat required.",
+      "Everyone stays in sync automatically when a bill, meal or settlement gets added - no group chat required.",
   },
   {
     icon: Smartphone,
     title: "Install on any device",
     description:
-      "Cottage is a full Progressive Web App — install it on Android, iOS or desktop and use it like a native app.",
+      "Cottage is a full Progressive Web App - install it on Android, iOS or desktop and use it like a native app.",
   },
 ];
 
@@ -95,7 +95,7 @@ export default function LandingPage() {
               <span className="text-primary">Zero confusion.</span>
             </h1>
             <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
-              Cottage tracks meals, utilities and shared expenses for your roommates — so
+              Cottage tracks meals, utilities and shared expenses for your roommates - so
               everyone always knows exactly what they owe, and why.
             </p>
             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
@@ -134,7 +134,7 @@ export default function LandingPage() {
               Everything your house needs
             </h2>
             <p className="text-muted-foreground">
-              Meals, bills and settle-ups — Cottage keeps every roommate&apos;s numbers
+              Meals, bills and settle-ups - Cottage keeps every roommate&apos;s numbers
               straight, automatically.
             </p>
           </div>
@@ -163,7 +163,7 @@ export default function LandingPage() {
               </h2>
               <p className="text-muted-foreground">
                 No more single mystery totals. Every member gets a full category-by-category
-                breakdown — rent, bills, meal carry-in, discounts, advance payments — so
+                breakdown - rent, bills, meal carry-in, discounts, advance payments - so
                 settling up is a formality, not a negotiation.
               </p>
               <ul className="flex flex-col gap-2 text-sm text-foreground">
@@ -198,7 +198,7 @@ export default function LandingPage() {
                 {
                   step: "1",
                   title: "Create your Cottage",
-                  body: "Sign up and you're the admin — invite your roommates by email in seconds.",
+                  body: "Sign up and you're the admin - invite your roommates by email in seconds.",
                 },
                 {
                   step: "2",
@@ -208,7 +208,7 @@ export default function LandingPage() {
                 {
                   step: "3",
                   title: "Settle up with confidence",
-                  body: "Generate a clear statement each month and settle up — no arguments, no guesswork.",
+                  body: "Generate a clear statement each month and settle up - no arguments, no guesswork.",
                 },
               ].map((s) => (
                 <div key={s.step} className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
@@ -229,7 +229,7 @@ export default function LandingPage() {
             Ready to stop tracking rent in a group chat?
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-            Create your Cottage now — it takes less time than the last argument about who owes
+            Create your Cottage now - it takes less time than the last argument about who owes
             what.
           </p>
           <Button

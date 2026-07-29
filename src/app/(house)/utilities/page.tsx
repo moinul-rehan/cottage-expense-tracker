@@ -31,9 +31,9 @@ export default async function UtilitiesPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Utility Details — {monthKey}</h1>
+        <h1 className="text-xl font-semibold text-foreground">Utility Details - {monthKey}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage all shared utility expenses. This page does not generate member bills — that
+          Manage all shared utility expenses. This page does not generate member bills - that
           happens on Member Utility Statements.
         </p>
       </div>
@@ -89,7 +89,7 @@ export default async function UtilitiesPage() {
         <AddExpenseForm members={members ?? []} defaultDate={defaultDate} />
       ) : (
         <Card className="p-4 text-sm text-muted-foreground">
-          You don&apos;t have permission to add utility expenses — ask your admin.
+          You don&apos;t have permission to add utility expenses - ask your admin.
         </Card>
       )}
     </div>

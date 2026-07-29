@@ -44,7 +44,7 @@ const TABLE_ROW_H = 34;
 const TABLE_TOTAL_H = 36;
 const CELL_PAD = 14;
 
-/** Renders a personal utility statement as a shareable PNG using the Canvas API (client-only — must run in a browser). */
+/** Renders a personal utility statement as a shareable PNG using the Canvas API (client-only - must run in a browser). */
 export async function generateInvoicePng(data: InvoiceData): Promise<Blob> {
   const dueLabel = data.due < 0 ? "Advance Balance" : "Remaining Due";
   const dueColor = data.due < 0 ? COLORS.green : COLORS.red;
@@ -124,7 +124,7 @@ export async function generateInvoicePng(data: InvoiceData): Promise<Blob> {
   y = drawStripedTable(
     ctx,
     ["DATE", "NOTE", "AMOUNT"],
-    data.depositLines.map((l) => [formatShortDate(l.date), l.note ?? "—", `${l.amount.toFixed(2)} tk`]),
+    data.depositLines.map((l) => [formatShortDate(l.date), l.note ?? "-", `${l.amount.toFixed(2)} tk`]),
     data.depositLines.map(() => COLORS.green),
     "No deposits recorded this month.",
     "Total",
@@ -140,7 +140,7 @@ export async function generateInvoicePng(data: InvoiceData): Promise<Blob> {
   ctx.fillStyle = COLORS.muted;
   ctx.textAlign = "center";
   ctx.fillText(
-    "This is a system-generated statement — verify with your cottage manager if something looks incorrect.",
+    "This is a system-generated statement - verify with your cottage manager if something looks incorrect.",
     WIDTH / 2,
     y
   );

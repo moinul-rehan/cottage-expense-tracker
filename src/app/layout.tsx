@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { InstallPrompt } from "@/components/InstallPrompt";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const poppins = Poppins({
@@ -29,6 +28,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#DE7356" },
     { media: "(prefers-color-scheme: dark)", color: "#121316" },
@@ -44,7 +48,7 @@ export default function RootLayout({
     <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
-          // Runs before hydration so the correct theme is on <html> for the very first paint —
+          // Runs before hydration so the correct theme is on <html> for the very first paint -
           // otherwise the page would flash light before React mounts and corrects it.
           dangerouslySetInnerHTML={{
             __html: `(function(){try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}})();`,
@@ -53,7 +57,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         {children}
-        <InstallPrompt />
         <ServiceWorkerRegister />
       </body>
     </html>

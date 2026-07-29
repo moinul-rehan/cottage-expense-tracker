@@ -26,7 +26,7 @@ export function ProfileMenu({
         render={
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded-full border border-border bg-card py-1 pr-3 pl-1"
+            className="flex h-[42px] shrink-0 items-center gap-1.5 rounded-full border border-border bg-card pr-3 pl-1"
           />
         }
       >

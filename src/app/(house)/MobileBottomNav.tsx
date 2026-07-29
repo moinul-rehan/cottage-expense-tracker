@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Pin, UtensilsCrossed, Zap, Menu, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Pin, Inbox, UtensilsCrossed, Zap, Menu, type LucideIcon } from "lucide-react";
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
 import { MobileMenuSheet } from "./MobileMenuSheet";
@@ -23,7 +23,7 @@ const MEAL_PREFIX = "/meal";
 const UTILITIES_PREFIX = "/utilities";
 const MENU_PREFIXES = ["/members", "/months", "/contacts", "/settings"];
 
-/** One tab: a plain outline icon at rest, or — when active — the same icon
+/** One tab: a plain outline icon at rest, or - when active - the same icon
  * pops up into a filled circle that overlaps the bar's top edge, with a
  * ring matching the page background so it reads as a cutout in the bar.
  * Uses the same easing/duration as the speed-dial pills so the trigger
@@ -34,18 +34,20 @@ function NavTab({
   active,
   href,
   onClick,
+  badge,
 }: {
   icon: LucideIcon;
   label: string;
   active: boolean;
   href?: string;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  badge?: number;
 }) {
   const inner = (
     <>
       <span
         className={cn(
-          "flex items-center justify-center rounded-full",
+          "relative flex items-center justify-center rounded-full",
           active
             ? "-mt-8 size-14 bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
             : "size-9 text-neutral-400"
@@ -57,6 +59,11 @@ function NavTab({
         }}
       >
         <Icon className={active ? "size-6" : "size-5"} />
+        {!!badge && badge > 0 && (
+          <span className="absolute -top-1 -right-1 flex size-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white ring-2 ring-neutral-900">
+            {badge > 9 ? "9+" : badge}
+          </span>
+        )}
       </span>
       <span className="sr-only">{label}</span>
     </>
@@ -84,8 +91,8 @@ function NavTab({
  * needs sub-options (Meal, Utilities, Menu) opens a speed-dial pop-out
  * anchored just above this bar, originating from that tab's own on-screen
  * position (captured on tap via getBoundingClientRect). `activeSheet` is a
- * single value rather than three booleans so at most one dial — and one
- * highlighted tab — can ever be open at a time; tapping the already-open
+ * single value rather than three booleans so at most one dial - and one
+ * highlighted tab - can ever be open at a time; tapping the already-open
  * tab closes it instead of reopening the same dial. */
 export function MobileBottomNav({
   members,
@@ -94,6 +101,7 @@ export function MobileBottomNav({
   canAddMeals,
   canAddDeposit,
   isSuperAdmin,
+  pendingRequestCount = 0,
 }: {
   members: Member[];
   defaultDate: string;
@@ -101,6 +109,7 @@ export function MobileBottomNav({
   canAddMeals: boolean;
   canAddDeposit: boolean;
   isSuperAdmin: boolean;
+  pendingRequestCount?: number;
 }) {
   const pathname = usePathname();
   const [activeSheet, setActiveSheet] = useState<SheetKey | null>(null);
@@ -116,11 +125,14 @@ export function MobileBottomNav({
     setActiveSheet((prev) => (prev === key ? null : prev));
   }
 
+  const canManageMealRequests = canAddMeals || canAddBazaar;
+  const menuPrefixes = canManageMealRequests ? [...MENU_PREFIXES, "/notice-board"] : MENU_PREFIXES;
+
   const anySheetOpen = activeSheet !== null;
   const mealActive = !anySheetOpen && (pathname === MEAL_PREFIX || pathname.startsWith(`${MEAL_PREFIX}/`));
   const utilitiesActive =
     !anySheetOpen && (pathname === UTILITIES_PREFIX || pathname.startsWith(`${UTILITIES_PREFIX}/`));
-  const menuActive = !anySheetOpen && MENU_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const menuActive = !anySheetOpen && menuPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   return (
     <>
@@ -136,13 +148,24 @@ export function MobileBottomNav({
           active={!anySheetOpen && pathname === "/dashboard"}
           onClick={() => setActiveSheet(null)}
         />
-        <NavTab
-          icon={Pin}
-          label="Notices"
-          href="/notice-board"
-          active={!anySheetOpen && pathname === "/notice-board"}
-          onClick={() => setActiveSheet(null)}
-        />
+        {canManageMealRequests ? (
+          <NavTab
+            icon={Inbox}
+            label="Request"
+            href="/request"
+            active={!anySheetOpen && pathname === "/request"}
+            onClick={() => setActiveSheet(null)}
+            badge={pendingRequestCount}
+          />
+        ) : (
+          <NavTab
+            icon={Pin}
+            label="Notices"
+            href="/notice-board"
+            active={!anySheetOpen && pathname === "/notice-board"}
+            onClick={() => setActiveSheet(null)}
+          />
+        )}
         <NavTab
           icon={UtensilsCrossed}
           label="Meal"
@@ -185,6 +208,7 @@ export function MobileBottomNav({
         open={activeSheet === "menu"}
         onOpenChange={(open) => (open ? setActiveSheet("menu") : closeSheet("menu"))}
         origin={origin}
+        showNoticeBoard={canManageMealRequests}
       />
     </>
   );

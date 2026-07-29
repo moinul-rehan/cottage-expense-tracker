@@ -69,7 +69,7 @@ export const PRIORITY_META: Record<NoticePriority, { label: string; order: numbe
   low: { label: "Low", order: 3, pill: "bg-muted text-muted-foreground", pin: "bg-slate-400" },
 };
 
-/** Deterministic -3..3deg tilt per notice id — stable across re-renders, no layout jitter. */
+/** Deterministic -3..3deg tilt per notice id - stable across re-renders, no layout jitter. */
 export function noticeTilt(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
@@ -94,15 +94,15 @@ export const PIN_DURATION_LABEL: Record<PinDuration, string> = {
 
 /** Can this profile create the given notice type? Mirrors the notices_insert RLS check. */
 export function canCreateNoticeType(
-  profile: { role: "super_admin" | "member"; can_add_notice: boolean },
+  profile: { role: "super_admin" | "member" },
   type: NoticeType
 ) {
   if (profile.role === "super_admin") return true;
-  return profile.can_add_notice && NOTICE_TYPE_META[type].memberCreatable;
+  return NOTICE_TYPE_META[type].memberCreatable;
 }
 
-export function canCreateAnyNotice(profile: { role: "super_admin" | "member"; can_add_notice: boolean }) {
-  return profile.role === "super_admin" || profile.can_add_notice;
+export function canCreateAnyNotice(_profile: { role: "super_admin" | "member" }) {
+  return true;
 }
 
 /** Can this profile manage (pin/unpin/archive) this particular notice? */
@@ -146,7 +146,7 @@ export function computeStatus(
   return "published";
 }
 
-/** Effectively pinned right now — accounts for pin duration lapsing without a write-back. */
+/** Effectively pinned right now - accounts for pin duration lapsing without a write-back. */
 export function isEffectivelyPinned(
   notice: {
     is_pinned: boolean;

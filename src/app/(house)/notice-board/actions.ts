@@ -36,7 +36,7 @@ export async function createNotice(_prevState: CreateNoticeState, formData: Form
   const pinUntilDate = String(formData.get("pin_until_date") ?? "") || null;
   const isAnonymous = formData.get("is_anonymous") === "on";
   // Built client-side from the visitor's own local date/time inputs (see
-  // CreateNoticeForm) — the server must not reinterpret these against its
+  // CreateNoticeForm) - the server must not reinterpret these against its
   // own timezone, or "2pm" typed by the member silently shifts to 2pm
   // server-time and the notice publishes hours later/earlier than intended.
   const publishAtRaw = String(formData.get("publish_at") ?? "");
@@ -151,7 +151,7 @@ export async function setNoticePinned(id: string, isPinned: boolean) {
   revalidatePath("/dashboard");
 }
 
-/** Bring a scheduled notice's publish time to now — the fix for notices
+/** Bring a scheduled notice's publish time to now - the fix for notices
  * scheduled before the publish_at timezone bug (server-time instead of the
  * creator's local time) that left them stuck as "scheduled" past their
  * intended time. */

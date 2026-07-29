@@ -103,8 +103,8 @@ export function AddExpenseForm({
               </RadioGroup>
               <p className="text-xs text-muted-foreground">
                 {paymentSource === "member" &&
-                  "That member already paid the vendor directly — reduces their Utility Due. Cottage Balance is unaffected."}
-                {paymentSource === "cottage_balance" && "Paid from the shared fund — Cottage Balance decreases by this amount."}
+                  "That member already paid the vendor directly - reduces their Utility Due. Cottage Balance is unaffected."}
+                {paymentSource === "cottage_balance" && "Paid from the shared fund - Cottage Balance decreases by this amount."}
                 {paymentSource === "none" && "Recorded only. No balance or due changes."}
               </p>
             </div>

@@ -14,7 +14,7 @@ async function verifyPassword(
 ) {
   if (!password) return "Enter your password to confirm.";
 
-  // profiles.email can be stale/empty on older accounts — fall back to the
+  // profiles.email can be stale/empty on older accounts - fall back to the
   // authenticated session's own email, which is always accurate.
   const email = profileEmail ?? (await supabase.auth.getUser()).data.user?.email ?? null;
   if (!email) return "No email on file for this account.";

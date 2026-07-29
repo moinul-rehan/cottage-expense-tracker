@@ -113,7 +113,7 @@ export default async function MonthsPage() {
           ))}
           {!history.length && (
             <Card className="p-4 text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
-              No locked months yet{isSuperAdmin ? " — set a different month active to start building history." : "."}
+              No locked months yet{isSuperAdmin ? " - set a different month active to start building history." : "."}
             </Card>
           )}
         </div>

@@ -26,7 +26,7 @@ function getServerSnapshot(): string | null {
   return null;
 }
 
-/** Placed beside the theme toggle — the member's own device clock, purely
+/** Placed beside the theme toggle - the member's own device clock, purely
  * informational (no timezone math, no server round-trip). Renders nothing
  * until mounted so the server-rendered markup never has to guess the
  * visitor's local time and risk a hydration mismatch. */

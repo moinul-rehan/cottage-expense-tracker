@@ -30,7 +30,7 @@ const NOTICE_COLUMNS =
   "id, title, description, type, priority, visibility, target_member_ids, is_pinned, pin_duration, pin_until_date, is_anonymous, publish_at, expires_at, archived_at, due_amount, due_date, meal_lunch, meal_dinner, created_by, created_at, updated_at";
 
 /** Every notice this caller is allowed to see in their cottage (RLS already
- * scopes by visibility) — callers filter by status/pin themselves so one
+ * scopes by visibility) - callers filter by status/pin themselves so one
  * query can serve the Feed, Scheduled and History views. */
 export async function getNotices(supabase: SupabaseClient, cottageId: string): Promise<NoticeRow[]> {
   const { data } = await supabase

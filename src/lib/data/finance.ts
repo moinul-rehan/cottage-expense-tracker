@@ -18,10 +18,10 @@ export function monthRange(monthKey: string) {
 /**
  * Per-user, per-category totals from admin-entered utility_adjustments
  * (Utilities → Member Utility Statements) for the given month. Amounts are
- * signed — positive increases a member's due (a cost line), negative reduces
+ * signed - positive increases a member's due (a cost line), negative reduces
  * it (a discount, a "paid directly" credit, a manual carry-over, etc).
  *
- * This is the sole source of "what does each member owe" — Utility Expenses
+ * This is the sole source of "what does each member owe" - Utility Expenses
  * recorded on the Utility Details page are a separate ledger (see
  * getMonthlyExpenseTotal) and never generate member bills on their own; only
  * an adjustment entered here does. See src/app/(house)/utilities/actions.ts.
@@ -67,7 +67,7 @@ export type UtilityExpenseRow = {
   payer: { first_name: string; last_name: string | null } | null;
 };
 
-/** Full Utility Expense History for the month, newest first — history only, no calculations. */
+/** Full Utility Expense History for the month, newest first - history only, no calculations. */
 export async function getMonthlyExpenseHistory(
   supabase: SupabaseClient,
   monthKey: string
@@ -86,7 +86,7 @@ export async function getMonthlyExpenseHistory(
   );
 }
 
-/** Admin-recorded Member Utility Deposits per user within the month: reduces that member's due (and credits Cottage Balance — see addMemberUtilityDeposit). Cottage Deposits are excluded here — they credit Cottage Balance only, never any member's due. */
+/** Admin-recorded Member Utility Deposits per user within the month: reduces that member's due (and credits Cottage Balance - see addMemberUtilityDeposit). Cottage Deposits are excluded here - they credit Cottage Balance only, never any member's due. */
 export async function getUtilityDepositsForMonth(
   supabase: SupabaseClient,
   cottageId: string,
@@ -184,7 +184,7 @@ export async function getAmountOwedToUser(
 
 export type DefaultCostRow = { id: string; user_id: string; amount: number; notes: string | null };
 
-/** Admin-configured per-member default costs (Internet, Servant, etc — same every month), grouped by category. */
+/** Admin-configured per-member default costs (Internet, Servant, etc - same every month), grouped by category. */
 export async function getDefaultCosts(supabase: SupabaseClient, cottageId: string) {
   const { data } = await supabase
     .from("default_costs")
@@ -217,13 +217,13 @@ export async function getCottageBalance(supabase: SupabaseClient, cottageId: str
  * Member Utility Due = Assigned Utility Costs (utility_adjustments, signed)
  * − Member Utility Deposits, for the given month. "Rent" is broken out as
  * its own field purely for display (the house_rent category adjustment,
- * typically populated from a Default Cost template — see getDefaultCosts).
+ * typically populated from a Default Cost template - see getDefaultCosts).
  *
  * Utility Expenses recorded on the Utility Details page never factor in
- * here directly — they're a separate ledger and only affect a member's due
+ * here directly - they're a separate ledger and only affect a member's due
  * once the admin turns them into an adjustment on Member Utility Statements.
  * Likewise, a previous month's Meal Due/Advance only carries in if the admin
- * manually adds it as an adjustment — never automatically.
+ * manually adds it as an adjustment - never automatically.
  */
 export async function getMonthlyDues(supabase: SupabaseClient, cottageId: string, monthKey: string) {
   const [categoryTotals, deposits] = await Promise.all([

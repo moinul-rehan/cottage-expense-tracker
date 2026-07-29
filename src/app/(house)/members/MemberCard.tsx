@@ -9,7 +9,6 @@ import {
   setCanAddBazaar,
   setCanAddMeals,
   setCanAddDeposit,
-  setCanAddNotice,
   assignBazaarDuty,
   removeBazaarDuty,
   removeMember,
@@ -198,12 +197,6 @@ export function MemberCard({
               >
                 Add meal deposit
               </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={member.can_add_notice}
-                onCheckedChange={(v) => startTransition(() => setCanAddNotice(member.id, v))}
-              >
-                Create notices
-              </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -225,7 +218,7 @@ export function MemberCard({
           {!isSelf && !member.is_active && (
             <ConfirmPasswordDialog
               title={`Remove ${getDisplayName(member)}`}
-              warning={`This removes ${getDisplayName(member)} from the Members list and locks their login. Their past expenses, meals, deposits and statements are kept — nothing is deleted.`}
+              warning={`This removes ${getDisplayName(member)} from the Members list and locks their login. Their past expenses, meals, deposits and statements are kept - nothing is deleted.`}
               confirmLabel="Remove"
               action={removeMember}
               hiddenFields={{ user_id: member.id }}

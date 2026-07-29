@@ -9,7 +9,7 @@ import { CottageDepositForm } from "./utilities/CottageDepositForm";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 
-/** Bottom-nav "Utilities" destination on mobile — mirrors
+/** Bottom-nav "Utilities" destination on mobile - mirrors
  * UtilitiesQuickAddMenu's sidebar entry as a speed-dial pop-out. */
 export function MobileUtilitiesSheet({
   open,

@@ -6,6 +6,7 @@ import { ProfileMenu } from "./ProfileMenu";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LocalClock } from "@/components/LocalClock";
+import { Logo } from "@/components/logo";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 type Profile = {
@@ -53,7 +54,7 @@ export function PageHeader({
         {isDashboard && (
           <div className="flex min-w-0 flex-1 flex-col gap-3 sm:hidden">
             <div className="flex items-center justify-between gap-3">
-              <LocalClock />
+              <Logo size={42} />
               <div className="flex items-center gap-2.5">
                 <ThemeToggle />
                 <NotificationTray notifications={notifications} unreadCount={unreadCount} />

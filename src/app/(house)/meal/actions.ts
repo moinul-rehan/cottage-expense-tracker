@@ -56,7 +56,7 @@ export async function addBazaarEntry(
     supabase,
     profile.cottage_id,
     members.filter((id) => id !== profile.id),
-    { type: "bazaar_entry", title: "New bazaar entry added", body: `${description ?? "Bazaar"} — ${amount.toFixed(2)}`, link: "/meal" }
+    { type: "bazaar_entry", title: "New bazaar entry added", body: `${description ?? "Bazaar"} - ${amount.toFixed(2)}`, link: "/meal" }
   );
 
   revalidatePath("/meal");
@@ -98,7 +98,7 @@ export async function updateBazaarEntry(
     supabase,
     profile.cottage_id,
     members.filter((memberId) => memberId !== profile.id),
-    { type: "bazaar_entry", title: "A bazaar entry was updated", body: `${description ?? "Bazaar"} — ${amount.toFixed(2)}`, link: "/meal" }
+    { type: "bazaar_entry", title: "A bazaar entry was updated", body: `${description ?? "Bazaar"} - ${amount.toFixed(2)}`, link: "/meal" }
   );
 
   revalidatePath("/meal");

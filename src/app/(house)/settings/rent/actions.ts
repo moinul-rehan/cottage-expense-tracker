@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type SaveDefaultCostState = { error?: string } | undefined;
 
-/** Upserts one default-cost row per member for a category (a template, not a history — re-saving replaces the amount). */
+/** Upserts one default-cost row per member for a category (a template, not a history - re-saving replaces the amount). */
 export async function saveDefaultCost(
   _prevState: SaveDefaultCostState,
   formData: FormData

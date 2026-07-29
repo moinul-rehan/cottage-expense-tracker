@@ -52,7 +52,7 @@ export default async function UtilityHistoryPage({
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Utility History — {formatMonthKey(monthKey)}</h1>
+          <h1 className="text-xl font-semibold text-foreground">Utility History - {formatMonthKey(monthKey)}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Read-only record of every utility expense and deposit. No calculations happen here.
           </p>
@@ -102,12 +102,12 @@ export default async function UtilityHistoryPage({
                 <TableRow key={e.id}>
                   <TableCell className="text-muted-foreground">{formatDate(e.expense_date)}</TableCell>
                   <TableCell className="text-muted-foreground">{UTILITY_CATEGORY_LABELS[e.category] ?? e.category}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.description ?? "—"}</TableCell>
+                  <TableCell className="max-w-[220px] truncate text-muted-foreground">{e.description ?? "-"}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {e.payment_source === "cottage_balance"
                       ? "Cottage Balance"
                       : e.payment_source === "member"
-                        ? "Member" + (e.payer ? " — " + getDisplayName(e.payer) : "")
+                        ? "Member" + (e.payer ? " - " + getDisplayName(e.payer) : "")
                         : "None"}
                   </TableCell>
                   <TableCell className="text-right font-medium">{e.amount.toFixed(2)}</TableCell>
@@ -141,9 +141,9 @@ export default async function UtilityHistoryPage({
                 const member = d.user_id ? membersById.get(d.user_id) : null;
                 return (
                   <TableRow key={d.id}>
-                    <TableCell className="text-muted-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{member ? getDisplayName(member) : "-"}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(d.deposit_date)}</TableCell>
-                    <TableCell className="text-muted-foreground">{d.note ?? "—"}</TableCell>
+                    <TableCell className="max-w-[220px] truncate text-muted-foreground">{d.note ?? "-"}</TableCell>
                     <TableCell className="text-right font-medium">{d.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 );
@@ -174,7 +174,7 @@ export default async function UtilityHistoryPage({
               {cottageDeposits.map((d) => (
                 <TableRow key={d.id}>
                   <TableCell className="text-muted-foreground">{d.deposit_date}</TableCell>
-                  <TableCell className="text-muted-foreground">{d.note ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{d.note ?? "-"}</TableCell>
                   <TableCell className="text-right font-medium">{d.amount.toFixed(2)}</TableCell>
                 </TableRow>
               ))}

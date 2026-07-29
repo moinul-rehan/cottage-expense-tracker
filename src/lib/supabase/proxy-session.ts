@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // The marketing landing page, the privacy policy, and the password-reset
-  // page are reachable regardless of auth state — reset-password in
+  // page are reachable regardless of auth state - reset-password in
   // particular because completing a reset link creates a short-lived
   // recovery session, which would otherwise get bounced straight to
   // /dashboard before the user can set their new password.

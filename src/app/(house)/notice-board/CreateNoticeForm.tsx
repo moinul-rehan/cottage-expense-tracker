@@ -81,7 +81,7 @@ export function CreateNoticeForm({
   const [expireDate, setExpireDate] = useState("");
   const [expireTime, setExpireTime] = useState("23:59");
 
-  // Built client-side from local <input type="date"/"time"> values — where
+  // Built client-side from local <input type="date"/"time"> values - where
   // `new Date(...)` resolves against the visitor's own timezone. Doing this
   // server-side would use the server's timezone instead and silently
   // publish/expire notices at the wrong wall-clock time.
@@ -97,7 +97,7 @@ export function CreateNoticeForm({
   }, [expireMode, expireDate, expireTime]);
 
   // Live preview so the creator can see exactly what will be submitted,
-  // in their own local time, before publishing — catches mismatched
+  // in their own local time, before publishing - catches mismatched
   // dates/times immediately instead of discovering them on the board.
   const effectivePublishMs = publishMode === "now" ? Date.now() : publishAtIso ? new Date(publishAtIso).getTime() : NaN;
   const effectiveExpireMs =
@@ -112,7 +112,7 @@ export function CreateNoticeForm({
   if (!allowedTypes.length) {
     return (
       <p className="p-4 text-sm text-muted-foreground">
-        You don&apos;t have permission to create notices yet — ask your admin to grant it in Members.
+        You don&apos;t have permission to create notices yet - ask your admin to grant it in Members.
       </p>
     );
   }
@@ -141,7 +141,7 @@ export function CreateNoticeForm({
 
   return (
     <form action={action} className="flex flex-col">
-      <div className="flex max-h-[64vh] flex-col gap-5 overflow-y-auto px-4 pt-1 pb-4">
+      <div className="flex max-h-[64dvh] flex-col gap-5 overflow-y-auto overscroll-contain px-4 pt-1 pb-4">
         <FormSection title="Notice type">
           <div className="grid grid-cols-3 gap-2">
             {allowedTypes.map((t) => {
@@ -181,7 +181,7 @@ export function CreateNoticeForm({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="notice-desc">Description</Label>
-              <Textarea id="notice-desc" name="description" placeholder="Keep it scannable — one idea, plainly stated." />
+              <Textarea id="notice-desc" name="description" placeholder="Keep it scannable - one idea, plainly stated." />
             </div>
 
             {type === "meal" && (
@@ -258,7 +258,7 @@ export function CreateNoticeForm({
             <input type="hidden" name="visibility" value={visibility ?? ""} />
 
             {needsTargets && (
-              <div className="flex max-h-36 flex-col gap-2 overflow-y-auto rounded-lg border border-border p-2.5">
+              <div className="flex max-h-36 flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg border border-border p-2.5">
                 {members.map((m) => (
                   <label key={m.id} className="flex items-center gap-2 text-sm">
                     <Checkbox checked={targetIds.includes(m.id)} onCheckedChange={(c) => toggleTarget(m.id, c === true)} />
@@ -343,7 +343,7 @@ export function CreateNoticeForm({
                     </>
                   )}
                   {" "}
-                  — your device&apos;s local time.
+                  - your device&apos;s local time.
                 </p>
               )}
             </div>
@@ -391,7 +391,7 @@ export function CreateNoticeForm({
               <label htmlFor="anon-toggle" className="flex cursor-pointer items-center justify-between gap-3 p-3">
                 <div>
                   <p className="text-sm font-medium text-foreground">Post as &quot;Cottage&quot;</p>
-                  <p className="text-xs text-muted-foreground">Hides your name — members see it as a house announcement.</p>
+                  <p className="text-xs text-muted-foreground">Hides your name - members see it as a house announcement.</p>
                 </div>
                 <Checkbox id="anon-toggle" checked={isAnonymous} onCheckedChange={(c) => setIsAnonymous(c === true)} />
               </label>
