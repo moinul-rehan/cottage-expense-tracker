@@ -3,6 +3,7 @@ import {
   UtensilsCrossed,
   Zap,
   Pin,
+  Inbox,
   Users,
   CalendarRange,
   Contact,
@@ -29,10 +30,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-const topLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/notice-board", label: "Notice Board", icon: Pin },
-];
 const bottomLinks = [
   { href: "/members", label: "Members", icon: Users },
   { href: "/months", label: "Months", icon: CalendarRange },
@@ -53,6 +50,13 @@ export default async function HouseLayout({
     getActiveMonthKey(supabase, profile.cottage_id),
   ]);
   const defaultDate = defaultDateForMonth(activeMonthKey);
+  const canManageMealRequests = profile.role === "super_admin" || profile.can_add_meals;
+
+  const topLinks = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/notice-board", label: "Notice Board", icon: Pin },
+    ...(canManageMealRequests ? [{ href: "/request", label: "Request", icon: Inbox }] : []),
+  ];
 
   return (
     <SidebarProvider className="min-h-0 flex-1 bg-background">

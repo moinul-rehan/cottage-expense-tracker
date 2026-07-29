@@ -5,6 +5,8 @@ import { getMemberMealSummary } from "@/lib/data/meal";
 import { BazaarForm } from "./BazaarForm";
 import { DepositForm } from "./DepositForm";
 import { DailyMealForm } from "./DailyMealForm";
+import { CancelMealRequestButton } from "./CancelMealRequestButton";
+import { formatDate } from "@/lib/format-date";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -37,6 +39,15 @@ export default async function MealPage() {
 
   const canAddBazaar = profile.role === "super_admin" || profile.can_add_bazaar;
   const canAddMeals = profile.role === "super_admin" || profile.can_add_meals;
+
+  const { data: myPendingRequests } = canAddMeals
+    ? { data: null }
+    : await supabase
+        .from("meal_requests")
+        .select("id, request_date, lunch, dinner")
+        .eq("user_id", profile.id)
+        .eq("status", "pending")
+        .order("request_date");
 
   return (
     <div className="flex flex-col gap-8">
@@ -86,8 +97,32 @@ export default async function MealPage() {
           {canAddMeals ? (
             <DailyMealForm members={members ?? []} defaultDate={defaultDate} />
           ) : (
-            <Card className="p-4 text-sm text-muted-foreground">
-              You don&apos;t have permission to log meals.
+            <Card className="flex flex-col gap-3 p-4">
+              <div>
+                <p className="text-sm font-medium text-foreground">Your meal requests</p>
+                <p className="text-xs text-muted-foreground">
+                  Use &quot;Request Meal&quot; in the Meal menu to ask for a meal on a date — a manager will
+                  review it.
+                </p>
+              </div>
+              {myPendingRequests?.length ? (
+                <div className="flex flex-col gap-1.5">
+                  {myPendingRequests.map((r) => (
+                    <div
+                      key={r.id}
+                      className="flex items-center justify-between gap-2 rounded-xl bg-accent px-3 py-2 text-xs text-accent-foreground"
+                    >
+                      <span>
+                        {formatDate(r.request_date)} — {r.lunch + r.dinner} meal
+                        {r.lunch + r.dinner === 1 ? "" : "s"} (pending)
+                      </span>
+                      <CancelMealRequestButton requestId={r.id} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No pending requests.</p>
+              )}
             </Card>
           )}
         </div>
