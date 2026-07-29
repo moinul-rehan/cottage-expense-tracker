@@ -6,6 +6,7 @@ import { BazaarForm } from "./BazaarForm";
 import { DepositForm } from "./DepositForm";
 import { DailyMealForm } from "./DailyMealForm";
 import { CancelMealRequestButton } from "./CancelMealRequestButton";
+import { CancelMealCostRequestButton } from "./CancelMealCostRequestButton";
 import { formatDate } from "@/lib/format-date";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -49,6 +50,15 @@ export default async function MealPage() {
         .eq("status", "pending")
         .order("request_date");
 
+  const { data: myPendingCostRequests } = canAddBazaar
+    ? { data: null }
+    : await supabase
+        .from("meal_cost_requests")
+        .select("id, entry_date, amount, description")
+        .eq("user_id", profile.id)
+        .eq("status", "pending")
+        .order("entry_date");
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -88,8 +98,31 @@ export default async function MealPage() {
           {canAddBazaar ? (
             <BazaarForm members={members ?? []} defaultDate={defaultDate} />
           ) : (
-            <Card className="p-4 text-sm text-muted-foreground">
-              You don&apos;t have permission to add bazaar entries.
+            <Card className="flex flex-col gap-3 p-4">
+              <div>
+                <p className="text-sm font-medium text-foreground">Your meal cost requests</p>
+                <p className="text-xs text-muted-foreground">
+                  Use &quot;Request Meal Cost&quot; in the Meal menu — once approved, the amount is
+                  credited to your meal deposit.
+                </p>
+              </div>
+              {myPendingCostRequests?.length ? (
+                <div className="flex flex-col gap-1.5">
+                  {myPendingCostRequests.map((r) => (
+                    <div
+                      key={r.id}
+                      className="flex items-center justify-between gap-2 rounded-xl bg-accent px-3 py-2 text-xs text-accent-foreground"
+                    >
+                      <span>
+                        {formatDate(r.entry_date)} — {r.amount.toFixed(2)} tk (pending)
+                      </span>
+                      <CancelMealCostRequestButton requestId={r.id} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No pending requests.</p>
+              )}
             </Card>
           )}
         </div>

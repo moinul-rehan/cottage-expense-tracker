@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MealRequestActions } from "./MealRequestActions";
+import { MealCostRequestActions } from "./MealCostRequestActions";
 
 const STATUS_VARIANT = {
   approved: "default",
@@ -15,121 +16,227 @@ const STATUS_VARIANT = {
 
 export default async function RequestPage() {
   const profile = await getCurrentProfile();
-  if (profile.role !== "super_admin" && !profile.can_add_meals) {
+  const canAddMeals = profile.role === "super_admin" || profile.can_add_meals;
+  const canAddBazaar = profile.role === "super_admin" || profile.can_add_bazaar;
+  if (!canAddMeals && !canAddBazaar) {
     redirect("/dashboard");
   }
 
   const supabase = await createClient();
 
-  const [{ data: members }, { data: requests }] = await Promise.all([
+  const [{ data: members }, mealRequests, mealCostRequests] = await Promise.all([
     supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true),
-    supabase
-      .from("meal_requests")
-      .select("id, user_id, request_date, lunch, dinner, status, created_at, reviewed_at")
-      .order("created_at", { ascending: false }),
+    canAddMeals
+      ? supabase
+          .from("meal_requests")
+          .select("id, user_id, request_date, lunch, dinner, status, created_at, reviewed_at")
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: null }),
+    canAddBazaar
+      ? supabase
+          .from("meal_cost_requests")
+          .select("id, user_id, entry_date, amount, description, status, created_at, reviewed_at")
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: null }),
   ]);
 
   const membersById = new Map((members ?? []).map((m) => [m.id, m]));
-  const pending = (requests ?? []).filter((r) => r.status === "pending");
-  const history = (requests ?? []).filter((r) => r.status !== "pending").slice(0, 30);
+  const pending = (mealRequests.data ?? []).filter((r) => r.status === "pending");
+  const history = (mealRequests.data ?? []).filter((r) => r.status !== "pending").slice(0, 30);
+  const costPending = (mealCostRequests.data ?? []).filter((r) => r.status === "pending");
+  const costHistory = (mealCostRequests.data ?? []).filter((r) => r.status !== "pending").slice(0, 30);
 
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-xl font-semibold text-foreground">Request</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Meal requests submitted by members without direct meal-logging access. Approving writes
-          straight into their meal history for that date.
+          Meal and meal cost requests submitted by members without direct logging access.
+          Approving writes straight into their meal history / deposit.
         </p>
       </div>
 
-      <div>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Pending ({pending.length})</h2>
-        <Card className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Lunch</TableHead>
-                <TableHead className="text-right">Dinner</TableHead>
-                <TableHead>Submitted</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pending.map((r) => {
-                const member = membersById.get(r.user_id);
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(r.request_date)}</TableCell>
-                    <TableCell className="text-right text-muted-foreground">{r.lunch}</TableCell>
-                    <TableCell className="text-right text-muted-foreground">{r.dinner}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDateTime(r.created_at)}</TableCell>
-                    <TableCell>
-                      <MealRequestActions requestId={r.id} />
-                    </TableCell>
+      {canAddMeals && (
+        <>
+          <div>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Meal — Pending ({pending.length})</h2>
+            <Card className="p-0">
+              <Table className="table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[20%]">Member</TableHead>
+                    <TableHead className="w-[16%]">Date</TableHead>
+                    <TableHead className="w-[10%] text-right">Lunch</TableHead>
+                    <TableHead className="w-[10%] text-right">Dinner</TableHead>
+                    <TableHead className="w-[20%]">Submitted</TableHead>
+                    <TableHead className="w-[24%]" />
                   </TableRow>
-                );
-              })}
-              {!pending.length && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
-                    No pending requests.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      </div>
+                </TableHeader>
+                <TableBody>
+                  {pending.map((r) => {
+                    const member = membersById.get(r.user_id);
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(r.request_date)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{r.lunch}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{r.dinner}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDateTime(r.created_at)}</TableCell>
+                        <TableCell>
+                          <MealRequestActions requestId={r.id} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {!pending.length && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
+                        No pending requests.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
 
-      <div>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">History</h2>
-        <Card className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Lunch</TableHead>
-                <TableHead className="text-right">Dinner</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Reviewed</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {history.map((r) => {
-                const member = membersById.get(r.user_id);
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(r.request_date)}</TableCell>
-                    <TableCell className="text-right text-muted-foreground">{r.lunch}</TableCell>
-                    <TableCell className="text-right text-muted-foreground">{r.dinner}</TableCell>
-                    <TableCell>
-                      <Badge variant={STATUS_VARIANT[r.status as keyof typeof STATUS_VARIANT] ?? "secondary"} className="capitalize">
-                        {r.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {r.reviewed_at ? formatDateTime(r.reviewed_at) : "—"}
-                    </TableCell>
+          <div>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Meal — History</h2>
+            <Card className="p-0">
+              <Table className="table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[20%]">Member</TableHead>
+                    <TableHead className="w-[16%]">Date</TableHead>
+                    <TableHead className="w-[10%] text-right">Lunch</TableHead>
+                    <TableHead className="w-[10%] text-right">Dinner</TableHead>
+                    <TableHead className="w-[16%]">Status</TableHead>
+                    <TableHead className="w-[28%]">Reviewed</TableHead>
                   </TableRow>
-                );
-              })}
-              {!history.length && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
-                    No reviewed requests yet.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      </div>
+                </TableHeader>
+                <TableBody>
+                  {history.map((r) => {
+                    const member = membersById.get(r.user_id);
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(r.request_date)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{r.lunch}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{r.dinner}</TableCell>
+                        <TableCell>
+                          <Badge variant={STATUS_VARIANT[r.status as keyof typeof STATUS_VARIANT] ?? "secondary"} className="capitalize">
+                            {r.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {r.reviewed_at ? formatDateTime(r.reviewed_at) : "—"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {!history.length && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
+                        No reviewed requests yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        </>
+      )}
+
+      {canAddBazaar && (
+        <>
+          <div>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Cost — Pending ({costPending.length})</h2>
+            <Card className="p-0">
+              <Table className="table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[18%]">Member</TableHead>
+                    <TableHead className="w-[14%]">Date</TableHead>
+                    <TableHead className="w-[12%] text-right">Amount</TableHead>
+                    <TableHead className="w-[22%]">Description</TableHead>
+                    <TableHead className="w-[14%]">Submitted</TableHead>
+                    <TableHead className="w-[20%]" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {costPending.map((r) => {
+                    const member = membersById.get(r.user_id);
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(r.entry_date)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{r.amount.toFixed(2)}</TableCell>
+                        <TableCell className="truncate text-muted-foreground">{r.description ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDateTime(r.created_at)}</TableCell>
+                        <TableCell>
+                          <MealCostRequestActions requestId={r.id} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {!costPending.length && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-6 text-center text-muted-foreground">
+                        No pending requests.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+
+          <div>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Cost — History</h2>
+            <Card className="p-0">
+              <Table className="table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[18%]">Member</TableHead>
+                    <TableHead className="w-[14%]">Date</TableHead>
+                    <TableHead className="w-[12%] text-right">Amount</TableHead>
+                    <TableHead className="w-[18%]">Status</TableHead>
+                    <TableHead className="w-[28%]">Reviewed</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {costHistory.map((r) => {
+                    const member = membersById.get(r.user_id);
+                    return (
+                      <TableRow key={r.id}>
+                        <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDate(r.entry_date)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{r.amount.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Badge variant={STATUS_VARIANT[r.status as keyof typeof STATUS_VARIANT] ?? "secondary"} className="capitalize">
+                            {r.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {r.reviewed_at ? formatDateTime(r.reviewed_at) : "—"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {!costHistory.length && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                        No reviewed requests yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }

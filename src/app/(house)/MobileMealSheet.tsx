@@ -8,6 +8,7 @@ import { DailyMealForm } from "./meal/DailyMealForm";
 import { DepositForm } from "./meal/DepositForm";
 import { BazaarForm } from "./meal/BazaarForm";
 import { RequestMealForm } from "./meal/RequestMealForm";
+import { RequestMealCostForm } from "./meal/RequestMealCostForm";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 
@@ -33,7 +34,7 @@ export function MobileMealSheet({
   canAddMeals: boolean;
   canAddDeposit: boolean;
 }) {
-  const [dialog, setDialog] = useState<"meal" | "deposit" | "bazaar" | "request" | null>(null);
+  const [dialog, setDialog] = useState<"meal" | "deposit" | "bazaar" | "request" | "cost-request" | null>(null);
 
   function openDialog(next: typeof dialog) {
     onOpenChange(false);
@@ -58,7 +59,15 @@ export function MobileMealSheet({
             onClick: () => openDialog("bazaar"),
           },
         ]
-      : []),
+      : [
+          {
+            key: "request-cost",
+            label: "Request Meal Cost",
+            icon: Send,
+            colorClass: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+            onClick: () => openDialog("cost-request"),
+          },
+        ]),
     ...(canAddDeposit
       ? [
           {
@@ -135,6 +144,17 @@ export function MobileMealSheet({
           </DialogHeader>
           <div className="p-4 pt-2">
             <RequestMealForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "cost-request"} onOpenChange={(v) => !v && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Meal Cost</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <RequestMealCostForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
           </div>
         </DialogContent>
       </Dialog>

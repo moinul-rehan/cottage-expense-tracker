@@ -10,6 +10,7 @@ import { BazaarForm } from "./meal/BazaarForm";
 import { DailyMealForm } from "./meal/DailyMealForm";
 import { DepositForm } from "./meal/DepositForm";
 import { RequestMealForm } from "./meal/RequestMealForm";
+import { RequestMealCostForm } from "./meal/RequestMealCostForm";
 import { cn } from "@/lib/utils";
 
 type Member = { id: string; first_name: string; last_name: string | null };
@@ -27,11 +28,11 @@ export function MealQuickAddMenu({
   canAddMeals: boolean;
   canAddDeposit: boolean;
 }) {
-  const [open, setOpen] = useState<"meal" | "deposit" | "bazaar" | "request" | null>(null);
+  const [open, setOpen] = useState<"meal" | "deposit" | "bazaar" | "request" | "cost-request" | null>(null);
   const { setOpenMobile } = useSidebar();
   const pathname = usePathname();
 
-  function openDialog(dialog: "meal" | "deposit" | "bazaar" | "request") {
+  function openDialog(dialog: "meal" | "deposit" | "bazaar" | "request" | "cost-request") {
     setOpenMobile(false);
     setOpen(dialog);
   }
@@ -94,6 +95,14 @@ export function MealQuickAddMenu({
           </SidebarMenuButton>
         </SidebarMenuItem>
       )}
+      {!canAddBazaar && (
+        <SidebarMenuItem>
+          <SidebarMenuButton onClick={() => openDialog("cost-request")} tooltip="Request Meal Cost" className={itemClass()}>
+            <Send />
+            Request Meal Cost
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      )}
 
       <Dialog open={open === "meal"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
@@ -135,6 +144,17 @@ export function MealQuickAddMenu({
           </DialogHeader>
           <div className="p-4 pt-2">
             <RequestMealForm defaultDate={defaultDate} onSuccess={() => setOpen(null)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={open === "cost-request"} onOpenChange={(v) => !v && setOpen(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Meal Cost</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <RequestMealCostForm defaultDate={defaultDate} onSuccess={() => setOpen(null)} />
           </div>
         </DialogContent>
       </Dialog>

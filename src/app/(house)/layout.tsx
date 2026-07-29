@@ -50,7 +50,8 @@ export default async function HouseLayout({
     getActiveMonthKey(supabase, profile.cottage_id),
   ]);
   const defaultDate = defaultDateForMonth(activeMonthKey);
-  const canManageMealRequests = profile.role === "super_admin" || profile.can_add_meals;
+  const canManageMealRequests =
+    profile.role === "super_admin" || profile.can_add_meals || profile.can_add_bazaar;
 
   const topLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

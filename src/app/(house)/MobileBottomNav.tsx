@@ -185,7 +185,7 @@ export function MobileBottomNav({
         open={activeSheet === "menu"}
         onOpenChange={(open) => (open ? setActiveSheet("menu") : closeSheet("menu"))}
         origin={origin}
-        canManageMealRequests={canAddMeals}
+        canManageMealRequests={canAddMeals || canAddBazaar}
       />
     </>
   );
