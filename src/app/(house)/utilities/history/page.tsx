@@ -102,7 +102,7 @@ export default async function UtilityHistoryPage({
                 <TableRow key={e.id}>
                   <TableCell className="text-muted-foreground">{formatDate(e.expense_date)}</TableCell>
                   <TableCell className="text-muted-foreground">{UTILITY_CATEGORY_LABELS[e.category] ?? e.category}</TableCell>
-                  <TableCell className="text-muted-foreground">{e.description ?? "—"}</TableCell>
+                  <TableCell className="max-w-[220px] truncate text-muted-foreground">{e.description ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {e.payment_source === "cottage_balance"
                       ? "Cottage Balance"
@@ -143,7 +143,7 @@ export default async function UtilityHistoryPage({
                   <TableRow key={d.id}>
                     <TableCell className="text-muted-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(d.deposit_date)}</TableCell>
-                    <TableCell className="text-muted-foreground">{d.note ?? "—"}</TableCell>
+                    <TableCell className="max-w-[220px] truncate text-muted-foreground">{d.note ?? "—"}</TableCell>
                     <TableCell className="text-right font-medium">{d.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 );

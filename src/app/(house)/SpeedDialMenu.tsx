@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,7 @@ export function SpeedDialMenu({
   align?: "start" | "center" | "end";
   origin: SpeedDialOrigin | null;
 }) {
+  const router = useRouter();
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   // Each pill's resting center, measured ONCE while at rest (mount time,
   // when transform is always translate(0,0) — see the `offset` fallback
@@ -114,17 +115,23 @@ export function SpeedDialMenu({
             </span>
           );
 
+          // Plain button + router.push for nav items too, rather than
+          // next/link -- a next/link's own click interception didn't
+          // reliably win out over onClose closing/unmounting this pill
+          // mid-click inside the animated overlay, so navigation silently
+          // failed while onClick-only items (which never had that race)
+          // worked fine.
+          const handleClick = () => {
+            onClose();
+            if (item.href) router.push(item.href);
+            else item.onClick?.();
+          };
+
           return (
             <div key={item.key} ref={setRef} className="flex items-center justify-end gap-2.5 will-change-transform" style={style}>
-              {item.href ? (
-                <Link href={item.href} onClick={onClose} aria-label={item.label} className={iconButtonClassName}>
-                  <item.icon className="size-6" />
-                </Link>
-              ) : (
-                <button type="button" onClick={item.onClick} aria-label={item.label} className={iconButtonClassName}>
-                  <item.icon className="size-6" />
-                </button>
-              )}
+              <button type="button" onClick={handleClick} aria-label={item.label} className={iconButtonClassName}>
+                <item.icon className="size-6" />
+              </button>
               {label}
             </div>
           );
