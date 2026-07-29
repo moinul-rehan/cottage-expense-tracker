@@ -83,6 +83,13 @@ export function SpeedDialMenu({
           align === "center" && "left-1/2 -translate-x-1/2",
           align === "end" && "right-3"
         )}
+        // Every SpeedDialMenu stays mounted regardless of `open` (only its
+        // items animate away), so its full-height box still sits in the DOM
+        // at this shared bottom-nav position. Two dials sharing the same
+        // `align` (e.g. Utilities and Menu both "end") would otherwise have
+        // the later-mounted one's invisible-but-present box intercept every
+        // tap meant for the earlier one's open pills.
+        style={{ pointerEvents: open ? "auto" : "none" }}
       >
         {items.map((item, i) => {
           const center = restingCenters[i];
