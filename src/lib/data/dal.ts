@@ -60,6 +60,16 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/login')
   }
 
+  const { data: cottage } = await supabase
+    .from('cottages')
+    .select('suspended_at')
+    .eq('id', profile.cottage_id)
+    .maybeSingle()
+
+  if (cottage?.suspended_at) {
+    redirect('/suspended')
+  }
+
   return profile
 })
 

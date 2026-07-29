@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format-date";
-import { Logo } from "@/components/logo";
+import { PlatformAdminNav } from "./PlatformAdminNav";
 
 function daysAgo(n: number): Date {
   const d = new Date();
@@ -35,7 +35,7 @@ export default async function PlatformAdminPage() {
   const [{ data: cottages }, { data: profiles }] = await Promise.all([
     admin
       .from("cottages")
-      .select("id, name, plan, subscription_status, created_at")
+      .select("id, name, plan, subscription_status, suspended_at, created_at")
       .order("created_at", { ascending: false }),
     admin.from("profiles").select("id, cottage_id, created_at"),
   ]);
@@ -50,15 +50,7 @@ export default async function PlatformAdminPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
-          <Logo size={28} />
-          Platform Admin
-        </div>
-        <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline">
-          Back to app
-        </Link>
-      </div>
+      <PlatformAdminNav />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard icon={Building2} label="Total Cottages" value={cottages?.length ?? 0} />
@@ -77,25 +69,39 @@ export default async function PlatformAdminPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Members</TableHead>
                 <TableHead>Plan</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(cottages ?? []).map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell className="font-medium text-foreground">{c.name}</TableCell>
+                  <TableCell className="font-medium text-foreground">
+                    <Link href={`/platform-admin/cottages/${c.id}`} className="hover:underline">
+                      {c.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{memberCountByCottage.get(c.id) ?? 0}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="capitalize">
                       {c.plan}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    {c.suspended_at ? (
+                      <Badge variant="destructive">Suspended</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="capitalize">
+                        {c.subscription_status}
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{formatDate(c.created_at)}</TableCell>
                 </TableRow>
               ))}
               {!cottages?.length && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
                     No cottages yet.
                   </TableCell>
                 </TableRow>
