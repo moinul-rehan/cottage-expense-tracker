@@ -54,7 +54,7 @@ export function PushPermission() {
     async function run() {
       if (Notification.permission === "granted") {
         setStatus("granted");
-        subscribe().catch(() => {});
+        subscribe().catch((err) => console.error("[push] subscribe failed", err));
         return;
       }
 
@@ -84,7 +84,7 @@ export function PushPermission() {
   async function handleEnableClick() {
     const result = await Notification.requestPermission();
     setStatus(result);
-    if (result === "granted") await subscribe().catch(() => {});
+    if (result === "granted") await subscribe().catch((err) => console.error("[push] subscribe failed", err));
   }
 
   if (dismissed || status === "granted" || status === "unsupported") return null;

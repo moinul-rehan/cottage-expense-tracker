@@ -10,7 +10,7 @@ export async function saveSubscription(subscription: {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
-  await supabase.from("push_subscriptions").upsert(
+  const { error } = await supabase.from("push_subscriptions").upsert(
     {
       cottage_id: profile.cottage_id,
       user_id: profile.id,
@@ -20,6 +20,7 @@ export async function saveSubscription(subscription: {
     },
     { onConflict: "endpoint" }
   );
+  if (error) console.error("[push] saveSubscription failed", error.message);
 }
 
 export async function deleteSubscription(endpoint: string) {

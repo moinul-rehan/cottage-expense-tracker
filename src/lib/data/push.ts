@@ -39,6 +39,8 @@ export async function sendPushToUsers(
         const statusCode = (error as { statusCode?: number }).statusCode;
         if (statusCode === 404 || statusCode === 410) {
           await admin.from("push_subscriptions").delete().eq("id", sub.id);
+        } else {
+          console.error("[push] send failed", statusCode, (error as Error).message);
         }
       }
     })
