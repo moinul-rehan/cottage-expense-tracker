@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { sendPushToUsers } from "./push";
 
 export async function getUnreadCount(supabase: SupabaseClient, userId: string) {
   const { count } = await supabase
@@ -35,4 +36,5 @@ export async function notifyUsers(
       ...notification,
     }))
   );
+  await sendPushToUsers(userIds, notification);
 }

@@ -19,6 +19,7 @@ import { SidebarNavLink } from "./SidebarNavLink";
 import { PageHeader } from "./PageHeader";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { Logo } from "@/components/logo";
+import { PushPermission } from "@/components/PushPermission";
 import {
   Sidebar,
   SidebarContent,
@@ -150,6 +151,7 @@ export default async function HouseLayout({
         isSuperAdmin={profile.role === "super_admin"}
         pendingRequestCount={pendingRequestCount}
       />
+      <PushPermission />
     </SidebarProvider>
   );
 }
