@@ -26,7 +26,7 @@ function applyTheme(theme: Theme) {
 }
 
 /** Placed beside the notification bell. Reads the theme the blocking inline
- * script in the root layout already applied to <html> — nothing flashes on
+ * script in the root layout already applied to <html> - nothing flashes on
  * mount, only the icon itself resolves once the client can read the DOM. */
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

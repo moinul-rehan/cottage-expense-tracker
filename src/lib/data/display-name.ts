@@ -1,4 +1,4 @@
-/** Display identity used across the nav, dashboard, and tables — last name
+/** Display identity used across the nav, dashboard, and tables - last name
  * first, falling back to first name. Full name is reserved for the profile
  * page itself. Client-safe (no `server-only` import) so it can be used from
  * both Server and Client Components. */

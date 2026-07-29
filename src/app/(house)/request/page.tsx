@@ -25,6 +25,23 @@ type HistoryRow = {
   reviewed_at: string | null;
 };
 
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <Badge variant={STATUS_VARIANT[status as keyof typeof STATUS_VARIANT] ?? "secondary"} className="capitalize">
+      {status}
+    </Badge>
+  );
+}
+
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-1 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right text-foreground">{value}</span>
+    </div>
+  );
+}
+
 export default async function RequestPage() {
   const profile = await getCurrentProfile();
   const canAddMeals = profile.role === "super_admin" || profile.can_add_meals;
@@ -74,7 +91,7 @@ export default async function RequestPage() {
       type: "meal_cost",
       user_id: r.user_id,
       date: r.entry_date,
-      details: `${r.amount.toFixed(2)} tk${r.description ? ` — ${r.description}` : ""}`,
+      details: `${r.amount.toFixed(2)} tk${r.description ? ` - ${r.description}` : ""}`,
       status: r.status,
       created_at: r.created_at,
       reviewed_at: r.reviewed_at,
@@ -95,9 +112,35 @@ export default async function RequestPage() {
 
       {canAddMeals && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Request — Pending ({pending.length})</h2>
-          <Card className="p-0">
-            <Table className="min-w-[560px] sm:min-w-0 sm:table-fixed">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Request - Pending ({pending.length})</h2>
+
+          {/* Mobile: one card per request, fields stacked vertically */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {pending.map((r) => {
+              const member = membersById.get(r.user_id);
+              return (
+                <Card key={r.id} className="flex flex-col gap-1 p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="font-medium text-foreground">{member ? getDisplayName(member) : "-"}</span>
+                    <span className="text-xs text-muted-foreground">{formatDate(r.request_date)}</span>
+                  </div>
+                  <Field label="Lunch" value={r.lunch} />
+                  <Field label="Dinner" value={r.dinner} />
+                  <Field label="Submitted" value={formatDateTime(r.created_at)} />
+                  <div className="mt-2">
+                    <MealRequestActions requestId={r.id} />
+                  </div>
+                </Card>
+              );
+            })}
+            {!pending.length && (
+              <Card className="p-4 text-center text-sm text-muted-foreground">No pending requests.</Card>
+            )}
+          </div>
+
+          {/* Desktop: table */}
+          <Card className="hidden p-0 sm:block">
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[20%]">Member</TableHead>
@@ -113,7 +156,7 @@ export default async function RequestPage() {
                   const member = membersById.get(r.user_id);
                   return (
                     <TableRow key={r.id}>
-                      <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                      <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "-"}</TableCell>
                       <TableCell className="text-muted-foreground">{formatDate(r.request_date)}</TableCell>
                       <TableCell className="text-right text-muted-foreground">{r.lunch}</TableCell>
                       <TableCell className="text-right text-muted-foreground">{r.dinner}</TableCell>
@@ -139,9 +182,33 @@ export default async function RequestPage() {
 
       {canAddBazaar && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Cost Request — Pending ({costPending.length})</h2>
-          <Card className="p-0">
-            <Table className="min-w-[560px] sm:min-w-0 sm:table-fixed">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Cost Request - Pending ({costPending.length})</h2>
+
+          <div className="flex flex-col gap-3 sm:hidden">
+            {costPending.map((r) => {
+              const member = membersById.get(r.user_id);
+              return (
+                <Card key={r.id} className="flex flex-col gap-1 p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="font-medium text-foreground">{member ? getDisplayName(member) : "-"}</span>
+                    <span className="text-xs text-muted-foreground">{formatDate(r.entry_date)}</span>
+                  </div>
+                  <Field label="Amount" value={`${r.amount.toFixed(2)} tk`} />
+                  <Field label="Description" value={r.description ?? "-"} />
+                  <Field label="Submitted" value={formatDateTime(r.created_at)} />
+                  <div className="mt-2">
+                    <MealCostRequestActions requestId={r.id} />
+                  </div>
+                </Card>
+              );
+            })}
+            {!costPending.length && (
+              <Card className="p-4 text-center text-sm text-muted-foreground">No pending requests.</Card>
+            )}
+          </div>
+
+          <Card className="hidden p-0 sm:block">
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[18%]">Member</TableHead>
@@ -157,10 +224,10 @@ export default async function RequestPage() {
                   const member = membersById.get(r.user_id);
                   return (
                     <TableRow key={r.id}>
-                      <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                      <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "-"}</TableCell>
                       <TableCell className="text-muted-foreground">{formatDate(r.entry_date)}</TableCell>
                       <TableCell className="text-right text-muted-foreground">{r.amount.toFixed(2)}</TableCell>
-                      <TableCell className="truncate text-muted-foreground">{r.description ?? "—"}</TableCell>
+                      <TableCell className="truncate text-muted-foreground">{r.description ?? "-"}</TableCell>
                       <TableCell className="text-muted-foreground">{formatDateTime(r.created_at)}</TableCell>
                       <TableCell>
                         <MealCostRequestActions requestId={r.id} />
@@ -183,8 +250,30 @@ export default async function RequestPage() {
 
       <div>
         <h2 className="mb-3 text-sm font-semibold text-foreground">History</h2>
-        <Card className="p-0">
-          <Table className="min-w-[560px] sm:min-w-0 sm:table-fixed">
+
+        <div className="flex flex-col gap-3 sm:hidden">
+          {history.map((r) => {
+            const member = membersById.get(r.user_id);
+            return (
+              <Card key={`${r.type}-${r.id}`} className="flex flex-col gap-1 p-4">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="font-medium text-foreground">{member ? getDisplayName(member) : "-"}</span>
+                  <StatusBadge status={r.status} />
+                </div>
+                <Field label="Type" value={r.type === "meal" ? "Meal" : "Meal Cost"} />
+                <Field label="Date" value={formatDate(r.date)} />
+                <Field label="Details" value={r.details} />
+                <Field label="Reviewed" value={r.reviewed_at ? formatDateTime(r.reviewed_at) : "-"} />
+              </Card>
+            );
+          })}
+          {!history.length && (
+            <Card className="p-4 text-center text-sm text-muted-foreground">No reviewed requests yet.</Card>
+          )}
+        </div>
+
+        <Card className="hidden p-0 sm:block">
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[16%]">Member</TableHead>
@@ -200,17 +289,15 @@ export default async function RequestPage() {
                 const member = membersById.get(r.user_id);
                 return (
                   <TableRow key={`${r.type}-${r.id}`}>
-                    <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "—"}</TableCell>
+                    <TableCell className="truncate text-foreground">{member ? getDisplayName(member) : "-"}</TableCell>
                     <TableCell className="text-muted-foreground">{r.type === "meal" ? "Meal" : "Meal Cost"}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(r.date)}</TableCell>
                     <TableCell className="truncate text-muted-foreground">{r.details}</TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[r.status as keyof typeof STATUS_VARIANT] ?? "secondary"} className="capitalize">
-                        {r.status}
-                      </Badge>
+                      <StatusBadge status={r.status} />
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {r.reviewed_at ? formatDateTime(r.reviewed_at) : "—"}
+                      {r.reviewed_at ? formatDateTime(r.reviewed_at) : "-"}
                     </TableCell>
                   </TableRow>
                 );

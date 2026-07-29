@@ -18,14 +18,14 @@ function revalidateUtilityPaths() {
 export type AddExpenseState = { error?: string } | undefined;
 
 /**
- * Utility Expense Ledger only — records a shared cost. Never generates a
+ * Utility Expense Ledger only - records a shared cost. Never generates a
  * member bill on its own (see src/lib/data/finance.ts getMonthlyDues); only
  * an adjustment entered on Member Utility Statements does that.
  *
  * Payment Source side effects:
  *   member          → that member already paid the vendor directly: credit
  *                      their due via a negative utility_adjustment. Cottage
- *                      Balance is untouched — the money never entered the
+ *                      Balance is untouched - the money never entered the
  *                      shared fund.
  *   cottage_balance → paid from the shared fund: debit Cottage Balance.
  *   none            → recorded only, no balance or due change.
@@ -115,7 +115,7 @@ export async function addExpense(
     await notifyUsers(supabase, profile.cottage_id, [paidByMember], {
       type: "utility_expense_credit",
       title: `Credited for ${categoryLabel}`,
-      body: `${amount.toFixed(2)} reduced from your utility due — you paid this directly.`,
+      body: `${amount.toFixed(2)} reduced from your utility due - you paid this directly.`,
       link: "/utilities",
     });
   }
@@ -127,7 +127,7 @@ export async function addExpense(
 export type AddMemberUtilityDepositState = { error?: string } | undefined;
 
 /**
- * Member Utility Deposit — a member paying money toward their own utility
+ * Member Utility Deposit - a member paying money toward their own utility
  * due. Single transaction, two effects: reduces that member's Remaining Due
  * (via utility_deposits, read by getMonthlyDues) and credits Cottage
  * Balance (the money physically entered the shared fund).
@@ -195,7 +195,7 @@ export async function addMemberUtilityDeposit(
 
 export type AddCottageDepositState = { error?: string } | undefined;
 
-/** Cottage Deposit — the cottage's own money entering the fund directly. Credits Cottage Balance only; no member account changes. */
+/** Cottage Deposit - the cottage's own money entering the fund directly. Credits Cottage Balance only; no member account changes. */
 export async function addCottageDeposit(
   _prevState: AddCottageDepositState,
   formData: FormData

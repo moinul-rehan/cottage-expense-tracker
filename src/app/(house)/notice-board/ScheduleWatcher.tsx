@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-/** Renders nothing — schedules a single refresh for the next moment a
+/** Renders nothing - schedules a single refresh for the next moment a
  * notice's status should flip (scheduled → published, published →
  * expired), so the board and dashboard update live instead of only on
  * the next manual reload. Re-arms itself after every refresh because the

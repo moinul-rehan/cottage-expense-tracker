@@ -49,7 +49,7 @@ export default async function UtilityStatementPage() {
       <div>
         <h1 className="text-xl font-semibold text-foreground">Member Utility Statements</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Generate the final utility bill for {formatMonthKey(monthKey)} — every cost line,
+          Generate the final utility bill for {formatMonthKey(monthKey)} - every cost line,
           discount and manual adjustment shown here is what distributes money to members. Utility
           Expenses recorded on Utility Details don&apos;t appear until added here.
         </p>

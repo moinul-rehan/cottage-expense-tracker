@@ -62,7 +62,7 @@ export default async function MealPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Meal Ledger — {monthKey}</h1>
+        <h1 className="text-xl font-semibold text-foreground">Meal Ledger - {monthKey}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Bazaar spending, deposits and daily meals. Fully transparent to every member, and
           entirely separate from the Utility ledger.
@@ -102,7 +102,7 @@ export default async function MealPage() {
               <div>
                 <p className="text-sm font-medium text-foreground">Your meal cost requests</p>
                 <p className="text-xs text-muted-foreground">
-                  Use &quot;Request Meal Cost&quot; in the Meal menu — once approved, the amount is
+                  Use &quot;Request Meal Cost&quot; in the Meal menu - once approved, the amount is
                   credited to your meal deposit.
                 </p>
               </div>
@@ -114,7 +114,7 @@ export default async function MealPage() {
                       className="flex items-center justify-between gap-2 rounded-xl bg-accent px-3 py-2 text-xs text-accent-foreground"
                     >
                       <span>
-                        {formatDate(r.entry_date)} — {r.amount.toFixed(2)} tk (pending)
+                        {formatDate(r.entry_date)} - {r.amount.toFixed(2)} tk (pending)
                       </span>
                       <CancelMealCostRequestButton requestId={r.id} />
                     </div>
@@ -134,7 +134,7 @@ export default async function MealPage() {
               <div>
                 <p className="text-sm font-medium text-foreground">Your meal requests</p>
                 <p className="text-xs text-muted-foreground">
-                  Use &quot;Request Meal&quot; in the Meal menu to ask for a meal on a date — a manager will
+                  Use &quot;Request Meal&quot; in the Meal menu to ask for a meal on a date - a manager will
                   review it.
                 </p>
               </div>
@@ -146,7 +146,7 @@ export default async function MealPage() {
                       className="flex items-center justify-between gap-2 rounded-xl bg-accent px-3 py-2 text-xs text-accent-foreground"
                     >
                       <span>
-                        {formatDate(r.request_date)} — {r.lunch + r.dinner} meal
+                        {formatDate(r.request_date)} - {r.lunch + r.dinner} meal
                         {r.lunch + r.dinner === 1 ? "" : "s"} (pending)
                       </span>
                       <CancelMealRequestButton requestId={r.id} />
@@ -167,7 +167,7 @@ export default async function MealPage() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Monthly statement — {monthKey}</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">Monthly statement - {monthKey}</h2>
         <Card className="p-0">
           <Table>
             <TableHeader>

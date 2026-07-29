@@ -1,4 +1,4 @@
-/** A labeled group of related fields within a form — uppercase muted
+/** A labeled group of related fields within a form - uppercase muted
  * heading, optional hint line, then the fields. Pair with <Separator />
  * between sections so a long form reads as distinct steps instead of one
  * undifferentiated stack of inputs. */

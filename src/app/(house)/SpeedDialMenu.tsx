@@ -26,7 +26,7 @@ export const SPEED_DIAL_EASE_IN_CUBIC = "cubic-bezier(0.32, 0, 0.67, 0)";
  * from the trigger button's actual on-screen position (measured via
  * getBoundingClientRect, passed in as `origin`) and translates+scales+fades
  * to its resting spot in the stack, staggered closest-first on expand and
- * reversed (top item first) on collapse — so every item reads as physically
+ * reversed (top item first) on collapse - so every item reads as physically
  * emerging from, and retracting back into, the button that opened it. */
 export function SpeedDialMenu({
   open,
@@ -44,10 +44,10 @@ export function SpeedDialMenu({
   const router = useRouter();
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   // Each pill's resting center, measured ONCE while at rest (mount time,
-  // when transform is always translate(0,0) — see the `offset` fallback
+  // when transform is always translate(0,0) - see the `offset` fallback
   // below). getBoundingClientRect reflects whatever transform is currently
-  // applied, so measuring at any other time — e.g. re-measuring on every
-  // open — would read the pill's already-displaced position from the
+  // applied, so measuring at any other time - e.g. re-measuring on every
+  // open - would read the pill's already-displaced position from the
   // previous close and compound errors on every subsequent open. Centers
   // don't move once laid out, so measuring once and reusing is also just
   // cheaper.
@@ -102,7 +102,7 @@ export function SpeedDialMenu({
           const setRef = (el: HTMLElement | null) => {
             itemRefs.current[i] = el;
           };
-          // The icon circle is the one and only tap target — a plain label
+          // The icon circle is the one and only tap target - a plain label
           // span next to it, not part of any interactive element, so there's
           // no ambiguity left about whether text vs. icon registers a tap.
           const iconButtonClassName = cn(

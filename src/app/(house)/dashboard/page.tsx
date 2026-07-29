@@ -127,7 +127,7 @@ export default async function DashboardPage() {
   const shownNotices = pinnedNotices.slice(0, 3);
 
   // The moment a pinned notice visible to this member should next flip
-  // status (e.g. a scheduled one publishes, or a published one expires) —
+  // status (e.g. a scheduled one publishes, or a published one expires) -
   // refreshes the dashboard live instead of waiting for the next reload.
   const noticeWakeAt = notices
     .filter((n) => !n.archived_at && n.is_pinned && isVisibleTo(n, profile))

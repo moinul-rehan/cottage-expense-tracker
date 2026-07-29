@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** One tappable row inside a bottom-nav section sheet — icon chip + label,
+/** One tappable row inside a bottom-nav section sheet - icon chip + label,
  * either a route (Link) or an action (button, e.g. opens a dialog). */
 export function SheetActionRow({
   icon: Icon,

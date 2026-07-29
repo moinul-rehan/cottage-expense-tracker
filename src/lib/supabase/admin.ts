@@ -2,7 +2,7 @@ import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Service-role client. Bypasses RLS — only use for privileged operations
+ * Service-role client. Bypasses RLS - only use for privileged operations
  * (creating auth users) that have already been gated by requireSuperAdmin().
  * Never import this into a Client Component.
  */

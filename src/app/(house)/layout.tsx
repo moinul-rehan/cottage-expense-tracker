@@ -53,6 +53,15 @@ export default async function HouseLayout({
   const canManageMealRequests =
     profile.role === "super_admin" || profile.can_add_meals || profile.can_add_bazaar;
 
+  let pendingRequestCount = 0;
+  if (canManageMealRequests) {
+    const [mealPending, costPending] = await Promise.all([
+      supabase.from("meal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("meal_cost_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    ]);
+    pendingRequestCount = (mealPending.count ?? 0) + (costPending.count ?? 0);
+  }
+
   const topLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/notice-board", label: "Notice Board", icon: Pin },
@@ -139,6 +148,7 @@ export default async function HouseLayout({
         canAddMeals={profile.role === "super_admin" || profile.can_add_meals}
         canAddDeposit={profile.role === "super_admin" || profile.can_add_deposit}
         isSuperAdmin={profile.role === "super_admin"}
+        pendingRequestCount={pendingRequestCount}
       />
     </SidebarProvider>
   );

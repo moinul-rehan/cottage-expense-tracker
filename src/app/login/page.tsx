@@ -69,10 +69,10 @@ export default async function LoginPage({
             />
           </svg>
           <p className="max-w-md text-3xl font-semibold tracking-tight">
-            One house, one ledger — everyone always knows where the money stands.
+            One house, one ledger - everyone always knows where the money stands.
           </p>
           <div className="flex w-fit items-center justify-center rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur-md">
-            Cottage — Shared-house expense manager
+            Cottage - Shared-house expense manager
           </div>
         </div>
       </div>

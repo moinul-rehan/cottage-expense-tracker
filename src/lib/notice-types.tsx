@@ -69,7 +69,7 @@ export const PRIORITY_META: Record<NoticePriority, { label: string; order: numbe
   low: { label: "Low", order: 3, pill: "bg-muted text-muted-foreground", pin: "bg-slate-400" },
 };
 
-/** Deterministic -3..3deg tilt per notice id — stable across re-renders, no layout jitter. */
+/** Deterministic -3..3deg tilt per notice id - stable across re-renders, no layout jitter. */
 export function noticeTilt(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
@@ -146,7 +146,7 @@ export function computeStatus(
   return "published";
 }
 
-/** Effectively pinned right now — accounts for pin duration lapsing without a write-back. */
+/** Effectively pinned right now - accounts for pin duration lapsing without a write-back. */
 export function isEffectivelyPinned(
   notice: {
     is_pinned: boolean;

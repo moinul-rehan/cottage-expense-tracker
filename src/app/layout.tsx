@@ -48,7 +48,7 @@ export default function RootLayout({
     <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
-          // Runs before hydration so the correct theme is on <html> for the very first paint —
+          // Runs before hydration so the correct theme is on <html> for the very first paint -
           // otherwise the page would flash light before React mounts and corrects it.
           dangerouslySetInnerHTML={{
             __html: `(function(){try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}})();`,

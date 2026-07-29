@@ -14,7 +14,7 @@ export async function submitMealRequest(
 ): Promise<MealRequestState> {
   const profile = await getCurrentProfile();
   if (profile.role === "super_admin" || profile.can_add_meals) {
-    return { error: "You can already log meals directly — no need to request one." };
+    return { error: "You can already log meals directly - no need to request one." };
   }
 
   const requestDate = String(formData.get("request_date") ?? "");
@@ -68,7 +68,7 @@ export async function submitMealRequest(
   );
 
   revalidatePath("/meal");
-  return { success: "Request submitted — you'll be notified once it's reviewed." };
+  return { success: "Request submitted - you'll be notified once it's reviewed." };
 }
 
 export async function cancelMealRequest(requestId: string) {

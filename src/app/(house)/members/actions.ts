@@ -53,7 +53,7 @@ export async function inviteMember(
     return { error: error?.message ?? "Could not invite member." };
   }
 
-  // handle_new_user only sets id/first_name/last_name/email/role — the
+  // handle_new_user only sets id/first_name/last_name/email/role - the
   // permission columns fall back to their table defaults, three of which
   // are `true`. A newly invited member should start as a plain general
   // member with no permissions granted, so zero them out explicitly here.
@@ -198,9 +198,9 @@ export async function assignBazaarDuty(
   if (endDate < today) {
     // A duty entirely in the past would insert successfully but never show
     // up anywhere (Members page and Dashboard both only query duties whose
-    // end_date hasn't passed yet) — surface that as a validation error
+    // end_date hasn't passed yet) - surface that as a validation error
     // instead of a silent no-op the admin would otherwise mistake for a bug.
-    return { error: "End date can't be in the past — the duty would never show up anywhere." };
+    return { error: "End date can't be in the past - the duty would never show up anywhere." };
   }
 
   const { error } = await supabase.from("bazaar_duties").insert({
@@ -217,7 +217,7 @@ export async function assignBazaarDuty(
   await notifyUsers(supabase, admin_.cottage_id, [userId], {
     type: "bazaar_duty_assigned",
     title: "You've been assigned bazaar duty",
-    body: `${formatDate(startDate)} – ${formatDate(endDate)}${note ? ` — ${note}` : ""}`,
+    body: `${formatDate(startDate)} – ${formatDate(endDate)}${note ? ` - ${note}` : ""}`,
     link: "/members",
   });
 
@@ -254,8 +254,8 @@ export async function removeBazaarDuty(dutyId: string) {
 export type RemoveMemberState = { error?: string } | undefined;
 
 /**
- * Removes a member from the cottage roster — hides them from the Members
- * page and locks their login — without deleting their profile row or any
+ * Removes a member from the cottage roster - hides them from the Members
+ * page and locks their login - without deleting their profile row or any
  * historical record that references it (expenses, meals, deposits,
  * statements). Only ever called on an already-deactivated member.
  */

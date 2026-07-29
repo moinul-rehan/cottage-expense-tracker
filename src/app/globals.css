@@ -83,7 +83,7 @@
   --sidebar-ring: #DE7356;
 
   /* Notice Board sticky notes: fixed paper colors + a single dark ink,
-   * same in both themes on purpose — these represent physical paper pinned
+   * same in both themes on purpose - these represent physical paper pinned
    * to a board, not app chrome, so they don't invert with the theme.
    * --paper-ink clears WCAG AAA (7:1+) against every paper tint below. */
   --paper-utility: #FFEDB8;
@@ -99,7 +99,7 @@
  * Dark theme. Every pair actually used to render text (background/foreground,
  * card, muted-foreground, primary-as-link-or-icon, destructive-as-error-text)
  * is chosen to clear WCAG AAA (7:1 for normal text) against every background
- * it appears on in this app — verified via the WCAG relative-luminance
+ * it appears on in this app - verified via the WCAG relative-luminance
  * formula, not eyeballed. Borders/rings/chart fills are decorative, not text,
  * so they follow the same visual structure without that literal 7:1 bar.
  */
@@ -148,12 +148,12 @@
     @apply font-sans;
   }
 
-  /* Standard mobile tap behavior for every interactive element, app-wide —
+  /* Standard mobile tap behavior for every interactive element, app-wide -
    * without this, a tap on a wide/edge-adjacent target can get
    * miscategorized by the browser as the start of a scroll/pan gesture over
    * whatever scrollable ancestor it sits in and get silently swallowed
    * instead of firing (see the speed-dial pill bug this was pulled from).
-   * Also drops the default grey/blue tap-highlight flash on Android Chrome —
+   * Also drops the default grey/blue tap-highlight flash on Android Chrome -
    * every interactive element here already has its own focus/active state
    * (ring, translate, background), so the browser's overlay is redundant. */
   button,

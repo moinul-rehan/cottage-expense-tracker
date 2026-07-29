@@ -3,7 +3,7 @@
 import { Users, CalendarRange, Contact, Pin, Settings as SettingsIcon } from "lucide-react";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 
-/** Bottom-nav "Menu" destination on mobile — everything that doesn't get
+/** Bottom-nav "Menu" destination on mobile - everything that doesn't get
  * its own tab (Members, Months, Contact, Settings). When Request has taken
  * over the main nav's second slot (managers/admin), Notice Board moves in
  * here instead of being stranded off the bar entirely. */

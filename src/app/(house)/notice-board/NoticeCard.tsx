@@ -70,7 +70,7 @@ export function NoticeCard({
       {pinned && !isCritical && (
         <span
           className="absolute -top-2 left-1/2 size-4 -translate-x-1/2 rounded-full after:absolute after:top-full after:left-1/2 after:h-1.5 after:w-px after:-translate-x-1/2 after:bg-black/25"
-          title={`${PRIORITY_META[notice.priority].label} priority — pinned to dashboard`}
+          title={`${PRIORITY_META[notice.priority].label} priority - pinned to dashboard`}
         >
           <span className={cn("absolute inset-0 rounded-full shadow-[0_2px_3px_rgba(0,0,0,.45),inset_0_-2px_2px_rgba(0,0,0,.3),inset_0_2px_2px_rgba(255,255,255,.55)]", PRIORITY_META[notice.priority].pin)} />
         </span>
@@ -99,13 +99,13 @@ export function NoticeCard({
         <p className={cn("text-xs leading-snug", ink)}>
           {notice.meal_lunch && (
             <>
-              <b>Lunch</b> — {notice.meal_lunch}
+              <b>Lunch</b> - {notice.meal_lunch}
               <br />
             </>
           )}
           {notice.meal_dinner && (
             <>
-              <b>Dinner</b> — {notice.meal_dinner}
+              <b>Dinner</b> - {notice.meal_dinner}
             </>
           )}
         </p>

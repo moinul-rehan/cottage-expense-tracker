@@ -1,8 +1,8 @@
 "use client";
 
 /** Renders a timestamp in the viewer's own browser timezone. format-date's
- * formatDateTime executes wherever it's called — inside a Server Component
- * that resolves to the server's timezone, not the visitor's — so anything
+ * formatDateTime executes wherever it's called - inside a Server Component
+ * that resolves to the server's timezone, not the visitor's - so anything
  * showing a precise time-of-day (not just a calendar date) needs this
  * instead. */
 export function LocalDateTime({ iso }: { iso: string }) {

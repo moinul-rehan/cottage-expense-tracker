@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
 type MemberRef = { first_name: string; last_name: string | null } | null;
 
 function name(m: MemberRef) {
-  if (!m) return "—";
+  if (!m) return "-";
   return [m.first_name, m.last_name].filter(Boolean).join(" ");
 }
 
@@ -170,10 +170,10 @@ export function UtilityHistoryPdf({
 
   return (
     <Document>
-      {/* Page 1 — Overview + Expense Type Summary */}
+      {/* Page 1 - Overview + Expense Type Summary */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Utility Report — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Utility Report - {formatMonthKey(monthKey)}</Text>
         <Text style={styles.subtitle}>Full overview of cottage balance, expenses, collections and member utility records.</Text>
 
         <View style={styles.section}>
@@ -230,10 +230,10 @@ export function UtilityHistoryPdf({
         <Footer />
       </Page>
 
-      {/* Page 2+ — Member Utility Statements */}
+      {/* Page 2+ - Member Utility Statements */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Member Utility Statements — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Member Utility Statements - {formatMonthKey(monthKey)}</Text>
         <Text style={styles.subtitle}>Every cost line, discount and manual adjustment that distributes money to members.</Text>
 
         {memberStatements.map((m) => {
@@ -278,10 +278,10 @@ export function UtilityHistoryPdf({
         <Footer />
       </Page>
 
-      {/* Page 3 — Utility Expense History */}
+      {/* Page 3 - Utility Expense History */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Utility Expense History — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Utility Expense History - {formatMonthKey(monthKey)}</Text>
         <Text style={styles.subtitle}>Read-only record of every utility expense for the month.</Text>
 
         <View style={styles.section}>
@@ -297,12 +297,12 @@ export function UtilityHistoryPdf({
               <View style={styles.row} key={e.id}>
                 <Text style={styles.cell}>{formatDate(e.expense_date)}</Text>
                 <Text style={styles.cell}>{UTILITY_CATEGORY_LABELS[e.category] ?? e.category}</Text>
-                <Text style={styles.cell}>{e.description ?? "—"}</Text>
+                <Text style={styles.cell}>{e.description ?? "-"}</Text>
                 <Text style={styles.cell}>
                   {e.payment_source === "cottage_balance"
                     ? "Cottage Balance"
                     : e.payment_source === "member"
-                      ? "Member" + (e.payer ? " — " + name(e.payer) : "")
+                      ? "Member" + (e.payer ? " - " + name(e.payer) : "")
                       : "None"}
                 </Text>
                 <Text style={styles.cellRight}>{e.amount.toFixed(2)} tk</Text>
@@ -315,10 +315,10 @@ export function UtilityHistoryPdf({
         <Footer />
       </Page>
 
-      {/* Page 4 — Member Deposit History */}
+      {/* Page 4 - Member Deposit History */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Member Deposit History — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Member Deposit History - {formatMonthKey(monthKey)}</Text>
         <View style={styles.section}>
           <View style={styles.table}>
             <View style={styles.headerRow}>
@@ -331,7 +331,7 @@ export function UtilityHistoryPdf({
               <View style={styles.row} key={d.id}>
                 <Text style={styles.cell}>{name(d.member)}</Text>
                 <Text style={styles.cell}>{formatDate(d.deposit_date)}</Text>
-                <Text style={styles.cell}>{d.note ?? "—"}</Text>
+                <Text style={styles.cell}>{d.note ?? "-"}</Text>
                 <Text style={styles.cellRight}>{d.amount.toFixed(2)} tk</Text>
               </View>
             ))}
@@ -343,10 +343,10 @@ export function UtilityHistoryPdf({
         <Footer />
       </Page>
 
-      {/* Page 5 — Cottage Deposit History */}
+      {/* Page 5 - Cottage Deposit History */}
       <Page size="A4" style={styles.page}>
         <BrandHeader />
-        <Text style={styles.title}>Cottage Deposit History — {formatMonthKey(monthKey)}</Text>
+        <Text style={styles.title}>Cottage Deposit History - {formatMonthKey(monthKey)}</Text>
         <View style={styles.section}>
           <View style={styles.table}>
             <View style={styles.headerRow}>
@@ -357,7 +357,7 @@ export function UtilityHistoryPdf({
             {cottageDeposits.map((d) => (
               <View style={styles.row} key={d.id}>
                 <Text style={styles.cell}>{formatDate(d.deposit_date)}</Text>
-                <Text style={styles.cell}>{d.note ?? "—"}</Text>
+                <Text style={styles.cell}>{d.note ?? "-"}</Text>
                 <Text style={styles.cellRight}>{d.amount.toFixed(2)} tk</Text>
               </View>
             ))}

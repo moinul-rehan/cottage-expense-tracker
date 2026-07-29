@@ -39,7 +39,7 @@ export function ViewBazaarDialog({
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Spent by</span>
-            <span className="font-medium text-foreground">{member ? getDisplayName(member) : "—"}</span>
+            <span className="font-medium text-foreground">{member ? getDisplayName(member) : "-"}</span>
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Amount</span>
@@ -47,7 +47,7 @@ export function ViewBazaarDialog({
           </div>
           <div className="flex flex-col gap-1 border-t pt-3">
             <span className="text-muted-foreground">Description</span>
-            <p className="whitespace-pre-wrap text-foreground">{description ?? "—"}</p>
+            <p className="whitespace-pre-wrap text-foreground">{description ?? "-"}</p>
           </div>
         </div>
       </DialogContent>

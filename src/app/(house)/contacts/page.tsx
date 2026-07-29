@@ -24,7 +24,7 @@ export default async function ContactsPage() {
         <div>
           <h1 className="text-xl font-semibold text-foreground">Contact</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Necessary people for the Cottage — landlord, electrician, and the like.
+            Necessary people for the Cottage - landlord, electrician, and the like.
           </p>
         </div>
         <CreateContactDialog />

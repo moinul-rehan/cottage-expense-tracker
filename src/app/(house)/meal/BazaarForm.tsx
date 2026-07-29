@@ -86,7 +86,7 @@ export function BazaarForm({
           />
           <span>
             Cost deposit to <span className="font-medium text-foreground">{getDisplayName(spentByMember)}</span>{" "}
-            — credits this amount to their meal deposit
+            - credits this amount to their meal deposit
           </span>
         </label>
       )}

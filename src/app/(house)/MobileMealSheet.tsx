@@ -12,7 +12,7 @@ import { RequestMealCostForm } from "./meal/RequestMealCostForm";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 
-/** Bottom-nav "Meal" destination on mobile — a speed-dial pop-out listing
+/** Bottom-nav "Meal" destination on mobile - a speed-dial pop-out listing
  * Month Details plus whichever quick-add actions this member can use,
  * mirroring MealQuickAddMenu's sidebar entry. */
 export function MobileMealSheet({

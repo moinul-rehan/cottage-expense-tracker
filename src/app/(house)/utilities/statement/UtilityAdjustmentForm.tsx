@@ -257,7 +257,7 @@ export function UtilityAdjustmentForm({
                     ))}
                     <p className={cn("col-span-full text-xs", customMismatch ? "text-destructive" : "text-muted-foreground")}>
                       Assigned: {customTotal.toFixed(2)} / {totalAmount.toFixed(2)}
-                      {customMismatch && " — must match the amount entered above."}
+                      {customMismatch && " - must match the amount entered above."}
                     </p>
                   </div>
                 )}

@@ -5,7 +5,7 @@ import { getMealTotals } from "./meal";
 
 export { formatMonthKey } from "@/lib/format-month";
 
-/** The cottage's single authoritative "current month" — drives Dashboard/Meal/Utilities. */
+/** The cottage's single authoritative "current month" - drives Dashboard/Meal/Utilities. */
 export async function getActiveMonthKey(supabase: SupabaseClient, cottageId: string) {
   const { data } = await supabase
     .from("cottages")
@@ -15,7 +15,7 @@ export async function getActiveMonthKey(supabase: SupabaseClient, cottageId: str
   return (data?.active_month_key as string | undefined) ?? new Date().toISOString().slice(0, 7);
 }
 
-/** Today's date if it falls within `monthKey`, otherwise the 1st of that month — a sane default for date pickers when the active month isn't the real calendar month. */
+/** Today's date if it falls within `monthKey`, otherwise the 1st of that month - a sane default for date pickers when the active month isn't the real calendar month. */
 export function defaultDateForMonth(monthKey: string): string {
   const today = new Date().toISOString().slice(0, 10);
   return today.slice(0, 7) === monthKey ? today : `${monthKey}-01`;
