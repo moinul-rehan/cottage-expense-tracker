@@ -18,15 +18,26 @@ export async function sendPushToUsers(
   userIds: string[],
   payload: { title: string; body?: string; link?: string }
 ) {
-  if (!userIds.length || !vapidPublicKey || !vapidPrivateKey) return;
+  if (!userIds.length) return;
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    console.error("[push] VAPID keys missing at runtime, skipping send");
+    return;
+  }
 
   const admin = createAdminClient();
-  const { data: subs } = await admin
+  const { data: subs, error } = await admin
     .from("push_subscriptions")
     .select("id, endpoint, p256dh, auth")
     .in("user_id", userIds);
 
-  if (!subs?.length) return;
+  if (error) {
+    console.error("[push] subscription lookup failed", error.message);
+    return;
+  }
+  if (!subs?.length) {
+    console.error("[push] no subscriptions found for", userIds);
+    return;
+  }
 
   await Promise.allSettled(
     subs.map(async (sub) => {

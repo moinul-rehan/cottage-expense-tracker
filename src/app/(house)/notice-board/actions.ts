@@ -111,18 +111,28 @@ export async function createNotice(_prevState: CreateNoticeState, formData: Form
 
   if (error || !inserted) return { error: `Could not save the notice: ${error?.message ?? "unknown error"}` };
 
-  if (publishAt <= now && targetMemberIds.length) {
-    await notifyUsers(
-      supabase,
-      profile.cottage_id,
-      targetMemberIds.filter((id) => id !== profile.id),
-      {
+  if (publishAt <= now) {
+    let recipientIds = targetMemberIds;
+    if (visibility === "everyone" || visibility === "admins") {
+      let membersQuery = supabase
+        .from("profiles")
+        .select("id, role")
+        .eq("cottage_id", profile.cottage_id)
+        .eq("is_active", true);
+      if (visibility === "admins") membersQuery = membersQuery.eq("role", "super_admin");
+      const { data: recipients } = await membersQuery;
+      recipientIds = (recipients ?? []).map((m) => m.id);
+    }
+    recipientIds = recipientIds.filter((id) => id !== profile.id);
+
+    if (recipientIds.length) {
+      await notifyUsers(supabase, profile.cottage_id, recipientIds, {
         type: "notice_posted",
         title: `${NOTICE_TYPE_META[type].label}: ${title}`,
         body: description.slice(0, 140),
         link: "/notice-board",
-      }
-    );
+      });
+    }
   }
 
   revalidatePath("/notice-board");
