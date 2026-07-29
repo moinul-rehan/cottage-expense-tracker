@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/delete-expired-cottages",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

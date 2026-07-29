@@ -34,12 +34,14 @@ export function PageHeader({
   profile,
   displayName,
   monthLabel,
+  cottageName,
   notifications,
   unreadCount,
 }: {
   profile: Profile;
   displayName: string;
   monthLabel: string;
+  cottageName: string;
   notifications: Notification[];
   unreadCount: number;
 }) {
@@ -77,6 +79,9 @@ export function PageHeader({
                   can_add_notice={profile.can_add_notice}
                 />
               </span>
+              {cottageName && (
+                <span className="truncate text-xs font-medium text-muted-foreground">{cottageName}</span>
+              )}
               <span className="truncate text-sm text-muted-foreground">
                 Here&apos;s where things stand for {monthLabel}.
               </span>
@@ -97,6 +102,9 @@ export function PageHeader({
                 can_add_notice={profile.can_add_notice}
               />
             </span>
+            {cottageName && (
+              <span className="truncate text-xs font-medium text-muted-foreground">{cottageName}</span>
+            )}
             <span className="truncate text-sm text-muted-foreground">
               Here&apos;s where things stand for {monthLabel}.
             </span>

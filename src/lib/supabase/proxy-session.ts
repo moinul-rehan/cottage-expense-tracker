@@ -41,11 +41,15 @@ export async function updateSession(request: NextRequest) {
   // whether the visitor already has an unrelated Cottage session, so
   // signing into a different (allowed) account there never gets caught by
   // the guest-only redirect below and bounced back to Cottage's own login.
+  // /api/cron/* is called by Vercel's scheduler, never by a browser -- no
+  // user cookies will ever be present, so it must bypass the auth redirect
+  // below. The route itself checks the CRON_SECRET bearer token.
   const alwaysAccessible =
     pathname === '/' ||
     pathname === '/privacy' ||
     pathname.startsWith('/reset-password') ||
-    pathname === '/platform-admin/login'
+    pathname === '/platform-admin/login' ||
+    pathname.startsWith('/api/cron/')
 
   const guestOnlyPrefixes = ['/login', '/signup', '/forgot-password', '/auth/callback']
   const isGuestOnlyRoute = guestOnlyPrefixes.some((prefix) => pathname.startsWith(prefix))

@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   XCircle,
   MessageSquareWarning,
+  Crown,
+  Skull,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +28,9 @@ export const NOTIFICATION_ICONS: Record<string, LucideIcon> = {
   meal_cost_request_submitted: Inbox,
   meal_cost_request_approved: CheckCircle2,
   meal_cost_request_rejected: XCircle,
+  ownership_transferred: Crown,
+  cottage_deletion_scheduled: Skull,
+  cottage_deletion_cancelled: CheckCircle2,
   utility_adjustment: Receipt,
   utility_adjustment_removed: Trash2,
   utility_expense_credit: Receipt,
