@@ -8,11 +8,15 @@ import { createClient } from "@/lib/supabase/server";
  * since there's a single owner today. Add more addresses to
  * PLATFORM_ADMIN_EMAILS (comma-separated) as needed.
  */
-function allowedEmails(): string[] {
+export function platformAdminAllowedEmails(): string[] {
   return (process.env.PLATFORM_ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+}
+
+export function isPlatformAdminEmail(email: string | null | undefined) {
+  return !!email && platformAdminAllowedEmails().includes(email.toLowerCase());
 }
 
 export async function requirePlatformAdmin() {
@@ -21,10 +25,8 @@ export async function requirePlatformAdmin() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
-
-  const email = user.email?.toLowerCase();
-  if (!email || !allowedEmails().includes(email)) redirect("/dashboard");
+  if (!user) redirect("/platform-admin/login");
+  if (!isPlatformAdminEmail(user.email)) redirect("/platform-admin/login");
 
   return user;
 }

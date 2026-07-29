@@ -36,8 +36,16 @@ export async function updateSession(request: NextRequest) {
   // particular because completing a reset link creates a short-lived
   // recovery session, which would otherwise get bounced straight to
   // /dashboard before the user can set their new password.
+  // /platform-admin/login is its own, separate auth flow (a plain email
+  // allowlist, not a cottage role) -- always reachable regardless of
+  // whether the visitor already has an unrelated Cottage session, so
+  // signing into a different (allowed) account there never gets caught by
+  // the guest-only redirect below and bounced back to Cottage's own login.
   const alwaysAccessible =
-    pathname === '/' || pathname === '/privacy' || pathname.startsWith('/reset-password')
+    pathname === '/' ||
+    pathname === '/privacy' ||
+    pathname.startsWith('/reset-password') ||
+    pathname === '/platform-admin/login'
 
   const guestOnlyPrefixes = ['/login', '/signup', '/forgot-password', '/auth/callback']
   const isGuestOnlyRoute = guestOnlyPrefixes.some((prefix) => pathname.startsWith(prefix))
