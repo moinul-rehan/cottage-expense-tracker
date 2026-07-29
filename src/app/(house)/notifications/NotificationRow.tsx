@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getNotificationIcon } from "../notification-icons";
-import { formatDateTime } from "@/lib/format-date";
+import { LocalDateTime } from "@/components/LocalDateTime";
 
 type Notification = {
   id: string;
@@ -40,7 +40,7 @@ export function NotificationRow({ notification }: { notification: Notification }
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground">
-        {formatDateTime(notification.created_at)}
+        <LocalDateTime iso={notification.created_at} />
       </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
