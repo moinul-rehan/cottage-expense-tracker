@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Pin, UtensilsCrossed, Zap, Menu, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Pin, Inbox, UtensilsCrossed, Zap, Menu, type LucideIcon } from "lucide-react";
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
 import { MobileMenuSheet } from "./MobileMenuSheet";
@@ -116,11 +116,14 @@ export function MobileBottomNav({
     setActiveSheet((prev) => (prev === key ? null : prev));
   }
 
+  const canManageMealRequests = canAddMeals || canAddBazaar;
+  const menuPrefixes = canManageMealRequests ? [...MENU_PREFIXES, "/notice-board"] : MENU_PREFIXES;
+
   const anySheetOpen = activeSheet !== null;
   const mealActive = !anySheetOpen && (pathname === MEAL_PREFIX || pathname.startsWith(`${MEAL_PREFIX}/`));
   const utilitiesActive =
     !anySheetOpen && (pathname === UTILITIES_PREFIX || pathname.startsWith(`${UTILITIES_PREFIX}/`));
-  const menuActive = !anySheetOpen && MENU_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const menuActive = !anySheetOpen && menuPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   return (
     <>
@@ -136,13 +139,23 @@ export function MobileBottomNav({
           active={!anySheetOpen && pathname === "/dashboard"}
           onClick={() => setActiveSheet(null)}
         />
-        <NavTab
-          icon={Pin}
-          label="Notices"
-          href="/notice-board"
-          active={!anySheetOpen && pathname === "/notice-board"}
-          onClick={() => setActiveSheet(null)}
-        />
+        {canManageMealRequests ? (
+          <NavTab
+            icon={Inbox}
+            label="Request"
+            href="/request"
+            active={!anySheetOpen && pathname === "/request"}
+            onClick={() => setActiveSheet(null)}
+          />
+        ) : (
+          <NavTab
+            icon={Pin}
+            label="Notices"
+            href="/notice-board"
+            active={!anySheetOpen && pathname === "/notice-board"}
+            onClick={() => setActiveSheet(null)}
+          />
+        )}
         <NavTab
           icon={UtensilsCrossed}
           label="Meal"
@@ -185,7 +198,7 @@ export function MobileBottomNav({
         open={activeSheet === "menu"}
         onOpenChange={(open) => (open ? setActiveSheet("menu") : closeSheet("menu"))}
         origin={origin}
-        canManageMealRequests={canAddMeals || canAddBazaar}
+        showNoticeBoard={canManageMealRequests}
       />
     </>
   );

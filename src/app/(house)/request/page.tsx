@@ -97,7 +97,7 @@ export default async function RequestPage() {
         <div>
           <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Request — Pending ({pending.length})</h2>
           <Card className="p-0">
-            <Table className="table-fixed">
+            <Table className="min-w-[560px] sm:min-w-0 sm:table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[20%]">Member</TableHead>
@@ -141,7 +141,7 @@ export default async function RequestPage() {
         <div>
           <h2 className="mb-3 text-sm font-semibold text-foreground">Meal Cost Request — Pending ({costPending.length})</h2>
           <Card className="p-0">
-            <Table className="table-fixed">
+            <Table className="min-w-[560px] sm:min-w-0 sm:table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[18%]">Member</TableHead>
@@ -184,7 +184,7 @@ export default async function RequestPage() {
       <div>
         <h2 className="mb-3 text-sm font-semibold text-foreground">History</h2>
         <Card className="p-0">
-          <Table className="table-fixed">
+          <Table className="min-w-[560px] sm:min-w-0 sm:table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[16%]">Member</TableHead>
