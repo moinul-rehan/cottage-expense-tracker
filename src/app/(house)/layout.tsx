@@ -17,6 +17,7 @@ import { UtilitiesQuickAddMenu } from "./UtilitiesQuickAddMenu";
 import { SidebarNavLink } from "./SidebarNavLink";
 import { PageHeader } from "./PageHeader";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { RealtimeRefresher } from "./RealtimeRefresher";
 import { Logo } from "@/components/logo";
 import {
   Sidebar,
@@ -56,6 +57,7 @@ export default async function HouseLayout({
 
   return (
     <SidebarProvider className="min-h-0 flex-1 bg-background">
+      <RealtimeRefresher cottageId={profile.cottage_id} userId={profile.id} />
       <Sidebar collapsible="icon" className="border-none">
         <SidebarHeader className="gap-14 px-3 py-8">
           <div className="flex items-center gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
