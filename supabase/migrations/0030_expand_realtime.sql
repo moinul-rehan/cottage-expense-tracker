@@ -2,7 +2,7 @@
 -- live-refresh subscribes to (0011 only covered the mobile app's dashboard
 -- feed). Existing RLS select policies (cottage_id = current_cottage_id())
 -- already apply to realtime changefeeds, so no new policies are needed.
--- Run after 0001-0024. Safe to re-run (each add is a no-op if already added).
+-- Run after 0001-0029. Safe to re-run (each add is a no-op if already added).
 
 do $$
 begin
