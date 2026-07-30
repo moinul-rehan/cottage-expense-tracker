@@ -23,22 +23,23 @@ class StatCard extends StatelessWidget {
     this.paid = false,
   });
 
-  (Color bg, Color fg) get _colors {
+  (Color bg, Color fg) _colors(CottageSurface surface) {
     switch (tone) {
       case StatTone.blue:
-        return (CottageColors.toneBlueBg, CottageColors.toneBlueFg);
+        return (surface.toneBlueBg, surface.toneBlueFg);
       case StatTone.green:
-        return (CottageColors.toneGreenBg, CottageColors.toneGreenFg);
+        return (surface.toneGreenBg, surface.toneGreenFg);
       case StatTone.orange:
-        return (CottageColors.toneOrangeBg, CottageColors.toneOrangeFg);
+        return (surface.toneOrangeBg, surface.toneOrangeFg);
       case StatTone.red:
-        return (CottageColors.toneRedBg, CottageColors.toneRedFg);
+        return (surface.toneRedBg, surface.toneRedFg);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (bg, fg) = _colors;
+    final surface = context.surface;
+    final (bg, fg) = _colors(surface);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -62,7 +63,7 @@ class StatCard extends StatelessWidget {
                         child: Text(
                           label,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, color: CottageColors.mutedForeground),
+                          style: TextStyle(fontSize: 13, color: surface.mutedForeground),
                         ),
                       ),
                       if (paid) ...[
@@ -85,14 +86,14 @@ class StatCard extends StatelessWidget {
                   Text(
                     value,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: CottageColors.foreground),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: surface.foreground),
                   ),
                   if (hint != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       hint!,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12, color: CottageColors.mutedForeground),
+                      style: TextStyle(fontSize: 12, color: surface.mutedForeground),
                     ),
                   ],
                 ],

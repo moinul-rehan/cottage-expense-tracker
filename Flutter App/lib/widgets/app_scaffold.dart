@@ -3,13 +3,14 @@ import '../services/supabase_service.dart';
 import '../screens/login_screen.dart';
 import '../theme.dart';
 
-/// Shared top bar for authenticated screens -- Cottage wordmark + logout.
-/// Phase 2 can extend this into a bottom nav / drawer once more screens exist.
+/// Shared top bar for each tab under [BottomNavShell] -- Cottage wordmark,
+/// with sign-out surfaced only where [showLogout] is true (the Menu tab).
 class AppScaffold extends StatelessWidget {
   final String title;
   final Widget body;
+  final bool showLogout;
 
-  const AppScaffold({super.key, required this.title, required this.body});
+  const AppScaffold({super.key, required this.title, required this.body, this.showLogout = true});
 
   Future<void> _logout(BuildContext context) async {
     await SupabaseService.signOut();
@@ -33,11 +34,12 @@ class AppScaffold extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
-          ),
+          if (showLogout)
+            IconButton(
+              onPressed: () => _logout(context),
+              icon: const Icon(Icons.logout),
+              tooltip: 'Sign out',
+            ),
         ],
       ),
       body: body,

@@ -43,6 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Cottage',
+      showLogout: false,
       body: FutureBuilder<(Profile, DashboardData)>(
         future: _future,
         builder: (context, snapshot) {
@@ -68,6 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
 
           final (profile, data) = snapshot.data!;
+          final surface = context.surface;
 
           return RefreshIndicator(
             onRefresh: () async => _retry(),
@@ -76,12 +78,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   'Welcome, ${profile.displayName}',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: CottageColors.foreground),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: surface.foreground),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "Here's where things stand for ${data.monthKey}.",
-                  style: const TextStyle(fontSize: 13, color: CottageColors.mutedForeground),
+                  style: TextStyle(fontSize: 13, color: surface.mutedForeground),
                 ),
                 const SizedBox(height: 24),
 
@@ -176,10 +178,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _SectionTitle('Member meal summary'),
                 const SizedBox(height: 12),
                 if (data.memberMealRows.isEmpty)
-                  const Card(
+                  Card(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('No meal data yet.', style: TextStyle(color: CottageColors.mutedForeground)),
+                      padding: const EdgeInsets.all(16),
+                      child: Text('No meal data yet.', style: TextStyle(color: surface.mutedForeground)),
                     ),
                   )
                 else
@@ -204,7 +206,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: CottageColors.foreground),
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.surface.foreground),
     );
   }
 }
@@ -218,6 +220,7 @@ class _MemberMealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final balancePositive = row.balance >= 0;
+    final surface = context.surface;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -228,12 +231,12 @@ class _MemberMealCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: CottageColors.accent,
+                  backgroundColor: surface.accent,
                   backgroundImage: row.avatarUrl != null ? NetworkImage(row.avatarUrl!) : null,
                   child: row.avatarUrl == null
                       ? Text(
                           row.firstName.isNotEmpty ? row.firstName[0].toUpperCase() : '?',
-                          style: const TextStyle(color: CottageColors.accentForeground, fontWeight: FontWeight.w600),
+                          style: TextStyle(color: surface.accentForeground, fontWeight: FontWeight.w600),
                         )
                       : null,
                 ),
@@ -277,14 +280,15 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = context.surface;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: CottageColors.mutedForeground)),
+        Text(label, style: TextStyle(fontSize: 11, color: surface.mutedForeground)),
         const SizedBox(height: 2),
         Text(
           value,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: valueColor ?? CottageColors.foreground),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: valueColor ?? surface.foreground),
         ),
       ],
     );

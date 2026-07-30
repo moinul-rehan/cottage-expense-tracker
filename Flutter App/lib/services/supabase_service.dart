@@ -1,12 +1,16 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Values must match the web app's NEXT_PUBLIC_SUPABASE_URL /
-/// NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.local in the Next.js project).
-/// The anon key is safe to ship in a client build -- it's the same one the
-/// website already exposes to every browser; access is enforced by
-/// Postgres RLS, not by keeping this value secret.
+/// NEXT_PUBLIC_SUPABASE_ANON_KEY (same project the mobile/ Expo app's .env
+/// points at). The anon key is safe to ship in a client build -- it's the
+/// same one the website already exposes to every browser; access is
+/// enforced by Postgres RLS, not by keeping this value secret.
 ///
-/// Pass real values at build/run time instead of hardcoding them, e.g.:
+/// Pass real values at build/run time instead of hardcoding them here:
+///   flutter run --dart-define-from-file=env.json
+/// Copy env.json.example to env.json (gitignored) and fill in your
+/// project's URL/anon key -- the VS Code launch configs already do this.
+/// Equivalent single-flag form:
 ///   flutter run \
 ///     --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
 ///     --dart-define=SUPABASE_ANON_KEY=sb_publishable_xxxx

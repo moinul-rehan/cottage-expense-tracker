@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
 import '../theme.dart';
-import 'dashboard_screen.dart';
+import '../widgets/bottom_nav_shell.dart';
 
 /// Mirrors src/app/login/LoginForm.tsx's email/password fields and copy.
 /// Google sign-in and "Forgot password" are deferred to a later phase.
@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const BottomNavShell()));
     } on AuthException {
       setState(() => _error = 'Invalid email or password.');
     } catch (_) {
@@ -68,10 +68,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Icon(Icons.home_rounded, size: 48, color: CottageColors.primary),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Cottage',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: CottageColors.foreground),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.surface.foreground),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(
