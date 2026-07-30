@@ -25,12 +25,12 @@ function PopoverContent({
       <PopoverPrimitive.Positioner
         align={align}
         sideOffset={sideOffset}
-        className="isolate z-[70]"
+        className="isolate z-[90]"
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"
           className={cn(
-            "z-[70] w-80 origin-(--transform-origin) rounded-xl bg-popover bg-clip-padding text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 transition duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+            "z-[90] w-80 origin-(--transform-origin) rounded-xl bg-popover bg-clip-padding text-sm text-popover-foreground shadow-lg ring-1 ring-foreground/10 transition duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
             className
           )}
           {...props}
