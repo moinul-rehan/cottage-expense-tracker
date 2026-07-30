@@ -261,7 +261,7 @@ function AssignDutyDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign bazaar duty to {memberName}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><ShoppingBasket className="size-4" />Assign bazaar duty to {memberName}</DialogTitle>
         </DialogHeader>
         <form action={action} className="flex flex-col gap-4 p-4 pt-2">
           <input type="hidden" name="user_id" value={userId} />

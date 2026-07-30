@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UtilityBreakdownDialog } from "./UtilityBreakdownDialog";
 import { MobileDashboardHero } from "./MobileDashboardHero";
+import { NoticePopup } from "./NoticePopup";
 import { NoticeCard } from "../notice-board/NoticeCard";
 import { ScheduleWatcher } from "../notice-board/ScheduleWatcher";
 import { computeStatus, isEffectivelyPinned, isVisibleTo, sortForDisplay } from "@/lib/notice-types";
@@ -72,6 +73,7 @@ export default async function DashboardPage() {
     { data: members },
     myBazaarDuty,
     notices,
+    dismissalsQuery,
     myAdjustmentsQuery,
     myDepositsQuery,
     { data: cottage },
@@ -86,6 +88,7 @@ export default async function DashboardPage() {
       .order("last_name"),
     getMyNextBazaarDuty(supabase, profile.id),
     getNotices(supabase, profile.cottage_id),
+    supabase.from("notice_dismissals").select("notice_id").eq("user_id", profile.id),
     supabase
       .from("utility_adjustments")
       .select("id, category, amount, created_at")
@@ -138,6 +141,17 @@ export default async function DashboardPage() {
   );
   const shownNotices = pinnedNotices.slice(0, 3);
 
+  const dismissedIds = new Set((dismissalsQuery.data ?? []).map((d) => d.notice_id));
+  const popupNotices = sortForDisplay(
+    notices.filter(
+      (n) =>
+        n.visibility === "everyone" &&
+        computeStatus(n) === "published" &&
+        n.created_by !== profile.id &&
+        !dismissedIds.has(n.id)
+    )
+  );
+
   // The moment a pinned notice visible to this member should next flip
   // status (e.g. a scheduled one publishes, or a published one expires) -
   // refreshes the dashboard live instead of waiting for the next reload.
@@ -165,6 +179,7 @@ export default async function DashboardPage() {
         }}
       />
       <ScheduleWatcher wakeAt={noticeWakeAt} />
+      <NoticePopup notices={popupNotices} />
       {!!shownNotices.length && (
         <div>
           <div className="mb-3 flex items-baseline justify-between gap-3">

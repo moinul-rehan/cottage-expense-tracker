@@ -222,21 +222,17 @@ export async function addDailyMealsForDate(
 
   const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
 
-  const rows = memberIds
-    .map((userId) => {
-      const lunch = Number(formData.get(`lunch_${userId}`) ?? 0) || 0;
-      const dinner = Number(formData.get(`dinner_${userId}`) ?? 0) || 0;
-      return {
-        month_key: activeMonthKey,
-        user_id: userId,
-        meal_date: mealDate,
-        count: lunch + dinner,
-        created_by: profile.id,
-      };
-    })
-    .filter((row) => row.count > 0);
-
-  if (!rows.length) return { error: "Enter at least one meal count." };
+  const rows = memberIds.map((userId) => {
+    const lunch = Number(formData.get(`lunch_${userId}`) ?? 0) || 0;
+    const dinner = Number(formData.get(`dinner_${userId}`) ?? 0) || 0;
+    return {
+      month_key: activeMonthKey,
+      user_id: userId,
+      meal_date: mealDate,
+      count: lunch + dinner,
+      created_by: profile.id,
+    };
+  });
 
   const { error } = await supabase
     .from("daily_meals")
@@ -246,7 +242,7 @@ export async function addDailyMealsForDate(
 
   await Promise.all(
     rows
-      .filter((row) => row.user_id !== profile.id)
+      .filter((row) => row.count > 0 && row.user_id !== profile.id)
       .map((row) =>
         notifyUsers(supabase, profile.cottage_id, [row.user_id], {
           type: "daily_meal",

@@ -1,12 +1,13 @@
 import { requireSuperAdmin, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getMonthlyDues, getDefaultCosts } from "@/lib/data/finance";
+import { getMonthlyDues, getDefaultCosts, getCarryIns } from "@/lib/data/finance";
 import { getActiveMonthKey, formatMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UtilityAdjustmentForm } from "./UtilityAdjustmentForm";
 import { DeleteAdjustmentButton } from "./DeleteAdjustmentButton";
+import { CarryInLine } from "./CarryInLine";
 import { cn } from "@/lib/utils";
 
 export default async function UtilityStatementPage() {
@@ -14,7 +15,7 @@ export default async function UtilityStatementPage() {
   const supabase = await createClient();
   const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
 
-  const [{ data: members }, dues, adjustmentsQuery, defaultCosts] = await Promise.all([
+  const [{ data: members }, dues, adjustmentsQuery, defaultCosts, carryIns] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, first_name, last_name")
@@ -28,7 +29,15 @@ export default async function UtilityStatementPage() {
       .eq("month_key", monthKey)
       .order("created_at"),
     getDefaultCosts(supabase, profile.cottage_id),
+    getCarryIns(supabase, profile.cottage_id, monthKey),
   ]);
+
+  const carryInsByUser = new Map<string, typeof carryIns>();
+  for (const row of carryIns) {
+    const list = carryInsByUser.get(row.user_id) ?? [];
+    list.push(row);
+    carryInsByUser.set(row.user_id, list);
+  }
 
   const defaultCostsByCategory = Object.fromEntries(
     Array.from(defaultCosts.entries()).map(([category, rows]) => [
@@ -62,8 +71,9 @@ export default async function UtilityStatementPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {(members ?? []).map((m) => {
             const lines = adjustmentsByUser.get(m.id) ?? [];
-            const due = dues.get(m.id) ?? { rent: 0, expenses: 0, paid: 0, due: 0 };
-            const assignedCost = due.rent + due.expenses;
+            const carryInLines = carryInsByUser.get(m.id) ?? [];
+            const due = dues.get(m.id) ?? { rent: 0, expenses: 0, carryIn: 0, paid: 0, due: 0 };
+            const assignedCost = due.rent + due.expenses + due.carryIn;
             const remaining = due.due;
             const isPaid = assignedCost > 0 && remaining <= 0;
 
@@ -78,6 +88,20 @@ export default async function UtilityStatementPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3 px-0 text-sm">
+                  {!!carryInLines.length && (
+                    <div className="flex flex-col gap-1.5 border-b pb-2">
+                      {carryInLines.map((c) => (
+                        <CarryInLine
+                          key={c.id}
+                          id={c.id}
+                          amount={c.amount}
+                          label={`${formatMonthKey(c.source_month_key)} ${c.kind === "utility" ? "Utility" : "Meal"} ${
+                            c.amount >= 0 ? "Due" : c.kind === "utility" ? "Advanced" : "Balance"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
                   <div className="flex flex-col gap-1.5">
                     {lines.map((a) => (
                       <div key={a.id} className="flex items-center justify-between gap-2">

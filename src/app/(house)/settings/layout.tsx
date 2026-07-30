@@ -1,13 +1,13 @@
-import Link from "next/link";
+import { User, Banknote, Home, ShieldCheck } from "lucide-react";
 import { getCurrentProfile } from "@/lib/data/dal";
-import { Button } from "@/components/ui/button";
+import { SettingsNav, type SettingsLink } from "./SettingsNav";
 
-const memberLinks = [{ href: "/settings/profile", label: "Profile" }];
-const adminLinks = [
-  { href: "/settings/rent", label: "Default Cost" },
-  { href: "/settings/cottage", label: "Cottage Profile" },
+const memberLinks: SettingsLink[] = [{ href: "/settings/profile", label: "Profile", icon: User }];
+const adminLinks: SettingsLink[] = [
+  { href: "/settings/rent", label: "Default Cost", icon: Banknote },
+  { href: "/settings/cottage", label: "Cottage Profile", icon: Home },
 ];
-const trailingLinks = [{ href: "/settings/security", label: "Security" }];
+const trailingLinks: SettingsLink[] = [{ href: "/settings/security", label: "Security", icon: ShieldCheck }];
 
 export default async function SettingsLayout({
   children,
@@ -23,23 +23,7 @@ export default async function SettingsLayout({
 
   return (
     <div className="flex flex-col gap-8 sm:flex-row">
-      <nav className="flex shrink-0 flex-row gap-1 overflow-x-auto sm:w-48 sm:flex-col sm:overflow-visible">
-        {links.map((link) => (
-          <Button
-            key={link.href}
-            variant="ghost"
-            size="sm"
-            // Without shrink-0 these buttons compress to fit the row instead
-            // of the row scrolling past them -- the actual bug behind
-            // "Security" reading as a clipped "Secu" with no way to reach it.
-            className="shrink-0 justify-start"
-            nativeButton={false}
-            render={<Link href={link.href} />}
-          >
-            {link.label}
-          </Button>
-        ))}
-      </nav>
+      <SettingsNav links={links} />
       <div className="flex-1">{children}</div>
     </div>
   );

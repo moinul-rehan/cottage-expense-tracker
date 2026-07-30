@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Banknote } from "lucide-react";
 import { saveDefaultCost } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +51,10 @@ export function DefaultCostForm({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Default Cost" : "Add Default Cost"}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Banknote className="size-4" />
+              {editing ? "Edit Default Cost" : "Add Default Cost"}
+            </DialogTitle>
           </DialogHeader>
           <form action={action} className="flex flex-col">
             <div className="flex flex-col gap-5 px-4 pt-1 pb-4">

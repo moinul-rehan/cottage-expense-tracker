@@ -226,13 +226,14 @@ export async function getCottageBalance(supabase: SupabaseClient, cottageId: str
  * manually adds it as an adjustment - never automatically.
  */
 export async function getMonthlyDues(supabase: SupabaseClient, cottageId: string, monthKey: string) {
-  const [categoryTotals, deposits] = await Promise.all([
+  const [categoryTotals, deposits, carryIns] = await Promise.all([
     getUtilityAdjustmentsByCategoryForMonth(supabase, cottageId, monthKey),
     getUtilityDepositsForMonth(supabase, cottageId, monthKey),
+    getCarryInTotalsByUser(supabase, cottageId, monthKey),
   ]);
 
-  const userIds = new Set([...categoryTotals.keys(), ...deposits.keys()]);
-  const dues = new Map<string, { rent: number; expenses: number; paid: number; due: number }>();
+  const userIds = new Set([...categoryTotals.keys(), ...deposits.keys(), ...carryIns.keys()]);
+  const dues = new Map<string, { rent: number; expenses: number; carryIn: number; paid: number; due: number }>();
 
   for (const userId of userIds) {
     const categories = categoryTotals.get(userId);
@@ -241,9 +242,42 @@ export async function getMonthlyDues(supabase: SupabaseClient, cottageId: string
     for (const [category, amount] of categories ?? []) {
       if (category !== "house_rent") expenses += amount;
     }
+    const carryIn = carryIns.get(userId) ?? 0;
     const paid = deposits.get(userId) ?? 0;
-    dues.set(userId, { rent, expenses, paid, due: rent + expenses - paid });
+    dues.set(userId, { rent, expenses, carryIn, paid, due: rent + expenses + carryIn - paid });
   }
 
   return dues;
+}
+
+export type CarryInRow = {
+  id: string;
+  user_id: string;
+  amount: number;
+  source_month_key: string;
+  kind: "meal" | "utility";
+};
+
+/** Full list of carry-in lines (Utility due/advance + Meal due/balance auto-carried from the closed previous month) for the given month, per member. */
+export async function getCarryIns(
+  supabase: SupabaseClient,
+  cottageId: string,
+  monthKey: string
+): Promise<CarryInRow[]> {
+  const { data } = await supabase
+    .from("utility_carry_ins")
+    .select("id, user_id, amount, source_month_key, kind")
+    .eq("cottage_id", cottageId)
+    .eq("month_key", monthKey);
+
+  return (data ?? []).map((row) => ({ ...row, amount: Number(row.amount) }));
+}
+
+async function getCarryInTotalsByUser(supabase: SupabaseClient, cottageId: string, monthKey: string) {
+  const rows = await getCarryIns(supabase, cottageId, monthKey);
+  const byUser = new Map<string, number>();
+  for (const row of rows) {
+    byUser.set(row.user_id, (byUser.get(row.user_id) ?? 0) + row.amount);
+  }
+  return byUser;
 }

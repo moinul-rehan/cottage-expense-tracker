@@ -39,7 +39,7 @@ export function EditMealRowDialog({
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit meals - {date}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Pencil className="size-4" />Edit meals - {date}</DialogTitle>
         </DialogHeader>
         <form action={action} className="flex flex-col gap-4 p-4 pt-2">
           <input type="hidden" name="meal_date" value={date} />

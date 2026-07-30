@@ -107,7 +107,7 @@ export function MobileMealSheet({
       <Sheet open={dialog === "meal"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Add Meal</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><Plus className="size-4" />Add Meal</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <DailyMealForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
@@ -118,7 +118,7 @@ export function MobileMealSheet({
       <Sheet open={dialog === "deposit"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Add Meal Deposit</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><Wallet className="size-4" />Add Meal Deposit</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <DepositForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
@@ -129,7 +129,7 @@ export function MobileMealSheet({
       <Sheet open={dialog === "bazaar"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Add Meal Expense</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><ShoppingBasket className="size-4" />Add Meal Expense</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <BazaarForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
@@ -140,7 +140,7 @@ export function MobileMealSheet({
       <Sheet open={dialog === "request"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Request Meal</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><Send className="size-4" />Request Meal</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <RequestMealForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
@@ -151,7 +151,7 @@ export function MobileMealSheet({
       <Sheet open={dialog === "cost-request"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Request Meal Cost</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><Send className="size-4" />Request Meal Cost</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <RequestMealCostForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />

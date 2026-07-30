@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireSuperAdmin } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyUsers } from "@/lib/data/notifications";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 
@@ -150,4 +151,25 @@ export async function deleteUtilityAdjustment(id: string) {
   revalidatePath("/utilities/statement");
   revalidatePath("/dashboard");
   revalidatePath("/months");
+}
+
+/** Auto-carried Utility/Meal due-or-advance lines (see set_active_month) are
+ * locked by default on the statement page; these let an admin explicitly
+ * unlock and adjust or remove one. RLS has no write policy for
+ * utility_carry_ins (it's system-generated), so this goes through the admin
+ * client - same fix as the cottage-name update bug. */
+export async function updateCarryIn(id: string, amount: number) {
+  const profile = await requireSuperAdmin();
+  const admin = createAdminClient();
+  await admin.from("utility_carry_ins").update({ amount }).eq("id", id).eq("cottage_id", profile.cottage_id);
+  revalidatePath("/utilities/statement");
+  revalidatePath("/dashboard");
+}
+
+export async function deleteCarryIn(id: string) {
+  const profile = await requireSuperAdmin();
+  const admin = createAdminClient();
+  await admin.from("utility_carry_ins").delete().eq("id", id).eq("cottage_id", profile.cottage_id);
+  revalidatePath("/utilities/statement");
+  revalidatePath("/dashboard");
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Contact } from "lucide-react";
 import { addContact } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ export function CreateContactDialog() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Contact</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Contact className="size-4" />Create Contact</DialogTitle>
           </DialogHeader>
           <form action={action} className="flex flex-col gap-4 p-4 pt-2">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

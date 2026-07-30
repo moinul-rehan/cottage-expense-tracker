@@ -39,7 +39,7 @@ export function EditDepositDialog({
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit deposit</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Pencil className="size-4" />Edit deposit</DialogTitle>
         </DialogHeader>
         <form action={action} className="flex flex-col gap-4 p-4 pt-2">
           <input type="hidden" name="id" value={id} />

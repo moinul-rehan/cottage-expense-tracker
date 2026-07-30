@@ -89,7 +89,7 @@ export function MobileUtilitiesSheet({
       <Sheet open={dialog === "member-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Member Utility Deposit</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><Wallet className="size-4" />Member Utility Deposit</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <MemberDepositForm members={members} defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
@@ -100,7 +100,7 @@ export function MobileUtilitiesSheet({
       <Sheet open={dialog === "cottage-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Cottage Deposit</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><HandCoins className="size-4" />Cottage Deposit</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <CottageDepositForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
@@ -111,7 +111,7 @@ export function MobileUtilitiesSheet({
       <Sheet open={dialog === "expense"} onOpenChange={(v) => !v && setDialog(null)}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
           <SheetHeader>
-            <SheetTitle>Utility Expense</SheetTitle>
+            <SheetTitle className="flex items-center gap-2"><Receipt className="size-4" />Utility Expense</SheetTitle>
           </SheetHeader>
           <div className="p-4 pt-2">
             <AddExpenseForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
