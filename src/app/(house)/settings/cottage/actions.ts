@@ -30,8 +30,8 @@ export async function updateCottageName(_prevState: ActionState, formData: FormD
   if (!name) return { error: "Enter a Cottage name." };
   if (name.length > 60) return { error: "Cottage name is too long." };
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("cottages").update({ name }).eq("id", admin.cottage_id);
+  const admin_client = createAdminClient();
+  const { error } = await admin_client.from("cottages").update({ name }).eq("id", admin.cottage_id);
   if (error) return { error: "Could not update the Cottage name." };
 
   revalidatePath("/settings/cottage");

@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import {
+  approveCottage,
   updateCottagePlan,
   updateCottageSubscriptionStatus,
   suspendCottage,
@@ -73,6 +74,31 @@ export function PlanAndStatusControls({
             </SelectContent>
           </Select>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ApprovalControls({ cottageId }: { cottageId: string }) {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <Card className="border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
+      <CardHeader>
+        <CardTitle className="text-sm">Pending approval</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground">
+          This Cottage was just created and is waiting for review. Members can&apos;t sign in until it&apos;s
+          approved. The super admin will get an email once you approve it.
+        </p>
+        <Button
+          disabled={pending}
+          onClick={() => startTransition(() => approveCottage(cottageId))}
+          className="self-start"
+        >
+          {pending ? "Approving…" : "Approve Cottage"}
+        </Button>
       </CardContent>
     </Card>
   );

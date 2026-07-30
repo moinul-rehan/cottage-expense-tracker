@@ -4,6 +4,38 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email";
+
+export async function approveCottage(cottageId: string) {
+  await requirePlatformAdmin();
+  const admin = createAdminClient();
+
+  const { data: cottage } = await admin.from("cottages").select("name, status").eq("id", cottageId).single();
+  if (!cottage || cottage.status !== "pending") return;
+
+  await admin
+    .from("cottages")
+    .update({ status: "approved", approved_at: new Date().toISOString() })
+    .eq("id", cottageId);
+
+  const { data: superAdmin } = await admin
+    .from("profiles")
+    .select("email")
+    .eq("cottage_id", cottageId)
+    .eq("role", "super_admin")
+    .maybeSingle();
+
+  if (superAdmin?.email) {
+    await sendEmail({
+      to: superAdmin.email,
+      subject: `${cottage.name} is approved`,
+      html: `<p><strong>${cottage.name}</strong> has been reviewed and approved.</p><p>You and your members can now sign in and start using Cottage.</p>`,
+    });
+  }
+
+  revalidatePath(`/platform-admin/cottages/${cottageId}`);
+  revalidatePath("/platform-admin");
+}
 
 export async function updateCottagePlan(cottageId: string, plan: string) {
   await requirePlatformAdmin();

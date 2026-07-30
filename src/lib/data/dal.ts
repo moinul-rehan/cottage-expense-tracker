@@ -62,9 +62,13 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
 
   const { data: cottage } = await supabase
     .from('cottages')
-    .select('suspended_at')
+    .select('status, suspended_at')
     .eq('id', profile.cottage_id)
     .maybeSingle()
+
+  if (cottage?.status === 'pending') {
+    redirect('/pending-approval')
+  }
 
   if (cottage?.suspended_at) {
     redirect('/suspended')

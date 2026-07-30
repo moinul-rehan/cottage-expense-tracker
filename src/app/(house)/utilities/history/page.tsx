@@ -64,7 +64,7 @@ export default async function UtilityHistoryPage({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">
-            Utility Details - <span className="font-bold">{formatMonthKey(monthKey)}</span>
+            Utility Details - <span className="font-bold text-primary">{formatMonthKey(monthKey)}</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Read-only record of every utility expense and deposit. No calculations happen here.
