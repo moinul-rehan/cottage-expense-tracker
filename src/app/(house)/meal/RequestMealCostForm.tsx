@@ -39,7 +39,7 @@ export function RequestMealCostForm({ defaultDate, onSuccess }: { defaultDate: s
       </div>
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
       {state?.success && <p className="text-sm text-emerald-600">{state.success}</p>}
-      <Button type="submit" disabled={pending} className="self-start">
+      <Button type="submit" disabled={pending} size="lg" className="w-full">
         {pending ? "Submitting…" : "Request meal cost"}
       </Button>
     </form>

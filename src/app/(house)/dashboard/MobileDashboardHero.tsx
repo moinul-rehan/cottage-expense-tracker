@@ -55,7 +55,7 @@ export function MobileDashboardHero({
       </div>
 
       <div className="px-4" style={{ marginTop: `calc(${OVERLAP} * -1)` }}>
-        <div className="flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)]">
+        <div className="flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)] animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
           <SummaryGroup
             title="Utility"
             rows={[

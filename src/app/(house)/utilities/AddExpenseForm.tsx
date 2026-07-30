@@ -142,7 +142,7 @@ export function AddExpenseForm({
 
           <div className="flex flex-col gap-2 border-t border-border pt-4">
             {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-            <Button type="submit" disabled={pending} className="self-start">
+            <Button type="submit" disabled={pending} size="lg" className="w-full">
               {pending ? "Saving…" : "Add Expense"}
             </Button>
           </div>

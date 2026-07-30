@@ -92,7 +92,7 @@ export function BazaarForm({
       )}
 
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-      <Button type="submit" disabled={pending} className="self-start">
+      <Button type="submit" disabled={pending} size="lg" className="w-full">
         {pending ? "Saving…" : "Add bazaar entry"}
       </Button>
     </form>
