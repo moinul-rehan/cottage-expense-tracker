@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ListTree, FileText, Wallet, HandCoins, Receipt } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { MemberDepositForm } from "./utilities/MemberDepositForm";
 import { CottageDepositForm } from "./utilities/CottageDepositForm";
@@ -86,38 +86,38 @@ export function MobileUtilitiesSheet({
     <>
       <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="end" origin={origin} />
 
-      <Dialog open={dialog === "member-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Member Utility Deposit</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "member-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Member Utility Deposit</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <MemberDepositForm members={members} defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog open={dialog === "cottage-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cottage Deposit</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "cottage-deposit"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Cottage Deposit</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <CottageDepositForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog open={dialog === "expense"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Utility Expense</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "expense"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Utility Expense</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <AddExpenseForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

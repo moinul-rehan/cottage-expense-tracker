@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CalendarDays, Plus, Wallet, ShoppingBasket, Send } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { DailyMealForm } from "./meal/DailyMealForm";
 import { DepositForm } from "./meal/DepositForm";
@@ -104,60 +104,60 @@ export function MobileMealSheet({
     <>
       <SpeedDialMenu open={open} onClose={() => onOpenChange(false)} items={items} align="center" origin={origin} />
 
-      <Dialog open={dialog === "meal"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Meal</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "meal"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Add Meal</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <DailyMealForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog open={dialog === "deposit"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Meal Deposit</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "deposit"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Add Meal Deposit</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <DepositForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog open={dialog === "bazaar"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Meal Expense</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "bazaar"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Add Meal Expense</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <BazaarForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog open={dialog === "request"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Meal</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "request"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Request Meal</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <RequestMealForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog open={dialog === "cost-request"} onOpenChange={(v) => !v && setDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Request Meal Cost</DialogTitle>
-          </DialogHeader>
+      <Sheet open={dialog === "cost-request"} onOpenChange={(v) => !v && setDialog(null)}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Request Meal Cost</SheetTitle>
+          </SheetHeader>
           <div className="p-4 pt-2">
             <RequestMealCostForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

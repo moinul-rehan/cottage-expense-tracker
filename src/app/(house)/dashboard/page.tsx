@@ -65,34 +65,44 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
 
-  const [dues, cottageBalance, totalUtilityExpense, { data: members }, myBazaarDuty, notices, myAdjustmentsQuery, myDepositsQuery] =
-    await Promise.all([
-      getMonthlyDues(supabase, profile.cottage_id, monthKey),
-      getCottageBalance(supabase, profile.cottage_id),
-      getMonthlyExpenseTotal(supabase, monthKey),
-      supabase
-        .from("profiles")
-        .select("id, first_name, last_name, avatar_url")
-        .eq("is_active", true)
-        .order("last_name"),
-      getMyNextBazaarDuty(supabase, profile.id),
-      getNotices(supabase, profile.cottage_id),
-      supabase
-        .from("utility_adjustments")
-        .select("id, category, amount, created_at")
-        .eq("cottage_id", profile.cottage_id)
-        .eq("month_key", monthKey)
-        .eq("user_id", profile.id)
-        .order("created_at"),
-      supabase
-        .from("utility_deposits")
-        .select("id, deposit_date, amount, note")
-        .eq("cottage_id", profile.cottage_id)
-        .eq("month_key", monthKey)
-        .eq("user_id", profile.id)
-        .eq("source_type", "member")
-        .order("deposit_date", { ascending: false }),
-    ]);
+  const [
+    dues,
+    cottageBalance,
+    totalUtilityExpense,
+    { data: members },
+    myBazaarDuty,
+    notices,
+    myAdjustmentsQuery,
+    myDepositsQuery,
+    { data: cottage },
+  ] = await Promise.all([
+    getMonthlyDues(supabase, profile.cottage_id, monthKey),
+    getCottageBalance(supabase, profile.cottage_id),
+    getMonthlyExpenseTotal(supabase, monthKey),
+    supabase
+      .from("profiles")
+      .select("id, first_name, last_name, avatar_url")
+      .eq("is_active", true)
+      .order("last_name"),
+    getMyNextBazaarDuty(supabase, profile.id),
+    getNotices(supabase, profile.cottage_id),
+    supabase
+      .from("utility_adjustments")
+      .select("id, category, amount, created_at")
+      .eq("cottage_id", profile.cottage_id)
+      .eq("month_key", monthKey)
+      .eq("user_id", profile.id)
+      .order("created_at"),
+    supabase
+      .from("utility_deposits")
+      .select("id, deposit_date, amount, note")
+      .eq("cottage_id", profile.cottage_id)
+      .eq("month_key", monthKey)
+      .eq("user_id", profile.id)
+      .eq("source_type", "member")
+      .order("deposit_date", { ascending: false }),
+    supabase.from("cottages").select("name").eq("id", profile.cottage_id).single(),
+  ]);
 
   const outstandingFromMembers = Array.from(dues.values()).reduce((sum, d) => sum + Math.max(0, d.due), 0);
   const collectedThisMonth = Array.from(dues.values()).reduce((sum, d) => sum + d.paid, 0);
@@ -145,6 +155,7 @@ export default async function DashboardPage() {
       <MobileDashboardHero
         displayName={getDisplayName(profile)}
         profile={profile}
+        cottageName={cottage?.name ?? ""}
         monthLabel={formatMonthKey(monthKey)}
         utility={{ assignedCost: myAssignedCost, paid: myDue.paid, due: myDue.due }}
         meal={{
@@ -187,7 +198,8 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      <div>
+      {/* Covered on mobile by MobileDashboardHero's summary card. */}
+      <div className="hidden sm:block">
         <h2 className="mb-3 text-lg font-semibold text-foreground">Utility overview</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -267,7 +279,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div>
+      {/* Covered on mobile by MobileDashboardHero's summary card. */}
+      <div className="hidden sm:block">
         <h2 className="mb-3 text-lg font-semibold text-foreground">Meal overview</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard

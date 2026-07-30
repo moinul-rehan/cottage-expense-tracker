@@ -90,7 +90,7 @@ export function PushPermission() {
   if (dismissed || status === "granted" || status === "unsupported") return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-20 z-[55] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-card p-3 text-sm shadow-lg ring-1 ring-foreground/10 md:bottom-4">
+    <div className="fixed inset-x-4 bottom-4 z-[55] mx-auto hidden max-w-md items-center gap-3 rounded-2xl bg-card p-3 text-sm shadow-lg ring-1 ring-foreground/10 sm:flex">
       {status === "denied" ? (
         <BellOff className="size-5 shrink-0 text-muted-foreground" />
       ) : (

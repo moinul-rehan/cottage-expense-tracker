@@ -12,9 +12,12 @@ type BadgeProfile = {
   can_add_notice: boolean;
 };
 
-// Reserved space below the greeting that the summary card overlaps into --
-// tuned so the card's negative top margin pulls it up roughly to its own
-// vertical middle, keeping brand color visible behind its top half.
+// Reserved space below the greeting: PAD is the full colored band, OVERLAP
+// (< PAD) is how far the card's negative top margin pulls it up into that
+// band. The gap between them (PAD - OVERLAP) stays visible brand color
+// between the greeting and the card, while OVERLAP still reaches roughly
+// the card's own vertical middle.
+const PAD = "16rem";
 const OVERLAP = "14rem";
 
 /** Mobile-only greeting hero + floating summary card, styled after the Rento
@@ -26,30 +29,33 @@ const OVERLAP = "14rem";
 export function MobileDashboardHero({
   displayName,
   profile,
+  cottageName,
   monthLabel,
   utility,
   meal,
 }: {
   displayName: string;
   profile: BadgeProfile;
+  cottageName: string;
   monthLabel: string;
   utility: { assignedCost: number; paid: number; due: number };
   meal: { cost: number; deposit: number; balance: number };
 }) {
   return (
     <div className="-mx-4 sm:hidden">
-      <div className="bg-primary px-6 pt-6 text-center text-primary-foreground" style={{ paddingBottom: OVERLAP }}>
+      <div className="bg-primary px-6 pt-6 text-center text-primary-foreground" style={{ paddingBottom: PAD }}>
         <p className="flex items-center justify-center gap-1.5 text-2xl font-bold">
           Welcome, {displayName}
           <VerifiedBadge {...profile} />
         </p>
+        {cottageName && <p className="text-sm font-bold text-primary-foreground">{cottageName}</p>}
         <p className="text-sm text-primary-foreground/80">
           Here&apos;s where things stand for <span className="font-bold">{monthLabel}</span>.
         </p>
       </div>
 
       <div className="px-4" style={{ marginTop: `calc(${OVERLAP} * -1)` }}>
-        <div className="flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_6px_16px_rgba(28,32,43,0.08)]">
+        <div className="flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)]">
           <SummaryGroup
             title="Utility"
             rows={[
