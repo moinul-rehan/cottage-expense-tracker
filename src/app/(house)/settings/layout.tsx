@@ -29,7 +29,10 @@ export default async function SettingsLayout({
             key={link.href}
             variant="ghost"
             size="sm"
-            className="justify-start"
+            // Without shrink-0 these buttons compress to fit the row instead
+            // of the row scrolling past them -- the actual bug behind
+            // "Security" reading as a clipped "Secu" with no way to reach it.
+            className="shrink-0 justify-start"
             nativeButton={false}
             render={<Link href={link.href} />}
           >
