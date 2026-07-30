@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { NotificationTray } from "./NotificationTray";
 import { ProfileMenu } from "./ProfileMenu";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -49,7 +50,16 @@ export function PageHeader({
   const isDashboard = pathname === "/dashboard";
 
   return (
-    <header className="sticky top-0 z-20 flex flex-col gap-3 bg-background px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-6">
+    <header
+      className={cn(
+        // On mobile the dashboard header merges into MobileDashboardHero's
+        // brand-color band below it (one continuous colored region from the
+        // very top down to the summary card) -- every other page/breakpoint
+        // keeps the neutral background.
+        "sticky top-0 z-20 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:bg-background sm:px-8 sm:py-6",
+        isDashboard ? "bg-primary" : "bg-background"
+      )}
+    >
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger className="hidden shrink-0 md:inline-flex" />
 

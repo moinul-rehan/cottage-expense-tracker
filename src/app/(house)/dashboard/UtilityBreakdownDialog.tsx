@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ShareInvoiceButton } from "./ShareInvoiceButton";
 
@@ -46,11 +46,11 @@ export function UtilityBreakdownDialog({
         See details
         <ChevronRight className="size-3.5" />
       </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Your Utility Breakdown</DialogTitle>
-          </DialogHeader>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
+          <SheetHeader>
+            <SheetTitle>Your Utility Breakdown</SheetTitle>
+          </SheetHeader>
           <div className="flex flex-col gap-3 p-4 pt-2 text-sm">
             <div className="flex flex-col gap-1.5">
               {lines.map((l) => (
@@ -98,8 +98,8 @@ export function UtilityBreakdownDialog({
               />
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
