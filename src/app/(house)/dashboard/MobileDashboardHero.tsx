@@ -55,7 +55,13 @@ export function MobileDashboardHero({
       </div>
 
       <div className="px-4" style={{ marginTop: `calc(${OVERLAP} * -1)` }}>
-        <div className="flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)] animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
+        <div
+          className={cn(
+            "group flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)]",
+            "animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out",
+            "transition-transform duration-300 ease-out will-change-transform hover:scale-[1.02] active:scale-[0.98]"
+          )}
+        >
           <SummaryGroup
             title="Utility"
             rows={[
@@ -100,8 +106,11 @@ function SummaryGroup({
     <div className="flex flex-col gap-2">
       <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{title}</p>
       {rows.map((row) => (
-        <div key={row.label} className="flex h-12 items-center gap-3 rounded-[10px] bg-muted/40 px-3 text-sm">
-          <row.icon className="size-4 shrink-0 text-primary" />
+        <div
+          key={row.label}
+          className="flex h-12 items-center gap-3 rounded-[10px] bg-muted/40 px-3 text-sm transition-colors duration-200 active:bg-muted/70"
+        >
+          <row.icon className="size-4 shrink-0 text-primary transition-transform duration-300 ease-out group-hover:scale-110" />
           <span className="flex-1 text-muted-foreground">{row.label}</span>
           <span
             className={cn(
