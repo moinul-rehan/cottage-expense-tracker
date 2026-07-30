@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UtilityBreakdownDialog } from "./UtilityBreakdownDialog";
+import { MobileDashboardHero } from "./MobileDashboardHero";
 import { NoticeCard } from "../notice-board/NoticeCard";
 import { ScheduleWatcher } from "../notice-board/ScheduleWatcher";
 import { computeStatus, isEffectivelyPinned, isVisibleTo, sortForDisplay } from "@/lib/notice-types";
@@ -117,6 +118,7 @@ export default async function DashboardPage() {
     monthKey,
     members ?? []
   );
+  const myMealRow = mealRows.find((r) => r.id === profile.id);
 
   const membersById = new Map((members ?? []).map((m) => [m.id, m]));
   const pinnedNotices = sortForDisplay(
@@ -140,6 +142,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <MobileDashboardHero
+        displayName={getDisplayName(profile)}
+        profile={profile}
+        monthLabel={formatMonthKey(monthKey)}
+        utility={{ assignedCost: myAssignedCost, paid: myDue.paid, due: myDue.due }}
+        meal={{
+          cost: myMealRow?.cost ?? 0,
+          deposit: myMealRow?.deposit ?? 0,
+          balance: myMealRow?.balance ?? 0,
+        }}
+      />
       <ScheduleWatcher wakeAt={noticeWakeAt} />
       {!!shownNotices.length && (
         <div>

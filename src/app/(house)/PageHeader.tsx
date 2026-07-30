@@ -54,37 +54,19 @@ export function PageHeader({
         <SidebarTrigger className="hidden shrink-0 md:inline-flex" />
 
         {isDashboard && (
-          <div className="flex min-w-0 flex-1 flex-col gap-3 sm:hidden">
-            <div className="flex items-center justify-between gap-3">
-              <Logo size={42} />
-              <div className="flex items-center gap-2.5">
-                <ThemeToggle />
-                <NotificationTray notifications={notifications} unreadCount={unreadCount} />
-                <ProfileMenu
-                  name={displayName}
-                  avatarUrl={profile.avatar_url}
-                  initial={profile.first_name[0]?.toUpperCase() ?? "?"}
-                />
-              </div>
-            </div>
-            <div className="flex min-w-0 flex-col leading-tight">
-              <span className="flex items-center gap-1.5 truncate text-lg font-bold text-foreground">
-                Welcome, {displayName}
-                <VerifiedBadge
-                  role={profile.role}
-                  can_add_expenses={profile.can_add_expenses}
-                  can_add_bazaar={profile.can_add_bazaar}
-                  can_add_meals={profile.can_add_meals}
-                  can_add_deposit={profile.can_add_deposit}
-                  can_add_notice={profile.can_add_notice}
-                />
-              </span>
-              {cottageName && (
-                <span className="truncate text-sm font-bold text-primary">{cottageName}</span>
-              )}
-              <span className="truncate text-sm text-muted-foreground">
-                Here&apos;s where things stand for <span className="font-bold text-primary">{monthLabel}</span>.
-              </span>
+          // The greeting itself now lives in MobileDashboardHero (a hero
+          // band + floating summary card at the top of the dashboard page,
+          // Rento-styled) -- this row keeps only the logo/icon controls.
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-3 sm:hidden">
+            <Logo size={42} />
+            <div className="flex items-center gap-2.5">
+              <ThemeToggle />
+              <NotificationTray notifications={notifications} unreadCount={unreadCount} />
+              <ProfileMenu
+                name={displayName}
+                avatarUrl={profile.avatar_url}
+                initial={profile.first_name[0]?.toUpperCase() ?? "?"}
+              />
             </div>
           </div>
         )}
