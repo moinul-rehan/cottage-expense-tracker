@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { addExpense } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,20 +27,27 @@ const CATEGORY_OPTIONS = Object.entries(UTILITY_CATEGORY_LABELS).filter(([value]
 export function AddExpenseForm({
   members,
   defaultDate,
+  onSuccess,
+  hideCard = false,
 }: {
   members: Member[];
   defaultDate: string;
+  onSuccess?: () => void;
+  hideCard?: boolean;
 }) {
   const [state, action, pending] = useActionState(addExpense, undefined);
   const [category, setCategory] = useState("electricity");
   const [paymentSource, setPaymentSource] = useState<"member" | "cottage_balance" | "none">("cottage_balance");
+  const wasPending = useRef(false);
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Add Utility Expense</CardTitle>
-      </CardHeader>
-      <CardContent>
+  useEffect(() => {
+    if (wasPending.current && !pending && !state?.error) {
+      onSuccess?.();
+    }
+    wasPending.current = pending;
+  }, [pending, state, onSuccess]);
+
+  const form = (
         <form action={action} className="flex flex-col gap-5">
           <FormSection title="Expense">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -140,7 +147,16 @@ export function AddExpenseForm({
             </Button>
           </div>
         </form>
-      </CardContent>
+  );
+
+  if (hideCard) return form;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">Add Utility Expense</CardTitle>
+      </CardHeader>
+      <CardContent>{form}</CardContent>
     </Card>
   );
 }

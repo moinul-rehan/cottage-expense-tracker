@@ -53,7 +53,7 @@ export function MobileMealSheet({
       ? [
           {
             key: "add-cost",
-            label: "Add Meal Cost",
+            label: "Add Meal Expense",
             icon: ShoppingBasket,
             colorClass: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
             onClick: () => openDialog("bazaar"),
@@ -129,7 +129,7 @@ export function MobileMealSheet({
       <Dialog open={dialog === "bazaar"} onOpenChange={(v) => !v && setDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Meal Cost</DialogTitle>
+            <DialogTitle>Add Meal Expense</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <BazaarForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />

@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ListTree, FileText, Wallet, HandCoins, History } from "lucide-react";
+import { ListTree, FileText, Wallet, HandCoins, Receipt } from "lucide-react";
 import { MemberDepositForm } from "./utilities/MemberDepositForm";
 import { CottageDepositForm } from "./utilities/CottageDepositForm";
+import { AddExpenseForm } from "./utilities/AddExpenseForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -16,12 +17,14 @@ export function UtilitiesQuickAddMenu({
   members,
   defaultDate,
   isSuperAdmin,
+  canAddExpenses,
 }: {
   members: Member[];
   defaultDate: string;
   isSuperAdmin: boolean;
+  canAddExpenses: boolean;
 }) {
-  const [open, setOpen] = useState<"member-deposit" | "cottage-deposit" | null>(null);
+  const [open, setOpen] = useState<"member-deposit" | "cottage-deposit" | "expense" | null>(null);
   const { setOpenMobile } = useSidebar();
   const pathname = usePathname();
 
@@ -47,10 +50,10 @@ export function UtilitiesQuickAddMenu({
     <>
       <SidebarMenuItem>
         <SidebarMenuButton
-          render={<Link href="/utilities" onClick={() => setOpenMobile(false)} />}
+          render={<Link href="/utilities/history" onClick={() => setOpenMobile(false)} />}
           tooltip="Utility Details"
-          isActive={isActive("/utilities")}
-          className={itemClass("/utilities")}
+          isActive={isActive("/utilities/history")}
+          className={itemClass("/utilities/history")}
         >
           <ListTree />
           <span className="truncate">Utility Details</span>
@@ -85,17 +88,14 @@ export function UtilitiesQuickAddMenu({
           </SidebarMenuButton>
         </SidebarMenuItem>
       )}
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          render={<Link href="/utilities/history" onClick={() => setOpenMobile(false)} />}
-          tooltip="Utility History"
-          isActive={isActive("/utilities/history")}
-          className={itemClass("/utilities/history")}
-        >
-          <History />
-          <span className="truncate">Utility History</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      {canAddExpenses && (
+        <SidebarMenuItem>
+          <SidebarMenuButton onClick={() => go("expense")} tooltip="Utility Expense" className={itemClass()}>
+            <Receipt />
+            <span className="truncate">Utility Expense</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      )}
 
       <Dialog open={open === "member-deposit"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
@@ -115,6 +115,17 @@ export function UtilitiesQuickAddMenu({
           </DialogHeader>
           <div className="p-4 pt-2">
             <CottageDepositForm defaultDate={defaultDate} onSuccess={() => setOpen(null)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={open === "expense"} onOpenChange={(v) => !v && setOpen(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Utility Expense</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <AddExpenseForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setOpen(null)} />
           </div>
         </DialogContent>
       </Dialog>

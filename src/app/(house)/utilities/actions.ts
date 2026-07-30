@@ -8,7 +8,6 @@ import { getActiveMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 
 function revalidateUtilityPaths() {
-  revalidatePath("/utilities");
   revalidatePath("/utilities/statement");
   revalidatePath("/utilities/history");
   revalidatePath("/dashboard");
@@ -116,7 +115,7 @@ export async function addExpense(
       type: "utility_expense_credit",
       title: `Credited for ${categoryLabel}`,
       body: `${amount.toFixed(2)} reduced from your utility due - you paid this directly.`,
-      link: "/utilities",
+      link: "/utilities/history",
     });
   }
 
@@ -186,7 +185,7 @@ export async function addMemberUtilityDeposit(
     type: "utility_deposit",
     title: "Utility deposit recorded",
     body: `${amount.toFixed(2)} added toward your utility due.`,
-    link: "/utilities",
+    link: "/utilities/history",
   });
 
   revalidateUtilityPaths();

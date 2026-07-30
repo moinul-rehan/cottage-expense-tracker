@@ -1,16 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { AlertTriangle } from "lucide-react";
-import { transferOwnership, requestCottageDeletion, cancelCottageDeletion } from "./actions";
+import { transferOwnership, requestCottageDeletion, cancelCottageDeletion, updateCottageName } from "./actions";
 import { ConfirmPasswordDialog } from "@/components/ConfirmPasswordDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getDisplayName } from "@/lib/data/display-name";
 import { formatDate } from "@/lib/format-date";
 
 type Member = { id: string; first_name: string; last_name: string | null };
+
+export function CottageNameForm({ name }: { name: string }) {
+  const [state, formAction, pending] = useActionState(updateCottageName, undefined);
+  const [value, setValue] = useState(name);
+
+  return (
+    <form action={formAction} className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Input
+          name="name"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          maxLength={60}
+          className="sm:max-w-xs"
+        />
+        <Button type="submit" variant="outline" disabled={pending || !value.trim() || value.trim() === name}>
+          Save
+        </Button>
+      </div>
+      {state?.error && <p className="text-xs text-destructive">{state.error}</p>}
+      {state?.success && <p className="text-xs text-emerald-600 dark:text-emerald-400">{state.success}</p>}
+    </form>
+  );
+}
 
 export function TransferOwnershipCard({ members }: { members: Member[] }) {
   const [selectedId, setSelectedId] = useState("");

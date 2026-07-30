@@ -100,6 +100,7 @@ export function MobileBottomNav({
   canAddBazaar,
   canAddMeals,
   canAddDeposit,
+  canAddExpenses,
   isSuperAdmin,
   pendingRequestCount = 0,
 }: {
@@ -108,6 +109,7 @@ export function MobileBottomNav({
   canAddBazaar: boolean;
   canAddMeals: boolean;
   canAddDeposit: boolean;
+  canAddExpenses: boolean;
   isSuperAdmin: boolean;
   pendingRequestCount?: number;
 }) {
@@ -203,6 +205,7 @@ export function MobileBottomNav({
         members={members}
         defaultDate={defaultDate}
         isSuperAdmin={isSuperAdmin}
+        canAddExpenses={canAddExpenses}
       />
       <MobileMenuSheet
         open={activeSheet === "menu"}

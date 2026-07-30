@@ -81,9 +81,9 @@ export function MealQuickAddMenu({
       )}
       {canAddBazaar && (
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => openDialog("bazaar")} tooltip="Add Meal Cost" className={itemClass()}>
+          <SidebarMenuButton onClick={() => openDialog("bazaar")} tooltip="Add Meal Expense" className={itemClass()}>
             <ShoppingBasket />
-            Add Meal Cost
+            Add Meal Expense
           </SidebarMenuButton>
         </SidebarMenuItem>
       )}
@@ -129,7 +129,7 @@ export function MealQuickAddMenu({
       <Dialog open={open === "bazaar"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Meal Cost</DialogTitle>
+            <DialogTitle>Add Meal Expense</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <BazaarForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setOpen(null)} />

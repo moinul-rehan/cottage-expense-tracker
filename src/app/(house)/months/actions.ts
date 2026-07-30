@@ -95,7 +95,7 @@ export async function resetUtilityMonth(
     type: "utility_month_reset",
     title: "The current month's Utility ledger was reset",
     body: "All expenses, settlements and Cottage Balance transactions for this month were cleared.",
-    link: "/utilities",
+    link: "/utilities/history",
   });
 
   revalidateAll();

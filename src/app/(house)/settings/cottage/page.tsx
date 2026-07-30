@@ -2,7 +2,7 @@ import { requireSuperAdmin } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format-date";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TransferOwnershipCard, DeleteCottageCard, PendingDeletionBanner } from "./CottageProfileControls";
+import { TransferOwnershipCard, DeleteCottageCard, PendingDeletionBanner, CottageNameForm } from "./CottageProfileControls";
 
 export default async function CottageProfilePage() {
   const profile = await requireSuperAdmin();
@@ -47,9 +47,9 @@ export default async function CottageProfilePage() {
           <CardTitle className="text-sm">Overview</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
-          <div>
+          <div className="sm:col-span-2">
             <p className="text-xs text-muted-foreground">Name</p>
-            <p className="font-medium text-foreground">{cottage.name}</p>
+            <CottageNameForm name={cottage.name} />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Created</p>

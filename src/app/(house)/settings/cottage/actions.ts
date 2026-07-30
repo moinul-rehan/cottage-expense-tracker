@@ -24,6 +24,21 @@ async function reauth(password: string) {
   return { admin: admin_, error: null };
 }
 
+export async function updateCottageName(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const admin = await requireSuperAdmin();
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "Enter a Cottage name." };
+  if (name.length > 60) return { error: "Cottage name is too long." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("cottages").update({ name }).eq("id", admin.cottage_id);
+  if (error) return { error: "Could not update the Cottage name." };
+
+  revalidatePath("/settings/cottage");
+  revalidatePath("/dashboard");
+  return { success: "Cottage name updated." };
+}
+
 export async function transferOwnership(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   const password = String(formData.get("password") ?? "");
   const { admin, error: reauthError } = await reauth(password);

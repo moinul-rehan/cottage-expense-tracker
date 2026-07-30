@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ListTree, FileText, Wallet, HandCoins, History } from "lucide-react";
+import { ListTree, FileText, Wallet, HandCoins, Receipt } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { MemberDepositForm } from "./utilities/MemberDepositForm";
 import { CottageDepositForm } from "./utilities/CottageDepositForm";
+import { AddExpenseForm } from "./utilities/AddExpenseForm";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 
@@ -18,6 +19,7 @@ export function MobileUtilitiesSheet({
   members,
   defaultDate,
   isSuperAdmin,
+  canAddExpenses,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,8 +27,9 @@ export function MobileUtilitiesSheet({
   members: Member[];
   defaultDate: string;
   isSuperAdmin: boolean;
+  canAddExpenses: boolean;
 }) {
-  const [dialog, setDialog] = useState<"member-deposit" | "cottage-deposit" | null>(null);
+  const [dialog, setDialog] = useState<"member-deposit" | "cottage-deposit" | "expense" | null>(null);
 
   function openDialog(next: typeof dialog) {
     onOpenChange(false);
@@ -35,10 +38,10 @@ export function MobileUtilitiesSheet({
 
   const items: SpeedDialItem[] = [
     {
-      key: "utility-history",
+      key: "utility-details",
       href: "/utilities/history",
-      label: "Utility History",
-      icon: History,
+      label: "Utility Details",
+      icon: ListTree,
       colorClass: "bg-accent text-accent-foreground",
     },
     ...(isSuperAdmin
@@ -66,13 +69,17 @@ export function MobileUtilitiesSheet({
           },
         ]
       : []),
-    {
-      key: "utility-details",
-      href: "/utilities",
-      label: "Utility Details",
-      icon: ListTree,
-      colorClass: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-    },
+    ...(canAddExpenses
+      ? [
+          {
+            key: "utility-expense",
+            label: "Utility Expense",
+            icon: Receipt,
+            colorClass: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+            onClick: () => openDialog("expense"),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -97,6 +104,17 @@ export function MobileUtilitiesSheet({
           </DialogHeader>
           <div className="p-4 pt-2">
             <CottageDepositForm defaultDate={defaultDate} onSuccess={() => setDialog(null)} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "expense"} onOpenChange={(v) => !v && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Utility Expense</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 pt-2">
+            <AddExpenseForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setDialog(null)} />
           </div>
         </DialogContent>
       </Dialog>

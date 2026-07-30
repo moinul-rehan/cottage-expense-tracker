@@ -80,10 +80,10 @@ export function PageHeader({
                 />
               </span>
               {cottageName && (
-                <span className="truncate text-xs font-medium text-muted-foreground">{cottageName}</span>
+                <span className="truncate text-sm font-bold text-foreground">{cottageName}</span>
               )}
               <span className="truncate text-sm text-muted-foreground">
-                Here&apos;s where things stand for {monthLabel}.
+                Here&apos;s where things stand for <span className="font-bold text-foreground">{monthLabel}</span>.
               </span>
             </div>
           </div>
@@ -103,10 +103,10 @@ export function PageHeader({
               />
             </span>
             {cottageName && (
-              <span className="truncate text-xs font-medium text-muted-foreground">{cottageName}</span>
+              <span className="truncate text-sm font-bold text-foreground">{cottageName}</span>
             )}
             <span className="truncate text-sm text-muted-foreground">
-              Here&apos;s where things stand for {monthLabel}.
+              Here&apos;s where things stand for <span className="font-bold text-foreground">{monthLabel}</span>.
             </span>
           </div>
         )}

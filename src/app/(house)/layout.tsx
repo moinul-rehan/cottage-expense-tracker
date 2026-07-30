@@ -121,6 +121,7 @@ export default async function HouseLayout({
               members={members ?? []}
               defaultDate={defaultDate}
               isSuperAdmin={profile.role === "super_admin"}
+              canAddExpenses={profile.role === "super_admin" || profile.can_add_expenses}
             />
           </SidebarMenu>
 
@@ -154,6 +155,7 @@ export default async function HouseLayout({
         canAddBazaar={profile.role === "super_admin" || profile.can_add_bazaar}
         canAddMeals={profile.role === "super_admin" || profile.can_add_meals}
         canAddDeposit={profile.role === "super_admin" || profile.can_add_deposit}
+        canAddExpenses={profile.role === "super_admin" || profile.can_add_expenses}
         isSuperAdmin={profile.role === "super_admin"}
         pendingRequestCount={pendingRequestCount}
       />
