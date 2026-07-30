@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Bell, ChevronUp, ChevronDown } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
+import { createPortal } from "react-dom";
+import { Bell } from "lucide-react";
 import { markNotificationRead } from "./notifications/actions";
 import { getNotificationIcon } from "./notification-icons";
 import { LocalDateTime } from "@/components/LocalDateTime";
@@ -18,7 +18,9 @@ type Notification = {
   created_at: string;
 };
 
-const COLLAPSED_COUNT = 5;
+const COLLAPSED_PEEK_COUNT = 3;
+const DISMISS_DRAG_PX = 70;
+const TRANSITION_MS = 280;
 
 export function NotificationTray({
   notifications,
@@ -28,19 +30,9 @@ export function NotificationTray({
   unreadCount: number;
 }) {
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const [pending, startTransition] = useTransition();
-
-  const visible = expanded ? notifications : notifications.slice(0, COLLAPSED_COUNT);
 
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(v) => {
-        setOpen(v);
-        if (!v) setExpanded(false);
-      }}
-    >
+    <>
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -50,41 +42,156 @@ export function NotificationTray({
         {unreadCount > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />}
       </button>
 
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        className={cn(
-          "mx-auto w-full max-w-lg rounded-t-2xl p-0 transition-[height] duration-300",
-          expanded ? "h-[92dvh]" : "h-[58dvh]"
-        )}
+      {open && (
+        <NotificationSheetBody
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onDismiss={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+/** A real swipe-driven bottom sheet: opens by sliding up from off-screen to
+ * a "peek" height that covers the last few notifications; dragging the
+ * handle further up expands it to near-full-screen, and dragging it down
+ * (past a threshold) slides it back off-screen and dismisses - no separate
+ * close button, purely swipe up / swipe down. */
+function NotificationSheetBody({
+  notifications,
+  unreadCount,
+  onDismiss,
+}: {
+  notifications: Notification[];
+  unreadCount: number;
+  onDismiss: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  const [expandedPx, setExpandedPx] = useState(0);
+  const [peekOffsetPx, setPeekOffsetPx] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [animate, setAnimate] = useState(false);
+  const ready = useRef(false);
+
+  const dragState = useRef<{ startY: number; startTranslate: number } | null>(null);
+
+  // Measure viewport-derived snap points, then slide in from off-screen to
+  // the collapsed "peek" position.
+  useLayoutEffect(() => {
+    const expanded = Math.round(window.innerHeight * 0.92);
+    setExpandedPx(expanded);
+
+    let peekHeight = 220;
+    const list = listRef.current;
+    const lastItem = itemRefs.current.get(Math.min(COLLAPSED_PEEK_COUNT, notifications.length) - 1);
+    if (list && lastItem) {
+      const headerHeight = list.getBoundingClientRect().top - containerRef.current!.getBoundingClientRect().top;
+      const itemsHeight = lastItem.getBoundingClientRect().bottom - list.getBoundingClientRect().top;
+      peekHeight = Math.min(expanded - 40, Math.max(240, headerHeight + itemsHeight + 24));
+    }
+    const offset = expanded - peekHeight;
+    setPeekOffsetPx(offset);
+
+    setTranslateY(expanded); // fully off-screen
+    requestAnimationFrame(() => {
+      setAnimate(true);
+      requestAnimationFrame(() => {
+        setTranslateY(offset);
+        ready.current = true;
+      });
+    });
+  }, [notifications.length]);
+
+  function dismiss() {
+    setAnimate(true);
+    setTranslateY(expandedPx);
+    setTimeout(onDismiss, TRANSITION_MS);
+  }
+
+  function onHandlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!ready.current) return;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    dragState.current = { startY: e.clientY, startTranslate: translateY };
+    setAnimate(false);
+  }
+
+  function onHandlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragState.current) return;
+    const delta = e.clientY - dragState.current.startY;
+    const next = Math.min(expandedPx, Math.max(0, dragState.current.startTranslate + delta));
+    setTranslateY(next);
+  }
+
+  function onHandlePointerUp() {
+    if (!dragState.current) return;
+    const dragged = dragState.current;
+    dragState.current = null;
+    setAnimate(true);
+
+    if (translateY >= peekOffsetPx + DISMISS_DRAG_PX && translateY > dragged.startTranslate) {
+      dismiss();
+      return;
+    }
+
+    const midpoint = peekOffsetPx / 2;
+    setTranslateY(translateY <= midpoint ? 0 : peekOffsetPx);
+  }
+
+  const expanded = translateY <= peekOffsetPx / 2;
+
+  const body = (
+    <>
+      <div
+        className="fixed inset-0 z-[80] bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+        onClick={dismiss}
+        style={{ opacity: ready.current ? 1 : 0, transition: `opacity ${TRANSITION_MS}ms ease` }}
+      />
+      <div
+        ref={containerRef}
+        className="fixed inset-x-0 bottom-0 z-[80] mx-auto flex w-full max-w-lg touch-none flex-col overflow-hidden rounded-t-2xl border-t border-border bg-popover text-sm text-popover-foreground shadow-lg"
+        style={{
+          height: expandedPx || "92dvh",
+          transform: `translateY(${translateY}px)`,
+          transition: animate ? `transform ${TRANSITION_MS}ms ease` : "none",
+        }}
       >
-        <button
-          type="button"
-          onClick={() => setExpanded((e) => !e)}
-          className="flex w-full flex-col items-center gap-1.5 pt-2.5 pb-1"
-          aria-label={expanded ? "Collapse notifications" : "Expand to see all notifications"}
+        <div
+          onPointerDown={onHandlePointerDown}
+          onPointerMove={onHandlePointerMove}
+          onPointerUp={onHandlePointerUp}
+          onPointerCancel={onHandlePointerUp}
+          className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-1.5 pt-2.5 pb-1 active:cursor-grabbing"
         >
           <span className="h-1.5 w-10 rounded-full bg-border" />
-          {expanded ? (
-            <ChevronDown className="size-4 text-muted-foreground" />
-          ) : (
-            <ChevronUp className="size-4 text-muted-foreground" />
-          )}
-        </button>
+        </div>
 
-        <SheetTitle className="sr-only">Notifications</SheetTitle>
+        <h2 className="sr-only">Notifications</h2>
 
-        <div className="flex items-center justify-between px-4 py-1.5">
+        <div className="flex shrink-0 items-center justify-between px-4 py-1.5">
           <p className="text-sm font-semibold text-foreground">Notifications</p>
           {unreadCount > 0 && <span className="text-xs text-muted-foreground">{unreadCount} unread</span>}
         </div>
 
-        <div className="flex flex-1 flex-col gap-1 overflow-y-auto px-2 pb-4">
-          {visible.map((n) => {
+        <div
+          ref={listRef}
+          className={cn(
+            "flex flex-1 flex-col gap-1 px-2 pb-4 touch-pan-y",
+            expanded ? "overflow-y-auto" : "overflow-hidden"
+          )}
+        >
+          {notifications.map((n, i) => {
             const Icon = getNotificationIcon(n.type);
             return (
               <div
                 key={n.id}
+                ref={(el) => {
+                  if (el) itemRefs.current.set(i, el);
+                }}
                 className={"flex gap-2.5 rounded-lg px-2 py-2 " + (n.is_read ? "" : "bg-accent/40")}
               >
                 <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
@@ -115,17 +222,10 @@ export function NotificationTray({
           {!notifications.length && (
             <p className="px-2 py-6 text-center text-sm text-muted-foreground">No notifications yet.</p>
           )}
-          {!expanded && notifications.length > COLLAPSED_COUNT && (
-            <button
-              type="button"
-              onClick={() => setExpanded(true)}
-              className="mt-1 rounded-full py-2 text-center text-xs font-semibold text-primary hover:underline"
-            >
-              Slide up to see all {notifications.length}
-            </button>
-          )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </>
   );
+
+  return createPortal(body, document.body);
 }
