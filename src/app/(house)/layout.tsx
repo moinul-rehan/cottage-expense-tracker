@@ -141,7 +141,7 @@ export default async function HouseLayout({
           notifications={notifications}
           unreadCount={unreadCount}
         />
-        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-24 sm:px-8 sm:pb-8 xl:px-12">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-4 pb-24 sm:px-8 sm:pt-0 sm:pb-8 xl:px-12">{children}</main>
       </SidebarInset>
       <MobileBottomNav
         members={members ?? []}

@@ -46,7 +46,7 @@ function StatCard({
 }) {
   return (
     <Card className="flex-row items-center gap-4 p-5">
-      <div className={cn("flex size-[54px] shrink-0 items-center justify-center", statCardTones[tone])}>
+      <div className={cn("flex size-[54px] shrink-0 items-center justify-center rounded-xl", statCardTones[tone])}>
         <Icon className="size-6" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
@@ -177,6 +177,19 @@ export default async function DashboardPage() {
           deposit: myMealRow?.deposit ?? 0,
           balance: myMealRow?.balance ?? 0,
         }}
+        breakdown={{
+          lines: myBreakdownLines,
+          adjustmentLines: myAdjustmentLines,
+          depositLines: myDepositLines,
+          invoiceMeta: {
+            memberName: getFullName(profile) || getDisplayName(profile),
+            email: profile.email,
+            phone: profile.mobile_number,
+            address: profile.address,
+            avatarUrl: profile.avatar_url,
+            monthLabel: formatMonthKey(monthKey),
+          },
+        }}
       />
       <ScheduleWatcher wakeAt={noticeWakeAt} />
       <NoticePopup notices={popupNotices} />
@@ -200,7 +213,7 @@ export default async function DashboardPage() {
 
       {myBazaarDuty && (
         <Card className="flex-row items-center gap-4 border-none bg-accent p-5">
-          <div className="flex size-[54px] shrink-0 items-center justify-center bg-background/60 text-accent-foreground">
+          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-xl bg-background/60 text-accent-foreground">
             <ShoppingBasket className="size-6" />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
@@ -213,8 +226,7 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Covered on mobile by MobileDashboardHero's summary card. */}
-      <div className="hidden sm:block">
+      <div>
         <h2 className="mb-3 text-lg font-semibold text-foreground">Utility overview</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -248,7 +260,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div>
+      {/* Covered on mobile by MobileDashboardHero's summary card. */}
+      <div className="hidden sm:block">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-foreground">Your utility summary</h2>
           <UtilityBreakdownDialog

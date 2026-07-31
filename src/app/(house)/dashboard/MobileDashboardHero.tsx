@@ -2,6 +2,7 @@ import { Receipt, HandCoins, Wallet, UtensilsCrossed } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { UtilityBreakdownDialog, type InvoiceMeta } from "./UtilityBreakdownDialog";
 
 type BadgeProfile = {
   role: "super_admin" | "member";
@@ -11,6 +12,8 @@ type BadgeProfile = {
   can_add_deposit: boolean;
   can_add_notice: boolean;
 };
+
+type Line = { id: string; label: string; amount: number };
 
 // Reserved space below the greeting: PAD is the full colored band, OVERLAP
 // (< PAD) is how far the card's negative top margin pulls it up into that
@@ -33,6 +36,7 @@ export function MobileDashboardHero({
   monthLabel,
   utility,
   meal,
+  breakdown,
 }: {
   displayName: string;
   profile: BadgeProfile;
@@ -40,9 +44,15 @@ export function MobileDashboardHero({
   monthLabel: string;
   utility: { assignedCost: number; paid: number; due: number };
   meal: { cost: number; deposit: number; balance: number };
+  breakdown: {
+    lines: Line[];
+    adjustmentLines: { date: string; label: string; amount: number }[];
+    depositLines: { date: string; note: string | null; amount: number }[];
+    invoiceMeta: InvoiceMeta;
+  };
 }) {
   return (
-    <div className="-mx-4 sm:hidden">
+    <div className="-mx-4 -mt-4 sm:hidden">
       <div className="bg-primary px-6 pt-6 text-center text-primary-foreground" style={{ paddingBottom: PAD }}>
         <p className="flex items-center justify-center gap-1.5 text-2xl font-bold">
           Welcome, {displayName}
@@ -63,20 +73,6 @@ export function MobileDashboardHero({
           )}
         >
           <SummaryGroup
-            title="Utility"
-            rows={[
-              { icon: Receipt, label: "Assigned Cost", value: `${utility.assignedCost.toFixed(2)} tk` },
-              { icon: HandCoins, label: "Paid", value: `${utility.paid.toFixed(2)} tk` },
-              {
-                icon: Wallet,
-                label: utility.due < 0 ? "Advance Balance" : "Remaining Due",
-                value: `${Math.abs(utility.due).toFixed(2)} tk`,
-                tone: utility.due > 0 ? "negative" : "positive",
-              },
-            ]}
-          />
-          <div className="h-px bg-border" />
-          <SummaryGroup
             title="Meal"
             rows={[
               { icon: UtensilsCrossed, label: "Meal Cost", value: `${meal.cost.toFixed(2)} tk` },
@@ -89,6 +85,31 @@ export function MobileDashboardHero({
               },
             ]}
           />
+          <div className="h-px bg-border" />
+          <SummaryGroup
+            title="Utility"
+            rows={[
+              { icon: Receipt, label: "Assigned Cost", value: `${utility.assignedCost.toFixed(2)} tk` },
+              { icon: HandCoins, label: "Paid", value: `${utility.paid.toFixed(2)} tk` },
+              {
+                icon: Wallet,
+                label: utility.due < 0 ? "Advance Balance" : "Remaining Due",
+                value: `${Math.abs(utility.due).toFixed(2)} tk`,
+                tone: utility.due > 0 ? "negative" : "positive",
+              },
+            ]}
+          />
+          <div className="flex justify-end">
+            <UtilityBreakdownDialog
+              lines={breakdown.lines}
+              assignedCost={utility.assignedCost}
+              paid={utility.paid}
+              due={utility.due}
+              adjustmentLines={breakdown.adjustmentLines}
+              depositLines={breakdown.depositLines}
+              invoiceMeta={breakdown.invoiceMeta}
+            />
+          </div>
         </div>
       </div>
     </div>

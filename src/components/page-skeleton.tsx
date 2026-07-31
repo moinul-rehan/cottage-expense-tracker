@@ -18,7 +18,7 @@ export function CardGridSkeleton({
         {Array.from({ length: cards }).map((_, i) => (
           <Card key={i} className="p-5">
             <div className="flex items-center gap-4">
-              <Skeleton className="size-[54px] shrink-0" />
+              <Skeleton className="size-[54px] shrink-0 rounded-xl" />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <Skeleton className="h-3 w-2/3 rounded-full" />
                 <Skeleton className="h-5 w-1/2 rounded-full" />

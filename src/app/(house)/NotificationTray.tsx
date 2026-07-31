@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { Bell } from "@/components/animate-ui/icons/bell";
 import { markNotificationRead } from "./notifications/actions";
@@ -137,6 +137,15 @@ function NotificationSheetBody({
 
   const dragState = useRef<{ startY: number; startTranslate: number } | null>(null);
 
+  // While the sheet is open, the page behind the backdrop shouldn't scroll.
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   // Measure viewport-derived snap points, then slide in from off-screen to
   // the collapsed "peek" position.
   useLayoutEffect(() => {
@@ -172,6 +181,10 @@ function NotificationSheetBody({
 
   function onDragPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
     if (!ready.current) return;
+    // When the list is expanded and already scrolled into its content,
+    // a touch on it should scroll the list, not drag the sheet -- only
+    // take over the gesture once the list is back at its top.
+    if (expanded && (listRef.current?.scrollTop ?? 0) > 0) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     dragState.current = { startY: e.clientY, startTranslate: translateY };
     setAnimate(false);
@@ -242,6 +255,7 @@ function NotificationSheetBody({
 
         <div
           ref={listRef}
+          {...dragHandlers}
           className={cn(
             "flex flex-1 flex-col gap-1 px-2 pb-4 touch-pan-y",
             expanded ? "overflow-y-auto" : "overflow-hidden"
