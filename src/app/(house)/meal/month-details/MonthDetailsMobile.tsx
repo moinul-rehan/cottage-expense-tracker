@@ -26,8 +26,8 @@ const MOBILE_VIEWS: { value: ViewValue; label: string }[] = [
 // Reserved space below the title that the intro card overlaps into (see
 // MobileDashboardHero for the same pattern, smaller here to match the
 // shallower overlap in the Rento reference).
-const PAD = "6rem";
-const OVERLAP = "3rem";
+const PAD = "7rem";
+const OVERLAP = "3.5rem";
 
 // Every chip in the reference (date pill, icon buttons, grid cells, avatar
 // box, description/note box, total row) has a visible hairline border, not
@@ -51,7 +51,7 @@ function DateRow({ date, actions }: { date: string; actions?: React.ReactNode })
 
 function MemberAvatar({ member }: { member: MemberRef }) {
   return (
-    <div className={cn(CHIP, "flex w-20 shrink-0 flex-col items-center justify-center gap-1 px-2 py-3")}>
+    <div className={cn(CHIP, "flex w-24 shrink-0 flex-col items-center justify-center gap-1 px-2 py-3")}>
       <Avatar size="sm" className="size-10">
         <AvatarImage src={member?.avatar_url ?? undefined} alt={member ? getDisplayName(member) : ""} />
         <AvatarFallback>{member?.first_name[0]?.toUpperCase() ?? "?"}</AvatarFallback>
@@ -76,10 +76,20 @@ function EntryCard({
     <div className="flex flex-col gap-3 rounded-[20px] bg-card p-3 shadow-[0_1px_3px_rgba(28,32,43,0.04)]">
       <DateRow date={date} actions={actions} />
       {children}
-      <div className={cn(CHIP, "flex h-11 items-center justify-between px-4 text-sm")}>
-        <span className="font-medium text-primary">Total Amount</span>
-        <span className="font-semibold text-foreground">{amount.toFixed(2)} tk</span>
-      </div>
+      <TotalAmountRow amount={amount} />
+    </div>
+  );
+}
+
+// The reference splits this row into two literal halves with a vertical
+// divider between label and value, not just justify-between whitespace.
+function TotalAmountRow({ amount }: { amount: number }) {
+  return (
+    <div className={cn(CHIP, "flex h-11 items-stretch text-sm")}>
+      <span className="flex flex-1 items-center px-4 font-medium text-primary">Total Amount</span>
+      <span className="flex flex-1 items-center justify-end border-l border-border px-4 font-semibold text-foreground">
+        {amount.toFixed(2)} tk
+      </span>
     </div>
   );
 }
@@ -114,7 +124,7 @@ export function MonthDetailsMobile({
     <div className="-mx-4 sm:hidden">
       <div className="bg-primary px-6 pt-6 text-primary-foreground" style={{ paddingBottom: PAD }}>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-[1.75rem] leading-tight font-bold">Monthly Details</h1>
+          <h1 className="text-3xl leading-tight font-bold">Monthly Details</h1>
           <span className="rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-semibold">
             {monthLabel}
           </span>
@@ -122,7 +132,7 @@ export function MonthDetailsMobile({
       </div>
 
       <div className="px-4" style={{ marginTop: `calc(${OVERLAP} * -1)` }}>
-        <div className="flex flex-col gap-4 rounded-[24px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)]">
+        <div className="flex flex-col gap-4 rounded-[32px] bg-card p-5 shadow-[0px_2px_8px_rgba(28,32,43,0.05)]">
           <p className="text-sm text-muted-foreground">
             Full meal, deposit and cost records for every member in the active month.
           </p>
