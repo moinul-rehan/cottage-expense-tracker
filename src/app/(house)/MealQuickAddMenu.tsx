@@ -107,7 +107,7 @@ export function MealQuickAddMenu({
       <Dialog open={open === "meal"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Meal</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Plus className="size-4" />Add Meal</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <DailyMealForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setOpen(null)} />
@@ -118,7 +118,7 @@ export function MealQuickAddMenu({
       <Dialog open={open === "deposit"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Meal Deposit</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Wallet className="size-4" />Add Meal Deposit</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <DepositForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setOpen(null)} />
@@ -129,7 +129,7 @@ export function MealQuickAddMenu({
       <Dialog open={open === "bazaar"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Meal Expense</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><ShoppingBasket className="size-4" />Add Meal Expense</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <BazaarForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setOpen(null)} />
@@ -140,7 +140,7 @@ export function MealQuickAddMenu({
       <Dialog open={open === "request"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request Meal</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Send className="size-4" />Request Meal</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <RequestMealForm defaultDate={defaultDate} onSuccess={() => setOpen(null)} />
@@ -151,7 +151,7 @@ export function MealQuickAddMenu({
       <Dialog open={open === "cost-request"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request Meal Cost</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Send className="size-4" />Request Meal Cost</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <RequestMealCostForm defaultDate={defaultDate} onSuccess={() => setOpen(null)} />

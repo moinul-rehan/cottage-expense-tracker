@@ -1,13 +1,12 @@
 "use client";
 
-import { useTransition } from "react";
-import Link from "next/link";
+import { useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { Bell } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
 import { markNotificationRead } from "./notifications/actions";
 import { getNotificationIcon } from "./notification-icons";
 import { LocalDateTime } from "@/components/LocalDateTime";
+import { cn } from "@/lib/utils";
 
 type Notification = {
   id: string;
@@ -19,6 +18,10 @@ type Notification = {
   created_at: string;
 };
 
+const COLLAPSED_PEEK_COUNT = 3;
+const DISMISS_DRAG_PX = 70;
+const TRANSITION_MS = 280;
+
 export function NotificationTray({
   notifications,
   unreadCount,
@@ -26,37 +29,170 @@ export function NotificationTray({
   notifications: Notification[];
   unreadCount: number;
 }) {
-  const [pending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <button
-            type="button"
-            className="relative flex size-[42px] items-center justify-center rounded-full border border-border bg-card"
-          />
-        }
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="relative flex size-[42px] items-center justify-center rounded-full border border-border bg-card"
       >
         <Bell className="size-5 text-foreground" />
-        {unreadCount > 0 && (
-          <span className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />
-        )}
-      </PopoverTrigger>
-      <PopoverContent className="p-2">
-        <div className="flex items-center justify-between px-2 py-1.5">
+        {unreadCount > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />}
+      </button>
+
+      {open && (
+        <NotificationSheetBody
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onDismiss={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+/** A real swipe-driven bottom sheet: opens by sliding up from off-screen to
+ * a "peek" height that covers the last few notifications; dragging the
+ * handle further up expands it to near-full-screen, and dragging it down
+ * (past a threshold) slides it back off-screen and dismisses - no separate
+ * close button, purely swipe up / swipe down. */
+function NotificationSheetBody({
+  notifications,
+  unreadCount,
+  onDismiss,
+}: {
+  notifications: Notification[];
+  unreadCount: number;
+  onDismiss: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  const [expandedPx, setExpandedPx] = useState(0);
+  const [peekOffsetPx, setPeekOffsetPx] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [animate, setAnimate] = useState(false);
+  const ready = useRef(false);
+
+  const dragState = useRef<{ startY: number; startTranslate: number } | null>(null);
+
+  // Measure viewport-derived snap points, then slide in from off-screen to
+  // the collapsed "peek" position.
+  useLayoutEffect(() => {
+    const expanded = Math.round(window.innerHeight * 0.92);
+    setExpandedPx(expanded);
+
+    let peekHeight = 220;
+    const list = listRef.current;
+    const lastItem = itemRefs.current.get(Math.min(COLLAPSED_PEEK_COUNT, notifications.length) - 1);
+    if (list && lastItem) {
+      const headerHeight = list.getBoundingClientRect().top - containerRef.current!.getBoundingClientRect().top;
+      const itemsHeight = lastItem.getBoundingClientRect().bottom - list.getBoundingClientRect().top;
+      peekHeight = Math.min(expanded - 40, Math.max(240, headerHeight + itemsHeight + 24));
+    }
+    const offset = expanded - peekHeight;
+    setPeekOffsetPx(offset);
+
+    setTranslateY(expanded); // fully off-screen
+    requestAnimationFrame(() => {
+      setAnimate(true);
+      requestAnimationFrame(() => {
+        setTranslateY(offset);
+        ready.current = true;
+      });
+    });
+  }, [notifications.length]);
+
+  function dismiss() {
+    setAnimate(true);
+    setTranslateY(expandedPx);
+    setTimeout(onDismiss, TRANSITION_MS);
+  }
+
+  function onHandlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!ready.current) return;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    dragState.current = { startY: e.clientY, startTranslate: translateY };
+    setAnimate(false);
+  }
+
+  function onHandlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragState.current) return;
+    const delta = e.clientY - dragState.current.startY;
+    const next = Math.min(expandedPx, Math.max(0, dragState.current.startTranslate + delta));
+    setTranslateY(next);
+  }
+
+  function onHandlePointerUp() {
+    if (!dragState.current) return;
+    const dragged = dragState.current;
+    dragState.current = null;
+    setAnimate(true);
+
+    if (translateY >= peekOffsetPx + DISMISS_DRAG_PX && translateY > dragged.startTranslate) {
+      dismiss();
+      return;
+    }
+
+    const midpoint = peekOffsetPx / 2;
+    setTranslateY(translateY <= midpoint ? 0 : peekOffsetPx);
+  }
+
+  const expanded = translateY <= peekOffsetPx / 2;
+
+  const body = (
+    <>
+      <div
+        className="fixed inset-0 z-[80] bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+        onClick={dismiss}
+        style={{ opacity: ready.current ? 1 : 0, transition: `opacity ${TRANSITION_MS}ms ease` }}
+      />
+      <div
+        ref={containerRef}
+        className="fixed inset-x-0 bottom-0 z-[80] mx-auto flex w-full max-w-lg touch-none flex-col overflow-hidden rounded-t-2xl border-t border-border bg-popover text-sm text-popover-foreground shadow-lg"
+        style={{
+          height: expandedPx || "92dvh",
+          transform: `translateY(${translateY}px)`,
+          transition: animate ? `transform ${TRANSITION_MS}ms ease` : "none",
+        }}
+      >
+        <div
+          onPointerDown={onHandlePointerDown}
+          onPointerMove={onHandlePointerMove}
+          onPointerUp={onHandlePointerUp}
+          onPointerCancel={onHandlePointerUp}
+          className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-1.5 pt-2.5 pb-1 active:cursor-grabbing"
+        >
+          <span className="h-1.5 w-10 rounded-full bg-border" />
+        </div>
+
+        <h2 className="sr-only">Notifications</h2>
+
+        <div className="flex shrink-0 items-center justify-between px-4 py-1.5">
           <p className="text-sm font-semibold text-foreground">Notifications</p>
           {unreadCount > 0 && <span className="text-xs text-muted-foreground">{unreadCount} unread</span>}
         </div>
-        <div className="flex max-h-80 flex-col gap-1 overflow-y-auto">
-          {notifications.map((n) => {
+
+        <div
+          ref={listRef}
+          className={cn(
+            "flex flex-1 flex-col gap-1 px-2 pb-4 touch-pan-y",
+            expanded ? "overflow-y-auto" : "overflow-hidden"
+          )}
+        >
+          {notifications.map((n, i) => {
             const Icon = getNotificationIcon(n.type);
             return (
               <div
                 key={n.id}
-                className={
-                  "flex gap-2.5 rounded-lg px-2 py-2 " + (n.is_read ? "" : "bg-accent/40")
-                }
+                ref={(el) => {
+                  if (el) itemRefs.current.set(i, el);
+                }}
+                className={"flex gap-2.5 rounded-lg px-2 py-2 " + (n.is_read ? "" : "bg-accent/40")}
               >
                 <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
                   <Icon className="size-3.5" />
@@ -87,16 +223,9 @@ export function NotificationTray({
             <p className="px-2 py-6 text-center text-sm text-muted-foreground">No notifications yet.</p>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          nativeButton={false}
-          render={<Link href="/notifications" />}
-          className="mt-1 w-full justify-center rounded-full"
-        >
-          View all
-        </Button>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </>
   );
+
+  return createPortal(body, document.body);
 }

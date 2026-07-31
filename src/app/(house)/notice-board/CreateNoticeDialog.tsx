@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreateNoticeForm } from "./CreateNoticeForm";
@@ -36,7 +36,7 @@ export function CreateNoticeDialog({
       >
         <DialogContent className="max-h-[85vh] max-w-xl overflow-hidden">
           <DialogHeader className="pb-3">
-            <DialogTitle>Create notice</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Pin className="size-4" />Create notice</DialogTitle>
           </DialogHeader>
           <CreateNoticeForm
             key={formKey}

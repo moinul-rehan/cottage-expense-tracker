@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -105,7 +105,7 @@ export function UtilityBreakdownDialog({
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-[24px]">
             <SheetHeader>
-              <SheetTitle>Your Utility Breakdown</SheetTitle>
+              <SheetTitle className="flex items-center gap-2"><Zap className="size-4" />Your Utility Breakdown</SheetTitle>
             </SheetHeader>
             {body}
           </SheetContent>
@@ -114,7 +114,7 @@ export function UtilityBreakdownDialog({
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Your Utility Breakdown</DialogTitle>
+              <DialogTitle className="flex items-center gap-2"><Zap className="size-4" />Your Utility Breakdown</DialogTitle>
             </DialogHeader>
             {body}
           </DialogContent>

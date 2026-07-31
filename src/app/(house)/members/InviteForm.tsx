@@ -42,7 +42,7 @@ export function InviteForm() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Invite a Cottage member</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><UserPlus className="size-4" />Invite a Cottage member</DialogTitle>
           </DialogHeader>
           <form action={action} className="flex flex-col gap-4 p-4 pt-2">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

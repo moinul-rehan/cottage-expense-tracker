@@ -100,7 +100,7 @@ export function UtilitiesQuickAddMenu({
       <Dialog open={open === "member-deposit"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Member Utility Deposit</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Wallet className="size-4" />Member Utility Deposit</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <MemberDepositForm members={members} defaultDate={defaultDate} onSuccess={() => setOpen(null)} />
@@ -111,7 +111,7 @@ export function UtilitiesQuickAddMenu({
       <Dialog open={open === "cottage-deposit"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cottage Deposit</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><HandCoins className="size-4" />Cottage Deposit</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <CottageDepositForm defaultDate={defaultDate} onSuccess={() => setOpen(null)} />
@@ -122,7 +122,7 @@ export function UtilitiesQuickAddMenu({
       <Dialog open={open === "expense"} onOpenChange={(v) => !v && setOpen(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Utility Expense</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Receipt className="size-4" />Utility Expense</DialogTitle>
           </DialogHeader>
           <div className="p-4 pt-2">
             <AddExpenseForm members={members} defaultDate={defaultDate} hideCard onSuccess={() => setOpen(null)} />

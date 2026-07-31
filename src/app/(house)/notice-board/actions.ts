@@ -14,6 +14,18 @@ import {
   type PinDuration,
 } from "@/lib/notice-types";
 
+/** Marks the big attention-grabbing dashboard popup for this notice as seen by the current member - never shows again for them. */
+export async function dismissNotice(noticeId: string) {
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+
+  await supabase
+    .from("notice_dismissals")
+    .upsert({ notice_id: noticeId, user_id: profile.id }, { onConflict: "notice_id,user_id" });
+
+  revalidatePath("/dashboard");
+}
+
 export type CreateNoticeState = { error?: string; success?: boolean } | undefined;
 
 const NOTICE_TYPES = Object.keys(NOTICE_TYPE_META) as NoticeType[];

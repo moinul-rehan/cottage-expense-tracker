@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, ShoppingBasket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getDisplayName } from "@/lib/data/display-name";
@@ -30,7 +30,7 @@ export function ViewBazaarDialog({
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Meal cost details</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><ShoppingBasket className="size-4" />Meal cost details</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 p-4 pt-2 text-sm">
           <div className="flex justify-between gap-4">

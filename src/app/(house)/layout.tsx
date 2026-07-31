@@ -49,7 +49,7 @@ export default async function HouseLayout({
   const supabase = await createClient();
   const [unreadCount, notifications, { data: members }, activeMonthKey, { data: cottage }] = await Promise.all([
     getUnreadCount(supabase, profile.id),
-    getNotifications(supabase, profile.id, 6),
+    getNotifications(supabase, profile.id, 30),
     supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true).order("last_name"),
     getActiveMonthKey(supabase, profile.cottage_id),
     supabase.from("cottages").select("name").eq("id", profile.cottage_id).single(),
