@@ -11,7 +11,11 @@ import { setActiveMonth } from "./actions";
 
 export function SetActiveMonthCard({ currentMonthKey }: { currentMonthKey: string }) {
   const [monthKey, setMonthKey] = useState(currentMonthKey);
-  const maxMonth = new Date().toISOString().slice(0, 7);
+  // Local calendar month, not UTC - toISOString() would show last month as
+  // still disabled for any timezone ahead of UTC (e.g. Bangladesh, UTC+6)
+  // during the first hours of a new month.
+  const now = new Date();
+  const maxMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const isValid = /^\d{4}-\d{2}$/.test(monthKey) && monthKey <= maxMonth;
 
   return (
