@@ -16,9 +16,9 @@ export function CardGridSkeleton({
       </div>
       <div className={`grid grid-cols-1 gap-4 ${cols}`}>
         {Array.from({ length: cards }).map((_, i) => (
-          <Card key={i} className="rounded-2xl p-5">
+          <Card key={i} className="p-5">
             <div className="flex items-center gap-4">
-              <Skeleton className="size-[54px] shrink-0 rounded-2xl" />
+              <Skeleton className="size-[54px] shrink-0" />
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <Skeleton className="h-3 w-2/3 rounded-full" />
                 <Skeleton className="h-5 w-1/2 rounded-full" />
@@ -38,7 +38,7 @@ export function FormSkeleton() {
         <Skeleton className="h-7 w-48 rounded-full" />
         <Skeleton className="h-4 w-72 rounded-full" />
       </div>
-      <Card className="flex max-w-lg flex-col gap-4 rounded-2xl p-5">
+      <Card className="flex max-w-lg flex-col gap-4 p-5">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex flex-col gap-2">
             <Skeleton className="h-3 w-24 rounded-full" />
@@ -58,7 +58,7 @@ export function TableSkeleton({ rows = 6 }: { rows?: number }) {
         <Skeleton className="h-7 w-48 rounded-full" />
         <Skeleton className="h-4 w-72 rounded-full" />
       </div>
-      <Card className="gap-0 rounded-2xl p-0">
+      <Card className="gap-0 p-0">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="flex items-center gap-4 border-b border-border px-5 py-4 last:border-b-0">
             <Skeleton className="size-10 shrink-0 rounded-full" />

@@ -45,8 +45,8 @@ function StatCard({
   paid?: boolean;
 }) {
   return (
-    <Card className="flex-row items-center gap-4 rounded-2xl p-5">
-      <div className={cn("flex size-[54px] shrink-0 items-center justify-center rounded-2xl", statCardTones[tone])}>
+    <Card className="flex-row items-center gap-4 p-5">
+      <div className={cn("flex size-[54px] shrink-0 items-center justify-center", statCardTones[tone])}>
         <Icon className="size-6" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
@@ -199,8 +199,8 @@ export default async function DashboardPage() {
       )}
 
       {myBazaarDuty && (
-        <Card className="flex-row items-center gap-4 rounded-2xl border-none bg-accent p-5">
-          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl bg-background/60 text-accent-foreground">
+        <Card className="flex-row items-center gap-4 border-none bg-accent p-5">
+          <div className="flex size-[54px] shrink-0 items-center justify-center bg-background/60 text-accent-foreground">
             <ShoppingBasket className="size-6" />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
@@ -324,7 +324,7 @@ export default async function DashboardPage() {
         <h2 className="mb-3 text-lg font-semibold text-foreground">Member meal summary</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {mealRows.map((r) => (
-            <Card key={r.id} className="rounded-2xl p-5">
+            <Card key={r.id} className="p-5">
               <CardHeader className="px-0 pt-0 pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
                   <Avatar size="sm">
@@ -362,7 +362,7 @@ export default async function DashboardPage() {
             </Card>
           ))}
           {!mealRows.length && (
-            <Card className="rounded-2xl p-4 text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
+            <Card className="p-4 text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
               No meal data yet.
             </Card>
           )}

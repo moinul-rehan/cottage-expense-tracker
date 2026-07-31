@@ -32,7 +32,7 @@ export default async function ContactsPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {contacts?.map((c) => (
-          <Card key={c.id} className="flex flex-col gap-3 rounded-2xl p-5">
+          <Card key={c.id} className="flex flex-col gap-3 p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-1.5">

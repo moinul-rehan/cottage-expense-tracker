@@ -41,7 +41,7 @@ export default async function RentPage() {
         const amounts = Object.fromEntries(rows.map((row) => [row.user_id, row.amount]));
 
         return (
-          <Card key={category} className="rounded-2xl">
+          <Card key={category}>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm">{categoryLabel}</CardTitle>
               <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export default async function RentPage() {
       })}
 
       {!defaultCosts.size && (
-        <Card className="rounded-2xl">
+        <Card>
           <CardContent className="py-6 text-center text-sm text-muted-foreground">
             No default costs set yet. Click &quot;Add Default Cost&quot; to get started.
           </CardContent>

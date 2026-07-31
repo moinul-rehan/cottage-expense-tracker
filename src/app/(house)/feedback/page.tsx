@@ -37,7 +37,7 @@ export default async function FeedbackPage() {
           {(feedback ?? []).map((f) => {
             const author = membersById.get(f.user_id);
             return (
-              <Card key={f.id} className="rounded-2xl p-4">
+              <Card key={f.id} className="p-4">
                 <CardContent className="flex flex-col gap-2 p-0">
                   <div className="flex items-center gap-2.5">
                     <Avatar size="sm">
@@ -67,7 +67,7 @@ export default async function FeedbackPage() {
             );
           })}
           {!feedback?.length && (
-            <Card className="rounded-2xl p-4 text-sm text-muted-foreground">No feedback submitted yet.</Card>
+            <Card className="p-4 text-sm text-muted-foreground">No feedback submitted yet.</Card>
           )}
         </div>
       </div>

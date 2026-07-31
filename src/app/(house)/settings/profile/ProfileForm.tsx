@@ -66,7 +66,7 @@ export function ProfileForm({ profile }: { profile: ProfileInfo }) {
   }
 
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <CardHeader>
         <CardTitle className="text-sm">Profile</CardTitle>
       </CardHeader>

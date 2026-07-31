@@ -78,7 +78,7 @@ export default async function UtilityStatementPage() {
             const isPaid = assignedCost > 0 && remaining <= 0;
 
             return (
-              <Card key={m.id} className="rounded-2xl p-5">
+              <Card key={m.id} className="p-5">
                 <CardHeader className="px-0 pt-0 pb-2">
                   <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
                     {getDisplayName(m)}

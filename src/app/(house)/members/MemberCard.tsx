@@ -75,7 +75,7 @@ export function MemberCard({
   const isSelf = member.role === "super_admin";
 
   return (
-    <Card className="flex flex-col gap-4 rounded-2xl p-5">
+    <Card className="flex flex-col gap-4 p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <Avatar size="lg">
