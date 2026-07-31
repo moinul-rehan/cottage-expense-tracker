@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BellOff, Bell, X } from "lucide-react";
+import { BellOff } from "@/components/animate-ui/icons/bell-off";
+import { Bell } from "@/components/animate-ui/icons/bell";
+import { X } from "@/components/animate-ui/icons/x";
 import { saveSubscription } from "@/app/(house)/push-actions";
 
 function urlBase64ToUint8Array(base64String: string) {

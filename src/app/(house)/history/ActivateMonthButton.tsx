@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCw } from "lucide-react";
+import { RotateCw } from "@/components/animate-ui/icons/rotate-cw";
 import { ConfirmPasswordDialog } from "@/components/ConfirmPasswordDialog";
 import { Button } from "@/components/ui/button";
 import { formatMonthKey } from "@/lib/format-month";

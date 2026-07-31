@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, Plus, Wallet, ShoppingBasket, Send } from "lucide-react";
+import { CalendarDays, Wallet, ShoppingBasket } from "lucide-react";
+import { Plus } from "@/components/animate-ui/icons/plus";
+import { Send } from "@/components/animate-ui/icons/send";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 import { DailyMealForm } from "./meal/DailyMealForm";

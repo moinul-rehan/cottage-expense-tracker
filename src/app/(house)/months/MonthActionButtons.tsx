@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { RotateCcw } from "@/components/animate-ui/icons/rotate-ccw";
 import { ConfirmPasswordDialog } from "@/components/ConfirmPasswordDialog";
 import { Button } from "@/components/ui/button";
 import { resetMealMonth, resetUtilityMonth } from "./actions";

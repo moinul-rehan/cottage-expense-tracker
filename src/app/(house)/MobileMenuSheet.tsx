@@ -1,6 +1,10 @@
 "use client";
 
-import { Users, CalendarRange, Contact, Pin, Settings as SettingsIcon, MessageSquareWarning } from "lucide-react";
+import { CalendarRange, Contact } from "lucide-react";
+import { Users } from "@/components/animate-ui/icons/users";
+import { Pin } from "@/components/animate-ui/icons/pin";
+import { Settings as SettingsIcon } from "@/components/animate-ui/icons/settings";
+import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
 import { SpeedDialMenu, type SpeedDialItem, type SpeedDialOrigin } from "./SpeedDialMenu";
 
 /** Bottom-nav "Menu" destination on mobile - everything that doesn't get

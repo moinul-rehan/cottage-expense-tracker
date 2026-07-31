@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Wallet, ShoppingBasket, CalendarDays, Send } from "lucide-react";
+import { Wallet, ShoppingBasket, CalendarDays } from "lucide-react";
+import { Plus } from "@/components/animate-ui/icons/plus";
+import { Send } from "@/components/animate-ui/icons/send";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { BazaarForm } from "./meal/BazaarForm";

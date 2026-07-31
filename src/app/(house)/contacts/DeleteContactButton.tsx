@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { X } from "lucide-react";
+import { X } from "@/components/animate-ui/icons/x";
 import { deleteContact } from "./actions";
 
 export function DeleteContactButton({ id }: { id: string }) {

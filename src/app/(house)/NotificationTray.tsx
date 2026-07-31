@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { Bell } from "lucide-react";
+import { Bell } from "@/components/animate-ui/icons/bell";
 import { markNotificationRead } from "./notifications/actions";
 import { getNotificationIcon } from "./notification-icons";
 import { LocalDateTime } from "@/components/LocalDateTime";

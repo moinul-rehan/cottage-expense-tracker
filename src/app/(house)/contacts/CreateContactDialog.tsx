@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Plus, Contact } from "lucide-react";
+import { Contact } from "lucide-react";
+import { Plus } from "@/components/animate-ui/icons/plus";
 import { addContact } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

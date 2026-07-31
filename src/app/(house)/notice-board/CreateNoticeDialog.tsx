@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pin } from "lucide-react";
+import { Plus } from "@/components/animate-ui/icons/plus";
+import { Pin } from "@/components/animate-ui/icons/pin";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreateNoticeForm } from "./CreateNoticeForm";

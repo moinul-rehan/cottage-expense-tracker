@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChartPie, Users, MessageSquareWarning, ArrowLeft } from "lucide-react";
+import { ChartPie } from "lucide-react";
+import { Users } from "@/components/animate-ui/icons/users";
+import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
+import { ArrowLeft } from "@/components/animate-ui/icons/arrow-left";
 import { cn } from "@/lib/utils";
+import type { IconComponent } from "@/lib/icon-type";
 
 // SnowUI's own icon set is Phosphor; the project already has lucide-react
 // installed app-wide (not Phosphor), so this uses the closest lucide glyph
 // per item rather than adding a second icon-library dependency.
 
-type NavLink = { href: string; label: string; icon: typeof ChartPie; matchPrefix?: string };
+type NavLink = { href: string; label: string; icon: IconComponent; matchPrefix?: string };
 
 const NAV_SECTIONS: { label: string; links: NavLink[] }[] = [
   {

@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
-import { Download } from "lucide-react";
+import { Download } from "@/components/animate-ui/icons/download";
 import { UtilityDetailsMobile } from "./UtilityDetailsMobile";
 
 const TABS = [

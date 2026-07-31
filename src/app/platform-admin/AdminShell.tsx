@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Inter } from "next/font/google";
-import { Search } from "lucide-react";
+import { Search } from "@/components/animate-ui/icons/search";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/ThemeToggle";

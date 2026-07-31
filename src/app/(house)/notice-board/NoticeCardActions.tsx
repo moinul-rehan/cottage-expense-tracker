@@ -1,7 +1,10 @@
 "use client";
 
 import { useTransition } from "react";
-import { Pin, PinOff, Archive, Send } from "lucide-react";
+import { Archive } from "lucide-react";
+import { Pin } from "@/components/animate-ui/icons/pin";
+import { PinOff } from "@/components/animate-ui/icons/pin-off";
+import { Send } from "@/components/animate-ui/icons/send";
 import { setNoticePinned, archiveNotice, publishNoticeNow } from "./actions";
 import { Button } from "@/components/ui/button";
 

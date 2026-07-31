@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { X } from "lucide-react";
+import { X } from "@/components/animate-ui/icons/x";
 import { cancelMealRequest } from "./request-actions";
 
 export function CancelMealRequestButton({ requestId }: { requestId: string }) {

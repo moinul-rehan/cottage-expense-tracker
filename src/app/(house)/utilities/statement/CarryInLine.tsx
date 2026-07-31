@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Lock, Pencil, Check, X } from "lucide-react";
+import { Pencil } from "lucide-react";
+import { Lock } from "@/components/animate-ui/icons/lock";
+import { Check } from "@/components/animate-ui/icons/check";
+import { X } from "@/components/animate-ui/icons/x";
 import { updateCarryIn, deleteCarryIn } from "./actions";
 import { cn } from "@/lib/utils";
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { Check, X } from "lucide-react";
+import { Check } from "@/components/animate-ui/icons/check";
+import { X } from "@/components/animate-ui/icons/x";
 import { Button } from "@/components/ui/button";
 import { approveMealCostRequest, rejectMealCostRequest } from "./actions";
 

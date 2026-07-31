@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { ImagePlus, X } from "lucide-react";
+import { ImagePlus } from "lucide-react";
+import { X } from "@/components/animate-ui/icons/x";
 import { submitFeedback } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";

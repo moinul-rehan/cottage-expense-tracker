@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { Clock } from "lucide-react";
+import { Clock } from "@/components/animate-ui/icons/clock";
 
 function subscribe(onChange: () => void) {
   const id = setInterval(onChange, 1000);

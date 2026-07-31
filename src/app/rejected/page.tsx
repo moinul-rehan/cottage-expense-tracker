@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { CircleX } from "lucide-react";
+import { CircleX } from "@/components/animate-ui/icons/circle-x";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logout } from "@/lib/auth-actions";

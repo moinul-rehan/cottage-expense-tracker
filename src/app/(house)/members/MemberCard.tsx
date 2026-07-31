@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useActionState } from "react";
-import { ChevronDown, ShoppingBasket, X, Mail, Phone, MapPin, Home, UserX } from "lucide-react";
+import { ShoppingBasket, Mail, Phone, Home, UserX } from "lucide-react";
+import { ChevronDown } from "@/components/animate-ui/icons/chevron-down";
+import { X } from "@/components/animate-ui/icons/x";
+import { MapPin } from "@/components/animate-ui/icons/map-pin";
 import {
   setMemberActive,
   setCanAddExpenses,

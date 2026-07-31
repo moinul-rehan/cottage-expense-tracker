@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
-import { Plus, Banknote } from "lucide-react";
+import { Banknote } from "lucide-react";
+import { Plus } from "@/components/animate-ui/icons/plus";
 import { saveDefaultCost } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

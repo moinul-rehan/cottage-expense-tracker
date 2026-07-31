@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "@/components/animate-ui/icons/trash-2";
 import { ConfirmPasswordDialog } from "@/components/ConfirmPasswordDialog";
 import { Button } from "@/components/ui/button";
 import { deleteDefaultCostCategory } from "./actions";

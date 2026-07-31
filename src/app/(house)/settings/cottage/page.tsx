@@ -38,7 +38,7 @@ export default async function CottageProfilePage() {
         <p className="mt-1 text-sm text-muted-foreground">Manage this Cottage&apos;s identity, ownership, and lifecycle.</p>
       </div>
 
-      <Card>
+      <Card className="rounded-2xl">
         <CardHeader>
           <CardTitle className="text-sm">Overview</CardTitle>
         </CardHeader>

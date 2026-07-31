@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Registry-installed component code (shadcn/Animate UI CLI) - vendored,
+    // not hand-maintained, so upstream lint nits aren't ours to fix here.
+    "src/components/animate-ui/**",
+    "src/hooks/use-is-in-view.tsx",
   ]),
 ]);
 

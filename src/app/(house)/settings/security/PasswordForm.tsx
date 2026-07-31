@@ -18,7 +18,7 @@ function SetInitialPasswordForm() {
   const [state, action, pending] = useActionState(setInitialPassword, undefined);
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm">Set a password</CardTitle>
       </CardHeader>
@@ -53,7 +53,7 @@ function ChangePasswordForm() {
   const [state, action, pending] = useActionState(changePassword, undefined);
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm">Change password</CardTitle>
       </CardHeader>

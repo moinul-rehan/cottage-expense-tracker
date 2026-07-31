@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
-import { Download } from "lucide-react";
+import { Download } from "@/components/animate-ui/icons/download";
 import { EditMealRowDialog } from "./EditMealRowDialog";
 import { EditDepositDialog } from "./EditDepositDialog";
 import { EditBazaarDialog } from "./EditBazaarDialog";

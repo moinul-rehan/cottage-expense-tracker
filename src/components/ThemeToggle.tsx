@@ -1,7 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon } from "@/components/animate-ui/icons/moon";
+import { Sun } from "@/components/animate-ui/icons/sun";
 
 const STORAGE_KEY = "theme";
 type Theme = "light" | "dark";

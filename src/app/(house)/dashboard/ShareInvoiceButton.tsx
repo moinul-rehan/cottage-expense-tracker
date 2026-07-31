@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Download } from "lucide-react";
+import { Share2 } from "lucide-react";
+import { Download } from "@/components/animate-ui/icons/download";
 import { Button } from "@/components/ui/button";
 import { generateInvoicePng, type InvoiceData } from "@/lib/generate-invoice-image";
 

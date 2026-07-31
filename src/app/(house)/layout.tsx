@@ -1,15 +1,9 @@
-import {
-  LayoutDashboard,
-  UtensilsCrossed,
-  Zap,
-  Pin,
-  Inbox,
-  Users,
-  CalendarRange,
-  Contact,
-  Settings as SettingsIcon,
-  MessageSquareWarning,
-} from "lucide-react";
+import { UtensilsCrossed, Zap, Inbox, CalendarRange, Contact } from "lucide-react";
+import { LayoutDashboard } from "@/components/animate-ui/icons/layout-dashboard";
+import { Pin } from "@/components/animate-ui/icons/pin";
+import { Users } from "@/components/animate-ui/icons/users";
+import { Settings as SettingsIcon } from "@/components/animate-ui/icons/settings";
+import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount, getNotifications } from "@/lib/data/notifications";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { X } from "lucide-react";
+import { X } from "@/components/animate-ui/icons/x";
 import { deleteUtilityAdjustment } from "./actions";
 
 export function DeleteAdjustmentButton({ id }: { id: string }) {

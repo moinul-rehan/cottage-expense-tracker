@@ -1,14 +1,7 @@
 import Link from "next/link";
-import {
-  UtensilsCrossed,
-  Zap,
-  Users,
-  CalendarRange,
-  Bell,
-  Smartphone,
-  ShieldCheck,
-  ArrowRight,
-} from "lucide-react";
+import { UtensilsCrossed, Zap, CalendarRange, Smartphone, ShieldCheck, ArrowRight } from "lucide-react";
+import { Users } from "@/components/animate-ui/icons/users";
+import { Bell } from "@/components/animate-ui/icons/bell";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

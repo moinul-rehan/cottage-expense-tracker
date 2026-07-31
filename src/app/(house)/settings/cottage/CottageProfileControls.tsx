@@ -27,7 +27,7 @@ export function CottageNameForm({ name }: { name: string }) {
           maxLength={60}
           className="sm:max-w-xs"
         />
-        <Button type="submit" variant="outline" disabled={pending || !value.trim() || value.trim() === name}>
+        <Button type="submit" disabled={pending || !value.trim() || value.trim() === name}>
           Save
         </Button>
       </div>
@@ -42,7 +42,7 @@ export function TransferOwnershipCard({ members }: { members: Member[] }) {
   const selectedMember = members.find((m) => m.id === selectedId);
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm">Transfer Ownership</CardTitle>
       </CardHeader>
@@ -87,7 +87,7 @@ export function TransferOwnershipCard({ members }: { members: Member[] }) {
 
 export function DeleteCottageCard({ cottageName }: { cottageName: string }) {
   return (
-    <Card className="border-destructive/30">
+    <Card className="rounded-2xl border-destructive/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm text-destructive">
           <AlertTriangle className="size-4" />
@@ -123,7 +123,7 @@ export function PendingDeletionBanner({
   deletionDate: string;
 }) {
   return (
-    <Card className="border-destructive/40 bg-destructive/5">
+    <Card className="rounded-2xl border-destructive/40 bg-destructive/5">
       <CardContent className="flex flex-col gap-3 pt-6">
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 size-5 shrink-0 text-destructive" />

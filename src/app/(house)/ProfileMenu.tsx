@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, User, LogOut } from "lucide-react";
+import { ChevronDown } from "@/components/animate-ui/icons/chevron-down";
+import { User } from "@/components/animate-ui/icons/user";
+import { LogOut } from "@/components/animate-ui/icons/log-out";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

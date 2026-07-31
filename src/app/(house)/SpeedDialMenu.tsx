@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { IconComponent } from "@/lib/icon-type";
 import { cn } from "@/lib/utils";
 
 export type SpeedDialItem = {
   key: string;
-  icon: LucideIcon;
+  icon: IconComponent;
   label: string;
   colorClass: string;
   href?: string;

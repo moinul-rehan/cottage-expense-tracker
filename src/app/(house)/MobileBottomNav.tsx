@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Pin, Inbox, UtensilsCrossed, Zap, Menu, type LucideIcon } from "lucide-react";
+import { Inbox, UtensilsCrossed, Zap } from "lucide-react";
+import { LayoutDashboard } from "@/components/animate-ui/icons/layout-dashboard";
+import { Pin } from "@/components/animate-ui/icons/pin";
+import { Menu } from "@/components/animate-ui/icons/menu";
+import type { IconComponent } from "@/lib/icon-type";
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
 import { MobileMenuSheet } from "./MobileMenuSheet";
@@ -36,7 +40,7 @@ function NavTab({
   onClick,
   badge,
 }: {
-  icon: LucideIcon;
+  icon: IconComponent;
   label: string;
   active: boolean;
   href?: string;
