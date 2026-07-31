@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { Download } from "lucide-react";
+import { UtilityDetailsMobile } from "./UtilityDetailsMobile";
 
 const TABS = [
   { value: "expense", label: "Expense History" },
@@ -30,13 +31,15 @@ const TABS = [
   { value: "cottage", label: "Cottage Deposit History" },
 ] as const;
 
+type TabValue = (typeof TABS)[number]["value"];
+
 export default async function UtilityHistoryPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab: tabParam } = await searchParams;
-  const tab = TABS.some((t) => t.value === tabParam) ? tabParam! : "expense";
+  const tab: TabValue = TABS.some((t) => t.value === tabParam) ? (tabParam as TabValue) : "expense";
 
   const profile = await getCurrentProfile();
   const supabase = await createClient();
@@ -60,7 +63,18 @@ export default async function UtilityHistoryPage({
   const canDownloadHistory = profile.role === "super_admin" || profile.can_add_expenses;
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
+      <UtilityDetailsMobile
+        monthLabel={formatMonthKey(monthKey)}
+        activeTab={tab}
+        canDownload={canDownloadHistory}
+        expenses={expenses}
+        memberDeposits={memberDeposits}
+        cottageDeposits={cottageDeposits}
+        membersById={membersById}
+      />
+
+      <div className="hidden flex-col gap-6 sm:flex">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">
@@ -252,6 +266,7 @@ export default async function UtilityHistoryPage({
           </Table>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -6,6 +6,8 @@ import { Bell } from "lucide-react";
 import { markNotificationRead } from "./notifications/actions";
 import { getNotificationIcon } from "./notification-icons";
 import { LocalDateTime } from "@/components/LocalDateTime";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 type Notification = {
@@ -29,19 +31,40 @@ export function NotificationTray({
   notifications: Notification[];
   unreadCount: number;
 }) {
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+
+  const bell = (
+    <span className="relative flex size-[42px] items-center justify-center rounded-full border border-border bg-card">
+      <Bell className="size-5 text-foreground" />
+      {unreadCount > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />}
+    </span>
+  );
+
+  // The full-screen swipe drawer is a mobile pattern -- on desktop this is
+  // just a lightweight dropdown anchored to the bell, no drag/dismiss.
+  if (!isMobile) {
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger render={<button type="button" />}>{bell}</PopoverTrigger>
+        <PopoverContent align="end" className="flex w-96 flex-col gap-0 p-0">
+          <div className="flex shrink-0 items-center justify-between px-4 py-3">
+            <p className="text-sm font-semibold text-foreground">Notifications</p>
+            {unreadCount > 0 && <span className="text-xs text-muted-foreground">{unreadCount} unread</span>}
+          </div>
+          <div className="flex max-h-96 flex-col gap-1 overflow-y-auto px-2 pb-2">
+            <NotificationList notifications={notifications} />
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  }
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="relative flex size-[42px] items-center justify-center rounded-full border border-border bg-card"
-      >
-        <Bell className="size-5 text-foreground" />
-        {unreadCount > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />}
+      <button type="button" onClick={() => setOpen(true)}>
+        {bell}
       </button>
-
       {open && (
         <NotificationSheetBody
           notifications={notifications}
@@ -53,11 +76,46 @@ export function NotificationTray({
   );
 }
 
+function NotificationList({ notifications }: { notifications: Notification[] }) {
+  if (!notifications.length) {
+    return <p className="px-2 py-6 text-center text-sm text-muted-foreground">No notifications yet.</p>;
+  }
+
+  return (
+    <>
+      {notifications.map((n) => {
+        const Icon = getNotificationIcon(n.type);
+        return (
+          <div
+            key={n.id}
+            className={"flex gap-2.5 rounded-lg px-2 py-2 " + (n.is_read ? "" : "bg-accent/40")}
+          >
+            <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+              <Icon className="size-3.5" />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium text-foreground">{n.title}</p>
+                {!n.is_read && <MarkReadButton id={n.id} />}
+              </div>
+              {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
+              <p className="text-xs text-muted-foreground/70">
+                <LocalDateTime iso={n.created_at} />
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 /** A real swipe-driven bottom sheet: opens by sliding up from off-screen to
  * a "peek" height that covers the last few notifications; dragging the
- * handle further up expands it to near-full-screen, and dragging it down
- * (past a threshold) slides it back off-screen and dismisses - no separate
- * close button, purely swipe up / swipe down. */
+ * handle -- or the header row above the list -- further up expands it to
+ * near-full-screen, and dragging it down (past a threshold) slides it back
+ * off-screen and dismisses. The scrollable list itself is excluded from the
+ * drag surface so it can still be scrolled without fighting the sheet. */
 function NotificationSheetBody({
   notifications,
   unreadCount,
@@ -67,7 +125,6 @@ function NotificationSheetBody({
   unreadCount: number;
   onDismiss: () => void;
 }) {
-  const [pending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -113,21 +170,21 @@ function NotificationSheetBody({
     setTimeout(onDismiss, TRANSITION_MS);
   }
 
-  function onHandlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+  function onDragPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
     if (!ready.current) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     dragState.current = { startY: e.clientY, startTranslate: translateY };
     setAnimate(false);
   }
 
-  function onHandlePointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+  function onDragPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
     if (!dragState.current) return;
     const delta = e.clientY - dragState.current.startY;
     const next = Math.min(expandedPx, Math.max(0, dragState.current.startTranslate + delta));
     setTranslateY(next);
   }
 
-  function onHandlePointerUp() {
+  function onDragPointerUp() {
     if (!dragState.current) return;
     const dragged = dragState.current;
     dragState.current = null;
@@ -143,6 +200,12 @@ function NotificationSheetBody({
   }
 
   const expanded = translateY <= peekOffsetPx / 2;
+  const dragHandlers = {
+    onPointerDown: onDragPointerDown,
+    onPointerMove: onDragPointerMove,
+    onPointerUp: onDragPointerUp,
+    onPointerCancel: onDragPointerUp,
+  };
 
   const body = (
     <>
@@ -161,10 +224,7 @@ function NotificationSheetBody({
         }}
       >
         <div
-          onPointerDown={onHandlePointerDown}
-          onPointerMove={onHandlePointerMove}
-          onPointerUp={onHandlePointerUp}
-          onPointerCancel={onHandlePointerUp}
+          {...dragHandlers}
           className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-1.5 pt-2.5 pb-1 active:cursor-grabbing"
         >
           <span className="h-1.5 w-10 rounded-full bg-border" />
@@ -172,7 +232,10 @@ function NotificationSheetBody({
 
         <h2 className="sr-only">Notifications</h2>
 
-        <div className="flex shrink-0 items-center justify-between px-4 py-1.5">
+        <div
+          {...dragHandlers}
+          className="flex shrink-0 cursor-grab touch-none items-center justify-between px-4 py-1.5 active:cursor-grabbing"
+        >
           <p className="text-sm font-semibold text-foreground">Notifications</p>
           {unreadCount > 0 && <span className="text-xs text-muted-foreground">{unreadCount} unread</span>}
         </div>
@@ -200,16 +263,7 @@ function NotificationSheetBody({
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium text-foreground">{n.title}</p>
-                    {!n.is_read && (
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() => startTransition(() => markNotificationRead(n.id))}
-                        className="shrink-0 text-xs text-primary hover:underline"
-                      >
-                        Mark read
-                      </button>
-                    )}
+                    {!n.is_read && <MarkReadButton id={n.id} />}
                   </div>
                   {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
                   <p className="text-xs text-muted-foreground/70">
@@ -228,4 +282,18 @@ function NotificationSheetBody({
   );
 
   return createPortal(body, document.body);
+}
+
+function MarkReadButton({ id }: { id: string }) {
+  const [pending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => startTransition(() => markNotificationRead(id))}
+      className="shrink-0 text-xs text-primary hover:underline"
+    >
+      Mark read
+    </button>
+  );
 }

@@ -26,8 +26,8 @@ const MOBILE_VIEWS: { value: ViewValue; label: string }[] = [
 // Reserved space below the title that the intro card overlaps into (see
 // MobileDashboardHero for the same pattern, smaller here to match the
 // shallower overlap in the Rento reference).
-const PAD = "7rem";
-const OVERLAP = "3.5rem";
+const PAD = "6.5rem";
+const OVERLAP = "5rem";
 
 // Every chip in the reference (date pill, icon buttons, grid cells, avatar
 // box, description/note box, total row) has a visible hairline border, not

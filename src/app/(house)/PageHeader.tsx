@@ -55,9 +55,12 @@ export function PageHeader({
         // On mobile the dashboard header merges into MobileDashboardHero's
         // brand-color band below it (one continuous colored region from the
         // very top down to the summary card) -- every other page/breakpoint
-        // keeps the neutral background.
-        "sticky top-0 z-20 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:bg-background sm:px-8 sm:py-6",
-        isDashboard ? "bg-primary" : "bg-background"
+        // keeps the neutral background. Non-dashboard pages render nothing
+        // in this header on mobile (every field below is isDashboard-gated),
+        // so it collapses to hidden there instead of leaving a blank bar --
+        // desktop always shows it (SidebarTrigger lives here on every page).
+        "sticky top-0 z-20 flex-col gap-3 px-4 py-4 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:bg-background sm:px-8 sm:py-6",
+        isDashboard ? "flex bg-primary" : "hidden bg-background"
       )}
     >
       <div className="flex min-w-0 items-center gap-3">
