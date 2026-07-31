@@ -26,6 +26,7 @@ import { EditMealRowDialog } from "./EditMealRowDialog";
 import { EditDepositDialog } from "./EditDepositDialog";
 import { EditBazaarDialog } from "./EditBazaarDialog";
 import { ViewBazaarDialog } from "./ViewBazaarDialog";
+import { MonthDetailsMobile } from "./MonthDetailsMobile";
 
 const VIEWS = [
   { value: "meal", label: "Meal Details" },
@@ -75,7 +76,20 @@ export default async function MealMonthDetailsPage({
   const { rows: pivotRows, totals } = pivotDailyMealsByDate(mealRecords, memberList);
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
+      <MonthDetailsMobile
+        monthLabel={formatMonthKey(monthKey)}
+        activeView={activeView}
+        canEditMeals={canEditMeals}
+        canEditBazaar={canEditBazaar}
+        canEditDeposits={canEditDeposits}
+        memberList={memberList}
+        pivotRows={pivotRows}
+        bazaarRecords={bazaarRecords}
+        depositRecords={depositRecords}
+      />
+
+      <div className="hidden flex-col gap-6 sm:flex">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Month Details - {formatMonthKey(monthKey)}</h1>
@@ -266,6 +280,7 @@ export default async function MealMonthDetailsPage({
           </Table>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 }
