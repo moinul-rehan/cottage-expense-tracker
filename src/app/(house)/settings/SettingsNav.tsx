@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import { User, Banknote, Home, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type SettingsLink = { href: string; label: string; icon: LucideIcon };
+const ICONS = { user: User, banknote: Banknote, home: Home, "shield-check": ShieldCheck } as const;
+
+export type SettingsLink = { href: string; label: string; icon: keyof typeof ICONS };
 
 export function SettingsNav({ links }: { links: SettingsLink[] }) {
   const pathname = usePathname();
@@ -14,6 +16,7 @@ export function SettingsNav({ links }: { links: SettingsLink[] }) {
     <nav className="flex flex-wrap gap-2 sm:w-48 sm:flex-col sm:flex-nowrap">
       {links.map((link) => {
         const active = pathname === link.href;
+        const Icon = ICONS[link.icon];
         return (
           <Link
             key={link.href}
@@ -25,7 +28,7 @@ export function SettingsNav({ links }: { links: SettingsLink[] }) {
                 : "border-border/40 text-muted-foreground hover:border-border hover:text-foreground"
             )}
           >
-            <link.icon className="size-4 shrink-0" />
+            <Icon className="size-4 shrink-0" />
             {link.label}
           </Link>
         );

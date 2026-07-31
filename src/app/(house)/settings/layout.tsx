@@ -1,13 +1,12 @@
-import { User, Banknote, Home, ShieldCheck } from "lucide-react";
 import { getCurrentProfile } from "@/lib/data/dal";
 import { SettingsNav, type SettingsLink } from "./SettingsNav";
 
-const memberLinks: SettingsLink[] = [{ href: "/settings/profile", label: "Profile", icon: User }];
+const memberLinks: SettingsLink[] = [{ href: "/settings/profile", label: "Profile", icon: "user" }];
 const adminLinks: SettingsLink[] = [
-  { href: "/settings/rent", label: "Default Cost", icon: Banknote },
-  { href: "/settings/cottage", label: "Cottage Profile", icon: Home },
+  { href: "/settings/rent", label: "Default Cost", icon: "banknote" },
+  { href: "/settings/cottage", label: "Cottage Profile", icon: "home" },
 ];
-const trailingLinks: SettingsLink[] = [{ href: "/settings/security", label: "Security", icon: ShieldCheck }];
+const trailingLinks: SettingsLink[] = [{ href: "/settings/security", label: "Security", icon: "shield-check" }];
 
 export default async function SettingsLayout({
   children,
