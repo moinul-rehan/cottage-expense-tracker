@@ -91,7 +91,7 @@ export function UtilityDetailsMobile({
   membersById: Map<string, Member>;
 }) {
   return (
-    <div className="-mx-4 sm:hidden">
+    <div className="-mx-4 -mt-4 sm:hidden">
       <div className="bg-primary px-6 pt-6 text-primary-foreground" style={{ paddingBottom: PAD }}>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-3xl leading-tight font-bold">Utility Details</h1>

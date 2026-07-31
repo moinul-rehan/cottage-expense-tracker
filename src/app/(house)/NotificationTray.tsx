@@ -181,13 +181,20 @@ function NotificationSheetBody({
 
   function onDragPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
     if (!ready.current) return;
-    // When the list is expanded and already scrolled into its content,
-    // a touch on it should scroll the list, not drag the sheet -- only
-    // take over the gesture once the list is back at its top.
-    if (expanded && (listRef.current?.scrollTop ?? 0) > 0) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     dragState.current = { startY: e.clientY, startTranslate: translateY };
     setAnimate(false);
+  }
+
+  // The list itself is only a drag surface while collapsed (nothing to
+  // scroll there yet, so a touch anywhere can safely open/dismiss the
+  // sheet). Once expanded the list becomes independently scrollable
+  // (overflow-y-auto + touch-action: pan-y) -- claiming those touches for
+  // dragging too fights the browser's native scroll and can cancel the
+  // gesture outright, so leave that to the handle/header instead.
+  function onListPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (expanded) return;
+    onDragPointerDown(e);
   }
 
   function onDragPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
@@ -219,6 +226,7 @@ function NotificationSheetBody({
     onPointerUp: onDragPointerUp,
     onPointerCancel: onDragPointerUp,
   };
+  const listDragHandlers = { ...dragHandlers, onPointerDown: onListPointerDown };
 
   const body = (
     <>
@@ -255,7 +263,7 @@ function NotificationSheetBody({
 
         <div
           ref={listRef}
-          {...dragHandlers}
+          {...listDragHandlers}
           className={cn(
             "flex flex-1 flex-col gap-1 px-2 pb-4 touch-pan-y",
             expanded ? "overflow-y-auto" : "overflow-hidden"
