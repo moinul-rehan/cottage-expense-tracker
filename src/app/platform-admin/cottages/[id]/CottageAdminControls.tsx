@@ -10,12 +10,10 @@ import {
   reactivateCottage,
   deleteCottage,
 } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminButton, AdminCard, AdminCardTitle, AdminInput } from "../../AdminUI";
 
 const PLANS = ["free", "paid"];
 const STATUSES = ["active", "past_due", "canceled"];
@@ -32,11 +30,9 @@ export function PlanAndStatusControls({
   const [pending, startTransition] = useTransition();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Plan & billing</CardTitle>
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <AdminCard className="flex flex-col gap-3">
+      <AdminCardTitle>Plan & billing</AdminCardTitle>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label>Plan</Label>
           <Select
@@ -75,8 +71,8 @@ export function PlanAndStatusControls({
             </SelectContent>
           </Select>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </AdminCard>
   );
 }
 
@@ -87,64 +83,42 @@ export function ApprovalControls({ cottageId }: { cottageId: string }) {
 
   if (rejecting) {
     return (
-      <Card className="border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
-        <CardHeader>
-          <CardTitle className="text-sm">Reject Cottage</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <Label htmlFor="reject-reason">Reason (emailed to the super admin)</Label>
-          <Textarea
-            id="reject-reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Optional"
-          />
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              disabled={pending}
-              onClick={() => startTransition(() => rejectCottage(cottageId, reason))}
-            >
-              {pending ? "Rejecting…" : "Confirm reject"}
-            </Button>
-            <Button variant="ghost" disabled={pending} onClick={() => setRejecting(false)}>
-              Cancel
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <AdminCard className="flex flex-col gap-3 border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
+        <AdminCardTitle>Reject Cottage</AdminCardTitle>
+        <Label htmlFor="reject-reason">Reason (emailed to the super admin)</Label>
+        <Textarea id="reject-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Optional" />
+        <div className="flex gap-2">
+          <AdminButton
+            variant="destructive"
+            disabled={pending}
+            onClick={() => startTransition(() => rejectCottage(cottageId, reason))}
+          >
+            {pending ? "Rejecting…" : "Confirm reject"}
+          </AdminButton>
+          <AdminButton variant="ghost" disabled={pending} onClick={() => setRejecting(false)}>
+            Cancel
+          </AdminButton>
+        </div>
+      </AdminCard>
     );
   }
 
   return (
-    <Card className="border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
-      <CardHeader>
-        <CardTitle className="text-sm">Pending approval</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <p className="text-sm text-muted-foreground">
-          This Cottage was just created and is waiting for review. Members can&apos;t sign in until it&apos;s
-          approved. The super admin will get an email either way.
-        </p>
-        <div className="flex gap-2">
-          <Button
-            disabled={pending}
-            onClick={() => startTransition(() => approveCottage(cottageId))}
-            className="self-start"
-          >
-            {pending ? "Approving…" : "Approve Cottage"}
-          </Button>
-          <Button
-            variant="outline"
-            className="self-start text-destructive hover:text-destructive"
-            disabled={pending}
-            onClick={() => setRejecting(true)}
-          >
-            Reject Cottage
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <AdminCard className="flex flex-col gap-3 border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
+      <AdminCardTitle>Pending approval</AdminCardTitle>
+      <p className="text-sm text-black/60 dark:text-white/60">
+        This Cottage was just created and is waiting for review. Members can&apos;t sign in until it&apos;s approved.
+        The super admin will get an email either way.
+      </p>
+      <div className="flex gap-2">
+        <AdminButton disabled={pending} onClick={() => startTransition(() => approveCottage(cottageId))}>
+          {pending ? "Approving…" : "Approve Cottage"}
+        </AdminButton>
+        <AdminButton variant="outline" disabled={pending} onClick={() => setRejecting(true)}>
+          Reject Cottage
+        </AdminButton>
+      </div>
+    </AdminCard>
   );
 }
 
@@ -155,40 +129,40 @@ export function SuspendControls({ cottageId, suspended }: { cottageId: string; s
 
   if (suspended) {
     return (
-      <Button variant="outline" disabled={pending} onClick={() => startTransition(() => reactivateCottage(cottageId))}>
+      <AdminButton
+        variant="outline"
+        disabled={pending}
+        onClick={() => startTransition(() => reactivateCottage(cottageId))}
+        className="self-start"
+      >
         {pending ? "Reactivating…" : "Reactivate Cottage"}
-      </Button>
+      </AdminButton>
     );
   }
 
   if (!showReason) {
     return (
-      <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => setShowReason(true)}>
+      <AdminButton variant="outline" onClick={() => setShowReason(true)} className="self-start">
         Suspend Cottage
-      </Button>
+      </AdminButton>
     );
   }
 
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor="suspend-reason">Reason (shown to members)</Label>
-      <Textarea
-        id="suspend-reason"
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-        placeholder="Optional"
-      />
+      <Textarea id="suspend-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Optional" />
       <div className="flex gap-2">
-        <Button
+        <AdminButton
           variant="destructive"
           disabled={pending}
           onClick={() => startTransition(() => suspendCottage(cottageId, reason))}
         >
           {pending ? "Suspending…" : "Confirm suspend"}
-        </Button>
-        <Button variant="ghost" onClick={() => setShowReason(false)}>
+        </AdminButton>
+        <AdminButton variant="ghost" onClick={() => setShowReason(false)}>
           Cancel
-        </Button>
+        </AdminButton>
       </div>
     </div>
   );
@@ -202,24 +176,25 @@ export function DeleteCottageForm({ cottageId, cottageName }: { cottageId: strin
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="cottage_id" value={cottageId} />
       <Label htmlFor="confirm-name">
-        Type <span className="font-semibold text-foreground">{cottageName}</span> to confirm deletion
+        Type <span className="font-semibold">{cottageName}</span> to confirm deletion
       </Label>
-      <Input
+      <AdminInput
         id="confirm-name"
         name="confirm_name"
         value={confirmName}
         onChange={(e) => setConfirmName(e.target.value)}
         autoComplete="off"
+        className="max-w-sm"
       />
-      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-      <Button
+      {state?.error && <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>}
+      <AdminButton
         type="submit"
         variant="destructive"
         disabled={pending || confirmName !== cottageName}
         className="self-start"
       >
         {pending ? "Deleting…" : "Permanently delete Cottage"}
-      </Button>
+      </AdminButton>
     </form>
   );
 }

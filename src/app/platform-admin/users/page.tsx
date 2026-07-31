@@ -1,12 +1,9 @@
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getFullName } from "@/lib/data/display-name";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlatformAdminNav } from "../PlatformAdminNav";
+import { AdminShell } from "../AdminShell";
+import { AdminCard, AdminInput, AdminButton, AdminBadge } from "../AdminUI";
 
 export default async function PlatformAdminUsersPage({
   searchParams,
@@ -35,56 +32,58 @@ export default async function PlatformAdminUsersPage({
   const cottageNameById = new Map((cottages ?? []).map((c) => [c.id, c.name]));
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
-      <PlatformAdminNav />
+    <AdminShell title="Users">
+      <div className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-lg font-semibold">Users</h2>
+          <p className="mt-1 text-sm text-black/40 dark:text-white/40">Search for a member across every Cottage.</p>
+        </div>
 
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">Users</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Search for a member across every Cottage.</p>
-      </div>
+        <form className="flex gap-2">
+          <AdminInput name="q" defaultValue={query} placeholder="Search by name or email…" className="max-w-sm" />
+          <AdminButton type="submit">Search</AdminButton>
+        </form>
 
-      <form className="flex gap-2">
-        <Input name="q" defaultValue={query} placeholder="Search by name or email…" className="max-w-sm" />
-        <Button type="submit">Search</Button>
-      </form>
-
-      <Card className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Cottage</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(users ?? []).map((u) => (
-              <TableRow key={u.id}>
-                <TableCell className="font-medium text-foreground">{getFullName(u)}</TableCell>
-                <TableCell className="text-muted-foreground">{u.email ?? "-"}</TableCell>
-                <TableCell className="text-muted-foreground">{cottageNameById.get(u.cottage_id) ?? "-"}</TableCell>
-                <TableCell>
-                  <Badge variant={u.role === "super_admin" ? "default" : "secondary"} className="capitalize">
-                    {u.role === "super_admin" ? "Super Admin" : "Member"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={u.is_active ? "default" : "secondary"}>{u.is_active ? "Active" : "Inactive"}</Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-            {!users?.length && (
+        <AdminCard className="p-0">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
-                  {query ? "No matching users." : "No users yet."}
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Cottage</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Card>
-    </div>
+            </TableHeader>
+            <TableBody>
+              {(users ?? []).map((u) => (
+                <TableRow key={u.id}>
+                  <TableCell className="font-medium">{getFullName(u)}</TableCell>
+                  <TableCell className="text-black/40 dark:text-white/40">{u.email ?? "-"}</TableCell>
+                  <TableCell className="text-black/40 dark:text-white/40">
+                    {cottageNameById.get(u.cottage_id) ?? "-"}
+                  </TableCell>
+                  <TableCell>
+                    <AdminBadge tone={u.role === "super_admin" ? "good" : "neutral"}>
+                      {u.role === "super_admin" ? "Super Admin" : "Member"}
+                    </AdminBadge>
+                  </TableCell>
+                  <TableCell>
+                    <AdminBadge tone={u.is_active ? "good" : "neutral"}>{u.is_active ? "Active" : "Inactive"}</AdminBadge>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {!users?.length && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-6 text-center text-black/40 dark:text-white/40">
+                    {query ? "No matching users." : "No users yet."}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </AdminCard>
+      </div>
+    </AdminShell>
   );
 }

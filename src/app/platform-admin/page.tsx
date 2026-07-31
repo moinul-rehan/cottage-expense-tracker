@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format-date";
-import { PlatformAdminNav } from "./PlatformAdminNav";
+import { AdminShell } from "./AdminShell";
+import { AdminCard, AdminCardTitle, AdminButton, AdminInput, AdminBadge } from "./AdminUI";
 import { TrendAreaChart, TrendBarChart, StatusDonutChart, StatTile, type DonutSlice } from "./AdminCharts";
 
 const STATUS_FILTERS = [
@@ -62,6 +59,13 @@ function cottageStatusKey(c: { status: string; suspended_at: string | null }): k
   if (c.status === "pending") return "pending";
   if (c.status === "rejected") return "rejected";
   return "approved";
+}
+
+function statusTone(key: keyof typeof STATUS_COLOR): "good" | "warning" | "critical" | "neutral" {
+  if (key === "approved") return "good";
+  if (key === "pending") return "warning";
+  if (key === "rejected" || key === "suspended") return "critical";
+  return "neutral";
 }
 
 export default async function PlatformAdminPage({
@@ -126,175 +130,152 @@ export default async function PlatformAdminPage({
   });
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-10">
-      <PlatformAdminNav />
+    <AdminShell title="Overview">
+      <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <StatTile label="Total Cottages" value={allCottages.length} />
+          <StatTile label="Total Users" value={allProfiles.length} />
+          <StatTile label="New Cottages this month" value={cottageTrend[cottageTrend.length - 1]?.value ?? 0} delta={newCottagesDelta} />
+          <StatTile label="Pending Approval" value={pendingCount} />
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <StatTile label="Total Cottages" value={allCottages.length} />
-        <StatTile label="Total Users" value={allProfiles.length} />
-        <StatTile label="New Cottages this month" value={cottageTrend[cottageTrend.length - 1]?.value ?? 0} delta={newCottagesDelta} />
-        <StatTile label="Pending Approval" value={pendingCount} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-sm">Cottage signups (12 months)</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <AdminCard className="lg:col-span-2">
+            <AdminCardTitle className="mb-4">Cottage signups (12 months)</AdminCardTitle>
             <TrendAreaChart data={cottageTrend} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Cottages by status</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCard>
+          <AdminCard>
+            <AdminCardTitle className="mb-4">Cottages by status</AdminCardTitle>
             {donutSlices.length ? (
               <StatusDonutChart slices={donutSlices} />
             ) : (
-              <p className="py-8 text-center text-sm text-muted-foreground">No cottages yet.</p>
+              <p className="py-8 text-center text-sm text-black/40 dark:text-white/40">No cottages yet.</p>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </AdminCard>
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-sm">New users (6 months)</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <AdminCard className="lg:col-span-2">
+            <AdminCardTitle className="mb-4">New users (6 months)</AdminCardTitle>
             <TrendBarChart data={userTrend} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Top Cottages by members</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-1">
-            {topCottages.map((c) => {
-              const count = memberCountByCottage.get(c.id) ?? 0;
-              const max = memberCountByCottage.get(topCottages[0]?.id ?? "") || 1;
-              return (
-                <Link
-                  key={c.id}
-                  href={`/platform-admin/cottages/${c.id}`}
-                  className="flex flex-col gap-1 rounded-md px-1.5 py-1.5 text-sm hover:bg-muted/60"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-foreground">{c.name}</span>
-                    <span className="shrink-0 tabular-nums text-muted-foreground">{count}</span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${Math.max((count / max) * 100, count > 0 ? 4 : 0)}%` }}
-                    />
-                  </div>
-                </Link>
-              );
-            })}
-            {!topCottages.length && <p className="py-8 text-center text-sm text-muted-foreground">No cottages yet.</p>}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Recent signups</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col divide-y divide-border">
-          {recentCottages.map((c) => (
-            <Link
-              key={c.id}
-              href={`/platform-admin/cottages/${c.id}`}
-              className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0 hover:text-primary"
-            >
-              <span className="truncate font-medium text-foreground">{c.name}</span>
-              <span className="shrink-0 text-muted-foreground">{formatDate(c.created_at)}</span>
-            </Link>
-          ))}
-          {!recentCottages.length && <p className="py-6 text-center text-sm text-muted-foreground">No cottages yet.</p>}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">All Cottages</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <form className="flex flex-wrap gap-2">
-            <Input name="q" defaultValue={query} placeholder="Search by name…" className="max-w-xs" />
-            <select
-              name="status"
-              defaultValue={statusFilter}
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground"
-            >
-              {STATUS_FILTERS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-            <Button type="submit" variant="outline">
-              Filter
-            </Button>
-          </form>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Members</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCottages.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium text-foreground">
-                    <Link href={`/platform-admin/cottages/${c.id}`} className="hover:underline">
-                      {c.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{memberCountByCottage.get(c.id) ?? 0}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="capitalize">
-                      {c.plan}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {c.status === "pending" ? (
-                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                        Pending approval
-                      </Badge>
-                    ) : c.status === "rejected" ? (
-                      <Badge variant="destructive">Rejected</Badge>
-                    ) : c.suspended_at ? (
-                      <Badge variant="destructive">Suspended</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="capitalize">
-                        {c.subscription_status}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(c.created_at)}</TableCell>
-                </TableRow>
-              ))}
-              {!filteredCottages.length && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    {query || statusFilter !== "all" ? "No matching cottages." : "No cottages yet."}
-                  </TableCell>
-                </TableRow>
+          </AdminCard>
+          <AdminCard className="flex flex-col">
+            <AdminCardTitle className="mb-3">Top Cottages by members</AdminCardTitle>
+            <div className="flex flex-col gap-1">
+              {topCottages.map((c) => {
+                const count = memberCountByCottage.get(c.id) ?? 0;
+                const max = memberCountByCottage.get(topCottages[0]?.id ?? "") || 1;
+                return (
+                  <Link
+                    key={c.id}
+                    href={`/platform-admin/cottages/${c.id}`}
+                    className="flex flex-col gap-1 rounded-lg px-2 py-1.5 text-sm hover:bg-black/4 dark:hover:bg-white/10"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate">{c.name}</span>
+                      <span className="shrink-0 tabular-nums text-black/40 dark:text-white/40">{count}</span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/4 dark:bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-black dark:bg-white"
+                        style={{ width: `${Math.max((count / max) * 100, count > 0 ? 4 : 0)}%` }}
+                      />
+                    </div>
+                  </Link>
+                );
+              })}
+              {!topCottages.length && (
+                <p className="py-8 text-center text-sm text-black/40 dark:text-white/40">No cottages yet.</p>
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+            </div>
+          </AdminCard>
+        </div>
+
+        <AdminCard>
+          <AdminCardTitle className="mb-3">Recent signups</AdminCardTitle>
+          <div className="flex flex-col divide-y divide-black/10 dark:divide-white/10">
+            {recentCottages.map((c) => (
+              <Link
+                key={c.id}
+                href={`/platform-admin/cottages/${c.id}`}
+                className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0 hover:opacity-70"
+              >
+                <span className="truncate font-medium">{c.name}</span>
+                <span className="shrink-0 text-black/40 dark:text-white/40">{formatDate(c.created_at)}</span>
+              </Link>
+            ))}
+            {!recentCottages.length && (
+              <p className="py-6 text-center text-sm text-black/40 dark:text-white/40">No cottages yet.</p>
+            )}
+          </div>
+        </AdminCard>
+
+        <AdminCard>
+          <AdminCardTitle className="mb-4">All Cottages</AdminCardTitle>
+          <div className="flex flex-col gap-4">
+            <form className="flex flex-wrap gap-2">
+              <AdminInput name="q" defaultValue={query} placeholder="Search by name…" className="max-w-xs" />
+              <select
+                name="status"
+                defaultValue={statusFilter}
+                className="h-9 rounded-lg border-[0.5px] border-black/10 bg-black/[0.02] px-3 text-sm dark:border-white/10 dark:bg-white/5 dark:text-white"
+              >
+                {STATUS_FILTERS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+              <AdminButton type="submit" variant="outline">
+                Filter
+              </AdminButton>
+            </form>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Members</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCottages.map((c) => {
+                  const key = cottageStatusKey(c);
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">
+                        <Link href={`/platform-admin/cottages/${c.id}`} className="hover:underline">
+                          {c.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{memberCountByCottage.get(c.id) ?? 0}</TableCell>
+                      <TableCell>
+                        <AdminBadge>{c.plan}</AdminBadge>
+                      </TableCell>
+                      <TableCell>
+                        <AdminBadge tone={statusTone(key)}>
+                          {key === "pending" ? "Pending approval" : key === "approved" ? c.subscription_status : key}
+                        </AdminBadge>
+                      </TableCell>
+                      <TableCell className="text-black/40 dark:text-white/40">{formatDate(c.created_at)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+                {!filteredCottages.length && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-black/40 dark:text-white/40">
+                      {query || statusFilter !== "all" ? "No matching cottages." : "No cottages yet."}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </AdminCard>
+      </div>
+    </AdminShell>
   );
 }

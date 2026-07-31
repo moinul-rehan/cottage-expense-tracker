@@ -282,19 +282,19 @@ export function StatTile({
   const isGood = delta === undefined ? null : deltaGoodDirection === "up" ? positive : !positive;
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-card p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="flex flex-col gap-2 rounded-2xl border-[0.5px] border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#0e0e10]">
+      <p className="text-sm text-black/60 dark:text-white/60">{label}</p>
       <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-semibold text-foreground">{value}</p>
+        <p className="text-[26px] leading-none font-semibold">{value}</p>
         {delta !== undefined && (
           <span
             className={cn(
-              "tabular-nums text-xs font-medium",
-              isGood ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+              "flex items-center gap-0.5 tabular-nums text-xs font-medium",
+              isGood ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
             )}
           >
-            {positive ? "+" : ""}
-            {delta}%
+            {positive ? "↑" : "↓"}
+            {Math.abs(delta)}%
           </span>
         )}
       </div>
