@@ -94,6 +94,8 @@ export default async function PlatformAdminPage() {
                       <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                         Pending approval
                       </Badge>
+                    ) : c.status === "rejected" ? (
+                      <Badge variant="destructive">Rejected</Badge>
                     ) : c.suspended_at ? (
                       <Badge variant="destructive">Suspended</Badge>
                     ) : (

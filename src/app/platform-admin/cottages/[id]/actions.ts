@@ -37,6 +37,39 @@ export async function approveCottage(cottageId: string) {
   revalidatePath("/platform-admin");
 }
 
+export async function rejectCottage(cottageId: string, reason: string) {
+  await requirePlatformAdmin();
+  const admin = createAdminClient();
+
+  const { data: cottage } = await admin.from("cottages").select("name, status").eq("id", cottageId).single();
+  if (!cottage || cottage.status !== "pending") return;
+
+  await admin
+    .from("cottages")
+    .update({ status: "rejected", rejected_at: new Date().toISOString(), rejected_reason: reason.trim() || null })
+    .eq("id", cottageId);
+
+  const { data: superAdmin } = await admin
+    .from("profiles")
+    .select("email")
+    .eq("cottage_id", cottageId)
+    .eq("role", "super_admin")
+    .maybeSingle();
+
+  if (superAdmin?.email) {
+    await sendEmail({
+      to: superAdmin.email,
+      subject: `${cottage.name} was not approved`,
+      html: `<p><strong>${cottage.name}</strong> was reviewed and could not be approved.</p>${
+        reason.trim() ? `<p>${reason.trim()}</p>` : ""
+      }`,
+    });
+  }
+
+  revalidatePath(`/platform-admin/cottages/${cottageId}`);
+  revalidatePath("/platform-admin");
+}
+
 export async function updateCottagePlan(cottageId: string, plan: string) {
   await requirePlatformAdmin();
   const admin = createAdminClient();

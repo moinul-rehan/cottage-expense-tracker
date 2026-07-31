@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Hourglass } from "lucide-react";
+import { CircleX } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logout } from "@/lib/auth-actions";
@@ -8,7 +8,7 @@ import { Logo } from "@/components/logo";
 
 // Deliberately does NOT call getCurrentProfile() -- that's the function that
 // redirects here in the first place, so reusing it would loop.
-export default async function PendingApprovalPage() {
+export default async function RejectedPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,11 +19,10 @@ export default async function PendingApprovalPage() {
   const admin = createAdminClient();
   const { data: profile } = await admin.from("profiles").select("cottage_id").eq("id", user.id).maybeSingle();
   const { data: cottage } = profile
-    ? await admin.from("cottages").select("status").eq("id", profile.cottage_id).maybeSingle()
+    ? await admin.from("cottages").select("status, rejected_reason").eq("id", profile.cottage_id).maybeSingle()
     : { data: null };
 
-  if (cottage?.status === "rejected") redirect("/rejected");
-  if (cottage?.status !== "pending") redirect("/dashboard");
+  if (cottage?.status !== "rejected") redirect("/dashboard");
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-4 text-center">
@@ -32,11 +31,10 @@ export default async function PendingApprovalPage() {
         Cottage
       </div>
       <div className="flex max-w-sm flex-col items-center gap-3">
-        <Hourglass className="size-10 text-muted-foreground" />
-        <h1 className="text-lg font-semibold text-foreground">Your Cottage is awaiting approval</h1>
+        <CircleX className="size-10 text-destructive" />
+        <h1 className="text-lg font-semibold text-foreground">This Cottage was not approved</h1>
         <p className="text-sm text-muted-foreground">
-          A platform admin is reviewing your new Cottage. You&apos;ll get an email as soon as it&apos;s approved and
-          ready to use.
+          {cottage.rejected_reason || "Contact support if you think this was a mistake."}
         </p>
       </div>
       <form action={logout}>

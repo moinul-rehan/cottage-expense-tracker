@@ -70,6 +70,10 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/pending-approval')
   }
 
+  if (cottage?.status === 'rejected') {
+    redirect('/rejected')
+  }
+
   if (cottage?.suspended_at) {
     redirect('/suspended')
   }

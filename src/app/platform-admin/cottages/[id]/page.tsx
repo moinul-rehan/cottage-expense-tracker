@@ -21,7 +21,7 @@ export default async function PlatformAdminCottageDetailPage({
   const [{ data: cottage }, { data: members }] = await Promise.all([
     admin
       .from("cottages")
-      .select("id, name, plan, subscription_status, suspended_at, suspended_reason, status, created_at")
+      .select("id, name, plan, subscription_status, suspended_at, suspended_reason, status, rejected_reason, created_at")
       .eq("id", id)
       .maybeSingle(),
     admin
@@ -35,6 +35,7 @@ export default async function PlatformAdminCottageDetailPage({
 
   const suspended = !!cottage.suspended_at;
   const pendingApproval = cottage.status === "pending";
+  const rejected = cottage.status === "rejected";
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
@@ -47,11 +48,22 @@ export default async function PlatformAdminCottageDetailPage({
             Pending approval
           </Badge>
         )}
+        {rejected && <Badge variant="destructive">Rejected</Badge>}
         {suspended && <Badge variant="destructive">Suspended</Badge>}
         <span className="text-sm text-muted-foreground">Created {formatDate(cottage.created_at)}</span>
       </div>
 
       {pendingApproval && <ApprovalControls cottageId={cottage.id} />}
+      {rejected && cottage.rejected_reason && (
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-sm">Rejection reason</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{cottage.rejected_reason}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PlanAndStatusControls cottageId={cottage.id} plan={cottage.plan} subscriptionStatus={cottage.subscription_status} />

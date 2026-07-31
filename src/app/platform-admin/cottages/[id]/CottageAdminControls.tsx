@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from "react";
 import {
   approveCottage,
+  rejectCottage,
   updateCottagePlan,
   updateCottageSubscriptionStatus,
   suspendCottage,
@@ -81,6 +82,39 @@ export function PlanAndStatusControls({
 
 export function ApprovalControls({ cottageId }: { cottageId: string }) {
   const [pending, startTransition] = useTransition();
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
+
+  if (rejecting) {
+    return (
+      <Card className="border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
+        <CardHeader>
+          <CardTitle className="text-sm">Reject Cottage</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <Label htmlFor="reject-reason">Reason (emailed to the super admin)</Label>
+          <Textarea
+            id="reject-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Optional"
+          />
+          <div className="flex gap-2">
+            <Button
+              variant="destructive"
+              disabled={pending}
+              onClick={() => startTransition(() => rejectCottage(cottageId, reason))}
+            >
+              {pending ? "Rejecting…" : "Confirm reject"}
+            </Button>
+            <Button variant="ghost" disabled={pending} onClick={() => setRejecting(false)}>
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-amber-400/40 bg-amber-50 dark:bg-amber-950/20">
@@ -90,15 +124,25 @@ export function ApprovalControls({ cottageId }: { cottageId: string }) {
       <CardContent className="flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
           This Cottage was just created and is waiting for review. Members can&apos;t sign in until it&apos;s
-          approved. The super admin will get an email once you approve it.
+          approved. The super admin will get an email either way.
         </p>
-        <Button
-          disabled={pending}
-          onClick={() => startTransition(() => approveCottage(cottageId))}
-          className="self-start"
-        >
-          {pending ? "Approving…" : "Approve Cottage"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            disabled={pending}
+            onClick={() => startTransition(() => approveCottage(cottageId))}
+            className="self-start"
+          >
+            {pending ? "Approving…" : "Approve Cottage"}
+          </Button>
+          <Button
+            variant="outline"
+            className="self-start text-destructive hover:text-destructive"
+            disabled={pending}
+            onClick={() => setRejecting(true)}
+          >
+            Reject Cottage
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
