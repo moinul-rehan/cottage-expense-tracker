@@ -172,16 +172,13 @@ export async function updateDeposit(
   if (!Number.isFinite(amount) || amount <= 0) return { error: "Enter a valid amount." };
   if (!depositDate) return { error: "Pick a date." };
 
-  const { data: existing } = await supabase
-    .from("meal_deposits")
-    .select("user_id")
-    .eq("id", id)
-    .single();
-
-  const { error } = await supabase
-    .from("meal_deposits")
-    .update({ amount, deposit_date: depositDate, note })
-    .eq("id", id);
+  // The update only needs `id` + the new field values (never `existing`,
+  // which is used purely for the post-write notification), so both run
+  // together instead of the select gating the write.
+  const [{ data: existing }, { error }] = await Promise.all([
+    supabase.from("meal_deposits").select("user_id").eq("id", id).single(),
+    supabase.from("meal_deposits").update({ amount, deposit_date: depositDate, note }).eq("id", id),
+  ]);
 
   if (error) {
     return { error: "Could not update the deposit." };

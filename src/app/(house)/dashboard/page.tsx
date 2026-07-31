@@ -3,7 +3,7 @@ import { getDisplayName, getFullName, getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getCottageBalance, getMonthlyDues, getMonthlyExpenseTotal } from "@/lib/data/finance";
 import { getActiveMonthKey } from "@/lib/data/months";
-import { getMemberMealSummary } from "@/lib/data/meal";
+import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
 import { getMyNextBazaarDuty } from "@/lib/data/bazaar-duty";
 import { getNotices } from "@/lib/data/notice-board";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
@@ -77,6 +77,7 @@ export default async function DashboardPage() {
     myAdjustmentsQuery,
     myDepositsQuery,
     { data: cottage },
+    mealTotals,
   ] = await Promise.all([
     getMonthlyDues(supabase, profile.cottage_id, monthKey),
     getCottageBalance(supabase, profile.cottage_id),
@@ -105,6 +106,9 @@ export default async function DashboardPage() {
       .eq("source_type", "member")
       .order("deposit_date", { ascending: false }),
     supabase.from("cottages").select("name").eq("id", profile.cottage_id).single(),
+    // Independent of `members` (only zipped against it locally below), so it
+    // runs alongside everything else instead of after members resolves.
+    getMealTotals(supabase, monthKey),
   ]);
 
   const outstandingFromMembers = Array.from(dues.values()).reduce((sum, d) => sum + Math.max(0, d.due), 0);
@@ -126,11 +130,7 @@ export default async function DashboardPage() {
     note: d.note,
     amount: Number(d.amount),
   }));
-  const { rows: mealRows, mealRate, totalBazaar, totalMeals } = await getMemberMealSummary(
-    supabase,
-    monthKey,
-    members ?? []
-  );
+  const { rows: mealRows, mealRate, totalBazaar, totalMeals } = zipMemberMealSummary(members ?? [], mealTotals);
   const myMealRow = mealRows.find((r) => r.id === profile.id);
 
   const membersById = new Map((members ?? []).map((m) => [m.id, m]));

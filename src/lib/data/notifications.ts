@@ -29,12 +29,18 @@ export async function notifyUsers(
   notification: { type: string; title: string; body?: string; link?: string }
 ) {
   if (userIds.length === 0) return;
-  await supabase.from("notifications").insert(
-    userIds.map((userId) => ({
-      cottage_id: cottageId,
-      user_id: userId,
-      ...notification,
-    }))
-  );
-  await sendPushToUsers(userIds, notification);
+  // sendPushToUsers does its own independent subscription lookup and never
+  // reads the inserted row back, so it runs alongside the insert instead of
+  // after it -- this helper is called from nearly every mutation in the
+  // app, so this shaves a round-trip off every one of them.
+  await Promise.all([
+    supabase.from("notifications").insert(
+      userIds.map((userId) => ({
+        cottage_id: cottageId,
+        user_id: userId,
+        ...notification,
+      }))
+    ),
+    sendPushToUsers(userIds, notification),
+  ]);
 }

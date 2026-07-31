@@ -1,7 +1,7 @@
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveMonthKey, defaultDateForMonth } from "@/lib/data/months";
-import { getMemberMealSummary } from "@/lib/data/meal";
+import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
 import { BazaarForm } from "./BazaarForm";
 import { DepositForm } from "./DepositForm";
 import { DailyMealForm } from "./DailyMealForm";
@@ -26,38 +26,32 @@ export default async function MealPage() {
   const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
   const defaultDate = defaultDateForMonth(monthKey);
 
-  const { data: members } = await supabase
-    .from("profiles")
-    .select("id, first_name, last_name")
-    .eq("is_active", true)
-    .order("last_name");
-
-  const { rows, mealRate, totalBazaar, totalMeals } = await getMemberMealSummary(
-    supabase,
-    monthKey,
-    members ?? []
-  );
-
   const canAddBazaar = profile.role === "super_admin" || profile.can_add_bazaar;
   const canAddMeals = profile.role === "super_admin" || profile.can_add_meals;
 
-  const { data: myPendingRequests } = canAddMeals
-    ? { data: null }
-    : await supabase
-        .from("meal_requests")
-        .select("id, request_date, lunch, dinner")
-        .eq("user_id", profile.id)
-        .eq("status", "pending")
-        .order("request_date");
+  const [{ data: members }, mealTotals, { data: myPendingRequests }, { data: myPendingCostRequests }] =
+    await Promise.all([
+      supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true).order("last_name"),
+      getMealTotals(supabase, monthKey),
+      canAddMeals
+        ? Promise.resolve({ data: null })
+        : supabase
+            .from("meal_requests")
+            .select("id, request_date, lunch, dinner")
+            .eq("user_id", profile.id)
+            .eq("status", "pending")
+            .order("request_date"),
+      canAddBazaar
+        ? Promise.resolve({ data: null })
+        : supabase
+            .from("meal_cost_requests")
+            .select("id, entry_date, amount, description")
+            .eq("user_id", profile.id)
+            .eq("status", "pending")
+            .order("entry_date"),
+    ]);
 
-  const { data: myPendingCostRequests } = canAddBazaar
-    ? { data: null }
-    : await supabase
-        .from("meal_cost_requests")
-        .select("id, entry_date, amount, description")
-        .eq("user_id", profile.id)
-        .eq("status", "pending")
-        .order("entry_date");
+  const { rows, mealRate, totalBazaar, totalMeals } = zipMemberMealSummary(members ?? [], mealTotals);
 
   return (
     <div className="flex flex-col gap-8">

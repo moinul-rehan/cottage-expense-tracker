@@ -130,13 +130,12 @@ export async function deleteUtilityAdjustment(id: string) {
   const profile = await requireSuperAdmin();
   const supabase = await createClient();
 
-  const { data: adjustment } = await supabase
-    .from("utility_adjustments")
-    .select("user_id, category, amount")
-    .eq("id", id)
-    .single();
-
-  await supabase.from("utility_adjustments").delete().eq("id", id);
+  // The delete only needs `id`; `adjustment` is used purely for the
+  // post-delete notification, so both run together.
+  const [{ data: adjustment }] = await Promise.all([
+    supabase.from("utility_adjustments").select("user_id, category, amount").eq("id", id).single(),
+    supabase.from("utility_adjustments").delete().eq("id", id),
+  ]);
 
   if (adjustment && adjustment.user_id !== profile.id) {
     const categoryLabel = UTILITY_CATEGORY_LABELS[adjustment.category] ?? adjustment.category;

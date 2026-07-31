@@ -25,14 +25,16 @@ export async function getMealTotals(supabase: SupabaseClient, monthKey: string) 
   return { totalBazaar, totalMeals, mealRate, mealsByUser, depositsByUser };
 }
 
-/** Per-member meal summary: meals eaten, meal cost, deposit, balance (deposit - cost). */
-export async function getMemberMealSummary<
-  T extends { id: string; first_name: string; last_name: string | null }
->(supabase: SupabaseClient, monthKey: string, members: T[]) {
-  const { mealRate, mealsByUser, depositsByUser, totalBazaar, totalMeals } = await getMealTotals(
-    supabase,
-    monthKey
-  );
+type MealTotals = Awaited<ReturnType<typeof getMealTotals>>;
+
+/** Zips already-fetched meal totals against a member list -- pure/sync, so
+ * callers can fetch `members` and `getMealTotals` in one Promise.all instead
+ * of awaiting `members` first just to pass it into this step. */
+export function zipMemberMealSummary<T extends { id: string; first_name: string; last_name: string | null }>(
+  members: T[],
+  totals: MealTotals
+) {
+  const { mealRate, mealsByUser, depositsByUser, totalBazaar, totalMeals } = totals;
 
   const rows = members.map((m) => {
     const meals = mealsByUser.get(m.id) ?? 0;
@@ -42,6 +44,17 @@ export async function getMemberMealSummary<
   });
 
   return { rows, mealRate, totalBazaar, totalMeals };
+}
+
+/** Per-member meal summary: meals eaten, meal cost, deposit, balance (deposit - cost).
+ * Convenience wrapper for callers that don't already have `members` fetched
+ * in parallel -- prefer `getMealTotals` + `zipMemberMealSummary` together in
+ * a Promise.all when `members` is being fetched anyway. */
+export async function getMemberMealSummary<
+  T extends { id: string; first_name: string; last_name: string | null }
+>(supabase: SupabaseClient, monthKey: string, members: T[]) {
+  const totals = await getMealTotals(supabase, monthKey);
+  return zipMemberMealSummary(members, totals);
 }
 
 type MemberRef = { first_name: string; last_name: string | null; avatar_url: string | null } | null;

@@ -8,7 +8,7 @@ export default async function CottageProfilePage() {
   const profile = await requireSuperAdmin();
   const supabase = await createClient();
 
-  const [{ data: cottage }, { data: members }] = await Promise.all([
+  const [{ data: cottage }, { data: members }, { count: memberCount }] = await Promise.all([
     supabase
       .from("cottages")
       .select("name, created_at, deletion_requested_at")
@@ -21,14 +21,10 @@ export default async function CottageProfilePage() {
       .eq("is_active", true)
       .neq("id", profile.id)
       .order("last_name"),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("cottage_id", profile.cottage_id),
   ]);
 
   if (!cottage) return null;
-
-  const { count: memberCount } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true })
-    .eq("cottage_id", profile.cottage_id);
 
   const deletionPending = !!cottage.deletion_requested_at;
   const deletionDate = deletionPending
@@ -39,7 +35,7 @@ export default async function CottageProfilePage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold text-foreground">Cottage Profile</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage this Cottage's identity, ownership, and lifecycle.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Manage this Cottage&apos;s identity, ownership, and lifecycle.</p>
       </div>
 
       <Card>

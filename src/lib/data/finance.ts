@@ -151,12 +151,13 @@ export async function getAmountOwedToUser(
 ) {
   const { start, end } = monthRange(monthKey);
 
-  const { data: paidExpenses } = await supabase
-    .from("expenses")
-    .select("id")
-    .eq("paid_by", userId)
-    .gte("expense_date", start)
-    .lt("expense_date", end);
+  // `received` doesn't depend on `paidExpenses`, so it runs alongside it
+  // instead of after it; `splits` genuinely needs `paidExpenses`' ids first
+  // and stays sequential.
+  const [{ data: paidExpenses }, { data: received }] = await Promise.all([
+    supabase.from("expenses").select("id").eq("paid_by", userId).gte("expense_date", start).lt("expense_date", end),
+    supabase.from("settlements").select("amount").eq("to_user", userId).gte("settled_on", start).lt("settled_on", end),
+  ]);
 
   const expenseIds = (paidExpenses ?? []).map((e) => e.id);
 
@@ -169,13 +170,6 @@ export async function getAmountOwedToUser(
       .neq("user_id", userId);
     frontedByOthers = (splits ?? []).reduce((sum, s) => sum + Number(s.share_amount), 0);
   }
-
-  const { data: received } = await supabase
-    .from("settlements")
-    .select("amount")
-    .eq("to_user", userId)
-    .gte("settled_on", start)
-    .lt("settled_on", end);
 
   const receivedTotal = (received ?? []).reduce((sum, s) => sum + Number(s.amount), 0);
 

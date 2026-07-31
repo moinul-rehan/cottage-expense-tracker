@@ -230,13 +230,12 @@ export async function removeBazaarDuty(dutyId: string) {
   const admin_ = await requireSuperAdmin();
   const supabase = await createClient();
 
-  const { data: duty } = await supabase
-    .from("bazaar_duties")
-    .select("user_id, start_date, end_date")
-    .eq("id", dutyId)
-    .single();
-
-  await supabase.from("bazaar_duties").delete().eq("id", dutyId);
+  // The delete only needs `dutyId`; `duty` is used purely for the
+  // post-delete notification, so both run together.
+  const [{ data: duty }] = await Promise.all([
+    supabase.from("bazaar_duties").select("user_id, start_date, end_date").eq("id", dutyId).single(),
+    supabase.from("bazaar_duties").delete().eq("id", dutyId),
+  ]);
 
   if (duty) {
     await notifyUsers(supabase, admin_.cottage_id, [duty.user_id], {
