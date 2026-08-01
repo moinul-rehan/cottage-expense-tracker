@@ -47,12 +47,12 @@ export function NoticePopup({ notices }: { notices: PopupNotice[] }) {
       <DialogContent
         showCloseButton
         className={cn(
-          "max-w-md rounded-sm bg-clip-padding p-0 text-[var(--paper-ink)] ring-0 [transform:translate(-50%,-50%)_rotate(var(--tilt))]",
+          "max-w-md rounded-sm bg-clip-padding p-0 text-[var(--paper-ink)] ring-0",
           meta.paper,
           notice.type === "emergency" && "border-t-4 border-t-red-600",
           isCritical && "ring-2 ring-red-600 ring-offset-2 ring-offset-background"
         )}
-        style={{ "--tilt": `${tilt}deg` } as CSSProperties}
+        style={{ rotate: `${tilt}deg` } as CSSProperties}
       >
         {isCritical && (
           <div className="flex items-center justify-center gap-1 bg-red-600 py-1.5 text-xs font-extrabold tracking-wider text-white uppercase">
@@ -61,17 +61,17 @@ export function NoticePopup({ notices }: { notices: PopupNotice[] }) {
           </div>
         )}
 
-        <div className="flex flex-col gap-3 p-6 pt-5">
+        <div className="flex flex-col gap-3 p-5 pt-4 sm:p-6 sm:pt-5">
           <span className="inline-flex items-center gap-1.5 self-start text-xs font-extrabold tracking-wide uppercase opacity-75">
             <Icon className="size-4" />
             {meta.label}
           </span>
 
-          <h2 className="text-xl leading-snug font-extrabold text-balance">{notice.title}</h2>
+          <h2 className="text-lg leading-snug font-extrabold text-balance sm:text-xl">{notice.title}</h2>
 
           {notice.type === "utility" && notice.due_amount != null ? (
             <p className="text-sm leading-snug">
-              <span className="block text-2xl font-extrabold">{notice.due_amount.toFixed(2)} BDT</span>
+              <span className="block text-xl font-extrabold sm:text-2xl">{notice.due_amount.toFixed(2)} BDT</span>
               {notice.description && (
                 <>
                   {notice.description}
