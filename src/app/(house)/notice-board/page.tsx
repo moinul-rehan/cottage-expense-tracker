@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getNotices } from "@/lib/data/notice-board";
+import { translate } from "@/lib/i18n/dictionary";
 import { NOTICE_TYPE_META, PRIORITY_META, VISIBILITY_LABEL, canCreateAnyNotice, computeStatus, sortForDisplay } from "@/lib/notice-types";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -57,7 +58,7 @@ export default async function NoticeBoardPage({
       <ScheduleWatcher wakeAt={wakeAt} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Notice Board</h1>
+          <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "notice_board")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             The house&apos;s communication hub - independent of Meal, Utilities and Cottage Balance.
           </p>

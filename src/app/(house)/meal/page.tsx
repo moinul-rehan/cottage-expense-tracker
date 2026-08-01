@@ -1,6 +1,7 @@
 import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { defaultDateForMonth } from "@/lib/data/months";
+import { translate } from "@/lib/i18n/dictionary";
 import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
 import { BazaarForm } from "./BazaarForm";
 import { DepositForm } from "./DepositForm";
@@ -56,7 +57,9 @@ export default async function MealPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Meal Ledger - {monthKey}</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          {translate(profile.language, "meal_ledger")} - {monthKey}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Bazaar spending, deposits and daily meals. Fully transparent to every member, and
           entirely separate from the Utility ledger.
@@ -66,19 +69,19 @@ export default async function MealPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-0">
-            <CardDescription className="text-xs font-medium tracking-wide uppercase">Total bazaar</CardDescription>
+            <CardDescription className="text-xs font-medium tracking-wide uppercase">{translate(profile.language, "total_bazaar")}</CardDescription>
             <CardTitle className="text-2xl font-semibold">{totalBazaar.toFixed(2)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-0">
-            <CardDescription className="text-xs font-medium tracking-wide uppercase">Total meals</CardDescription>
+            <CardDescription className="text-xs font-medium tracking-wide uppercase">{translate(profile.language, "total_meals")}</CardDescription>
             <CardTitle className="text-2xl font-semibold">{totalMeals}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-0">
-            <CardDescription className="text-xs font-medium tracking-wide uppercase">Meal rate</CardDescription>
+            <CardDescription className="text-xs font-medium tracking-wide uppercase">{translate(profile.language, "meal_rate")}</CardDescription>
             <CardTitle className="text-2xl font-semibold">{mealRate.toFixed(2)}</CardTitle>
           </CardHeader>
           <CardContent className="pt-1 text-xs text-muted-foreground">
@@ -166,11 +169,11 @@ export default async function MealPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead className="text-right">Meals</TableHead>
-                <TableHead className="text-right">Meal cost</TableHead>
-                <TableHead className="text-right">Deposit</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead>{translate(profile.language, "member")}</TableHead>
+                <TableHead className="text-right">{translate(profile.language, "meals")}</TableHead>
+                <TableHead className="text-right">{translate(profile.language, "meal_cost")}</TableHead>
+                <TableHead className="text-right">{translate(profile.language, "deposit")}</TableHead>
+                <TableHead className="text-right">{translate(profile.language, "balance")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

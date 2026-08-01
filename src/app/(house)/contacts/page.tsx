@@ -1,4 +1,5 @@
 import { getCurrentProfile } from "@/lib/data/dal";
+import { translate } from "@/lib/i18n/dictionary";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ export default async function ContactsPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Contact</h1>
+          <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "contact")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Necessary people for the Cottage - landlord, electrician, and the like.
           </p>

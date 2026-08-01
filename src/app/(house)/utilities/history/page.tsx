@@ -23,6 +23,7 @@ import { formatDate } from "@/lib/format-date";
 import { Download } from "@/components/animate-ui/icons/download";
 import { TabTransitionProvider, TabTrigger, TabContent } from "@/components/ui/tab-transition";
 import { InlineRowsSkeleton } from "@/components/page-skeleton";
+import { translate } from "@/lib/i18n/dictionary";
 import { UtilityDetailsMobile } from "./UtilityDetailsMobile";
 
 const TABS = [
@@ -74,13 +75,15 @@ export default async function UtilityHistoryPage({
         memberDeposits={memberDeposits}
         cottageDeposits={cottageDeposits}
         membersById={membersById}
+        lang={profile.language}
       />
 
       <div className="hidden flex-col gap-6 sm:flex">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">
-            Utility Details - <span className="font-bold text-primary">{formatMonthKey(monthKey)}</span>
+            {translate(profile.language, "utility_details")} -{" "}
+            <span className="font-bold text-primary">{formatMonthKey(monthKey)}</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Read-only record of every utility expense and deposit. No calculations happen here.
@@ -105,7 +108,7 @@ export default async function UtilityHistoryPage({
           <Card>
             <CardHeader className="pb-0">
               <CardDescription className="text-xs font-medium tracking-wide uppercase">
-                Cottage Balance
+                {translate(profile.language, "cottage_balance")}
               </CardDescription>
               <CardTitle className="text-2xl font-semibold">{cottageBalance.toFixed(2)}</CardTitle>
             </CardHeader>
@@ -116,7 +119,7 @@ export default async function UtilityHistoryPage({
           <Card>
             <CardHeader className="pb-0">
               <CardDescription className="text-xs font-medium tracking-wide uppercase">
-                Total Utility Expense
+                {translate(profile.language, "total_utility_expense")}
               </CardDescription>
               <CardTitle className="text-2xl font-semibold">{totalUtilityExpense.toFixed(2)}</CardTitle>
             </CardHeader>
@@ -127,7 +130,7 @@ export default async function UtilityHistoryPage({
           <Card>
             <CardHeader className="pb-0">
               <CardDescription className="text-xs font-medium tracking-wide uppercase">
-                Outstanding From Members
+                {translate(profile.language, "outstanding_from_members")}
               </CardDescription>
               <CardTitle className="text-2xl font-semibold">{outstandingFromMembers.toFixed(2)}</CardTitle>
             </CardHeader>
@@ -138,7 +141,7 @@ export default async function UtilityHistoryPage({
           <Card>
             <CardHeader className="pb-0">
               <CardDescription className="text-xs font-medium tracking-wide uppercase">
-                Collected This Month
+                {translate(profile.language, "collected_this_month")}
               </CardDescription>
               <CardTitle className="text-2xl font-semibold">{collectedThisMonth.toFixed(2)}</CardTitle>
             </CardHeader>

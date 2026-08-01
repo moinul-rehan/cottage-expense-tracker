@@ -1,4 +1,5 @@
 import { getCurrentProfile } from "@/lib/data/dal";
+import { translate } from "@/lib/i18n/dictionary";
 import { createClient } from "@/lib/supabase/server";
 import { getUpcomingBazaarDuties } from "@/lib/data/bazaar-duty";
 import { InviteForm } from "./InviteForm";
@@ -34,7 +35,7 @@ export default async function MembersPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Members</h1>
+        <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "members")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {isSuperAdmin
             ? "Invite Cottage members and manage who has access."

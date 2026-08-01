@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { TabTrigger, TabContent } from "@/components/ui/tab-transition";
 import { InlineCardsSkeleton } from "@/components/page-skeleton";
+import { translate, type Lang } from "@/lib/i18n/dictionary";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { getDisplayName } from "@/lib/data/display-name";
@@ -110,6 +111,7 @@ export function MonthDetailsMobile({
   pivotRows,
   bazaarRecords,
   depositRecords,
+  lang,
 }: {
   monthLabel: string;
   activeView: ViewValue;
@@ -120,12 +122,13 @@ export function MonthDetailsMobile({
   pivotRows: { date: string; counts: number[] }[];
   bazaarRecords: { id: string; entry_date: string; amount: number; description: string | null; member: MemberRef }[];
   depositRecords: { id: string; deposit_date: string; amount: number; note: string | null; member: MemberRef }[];
+  lang: Lang;
 }) {
   return (
     <div className="-mx-4 -mt-4 sm:hidden">
       <div className="bg-primary px-6 pt-6 text-primary-foreground" style={{ paddingBottom: PAD }}>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-3xl leading-tight font-bold">Monthly Details</h1>
+          <h1 className="text-3xl leading-tight font-bold">{translate(lang, "monthly_details")}</h1>
           <span className="rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-semibold">
             {monthLabel}
           </span>

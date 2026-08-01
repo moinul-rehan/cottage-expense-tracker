@@ -1,4 +1,5 @@
 import { getCurrentProfile } from "@/lib/data/dal";
+import { translate } from "@/lib/i18n/dictionary";
 import { ProfileForm } from "./ProfileForm";
 
 export default async function SettingsProfilePage() {
@@ -7,7 +8,7 @@ export default async function SettingsProfilePage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Profile</h1>
+        <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "profile")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Manage your personal info.</p>
       </div>
 

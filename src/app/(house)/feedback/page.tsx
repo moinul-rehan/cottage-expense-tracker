@@ -1,5 +1,6 @@
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
+import { translate } from "@/lib/i18n/dictionary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDateTime } from "@/lib/format-date";
@@ -21,7 +22,9 @@ export default async function FeedbackPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Feedback to Developer</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          {translate(profile.language, "feedback_to_developer")}
+        </h1>
         <p className="text-sm text-muted-foreground">
           Found a bug or have a suggestion? Let the developer know, screenshots help.
         </p>

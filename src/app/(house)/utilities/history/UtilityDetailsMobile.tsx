@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { getDisplayName } from "@/lib/data/display-name";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
+import { translate, type Lang } from "@/lib/i18n/dictionary";
 
 type Member = { id: string; first_name: string; last_name: string | null };
 type TabValue = "expense" | "member" | "cottage";
@@ -82,6 +83,7 @@ export function UtilityDetailsMobile({
   memberDeposits,
   cottageDeposits,
   membersById,
+  lang,
 }: {
   monthLabel: string;
   activeTab: TabValue;
@@ -90,12 +92,13 @@ export function UtilityDetailsMobile({
   memberDeposits: DepositRow[];
   cottageDeposits: DepositRow[];
   membersById: Map<string, Member>;
+  lang: Lang;
 }) {
   return (
     <div className="-mx-4 -mt-4 sm:hidden">
       <div className="bg-primary px-6 pt-6 text-primary-foreground" style={{ paddingBottom: PAD }}>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-3xl leading-tight font-bold">Utility Details</h1>
+          <h1 className="text-3xl leading-tight font-bold">{translate(lang, "utility_details")}</h1>
           <span className="rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-semibold">
             {monthLabel}
           </span>

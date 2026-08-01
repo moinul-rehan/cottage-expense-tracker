@@ -1,6 +1,7 @@
 import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonthKey } from "@/lib/data/months";
+import { translate } from "@/lib/i18n/dictionary";
 import {
   getDailyMealRecords,
   getDepositRecords,
@@ -86,12 +87,15 @@ export default async function MealMonthDetailsPage({
         pivotRows={pivotRows}
         bazaarRecords={bazaarRecords}
         depositRecords={depositRecords}
+        lang={profile.language}
       />
 
       <div className="hidden flex-col gap-6 sm:flex">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Month Details - {formatMonthKey(monthKey)}</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            {translate(profile.language, "month_details")} - {formatMonthKey(monthKey)}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Full meal, deposit and cost records for every member in the active month.
           </p>

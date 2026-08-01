@@ -1,6 +1,7 @@
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getNotifications } from "@/lib/data/notifications";
+import { translate } from "@/lib/i18n/dictionary";
 import { NotificationRow } from "./NotificationRow";
 import { MarkAllReadButton } from "./MarkAllReadButton";
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,7 @@ export default async function NotificationsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Notifications</h1>
+          <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "notifications")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Updates from the Meal ledger, Utility ledger, months and members.
           </p>

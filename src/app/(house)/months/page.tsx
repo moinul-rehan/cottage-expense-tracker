@@ -1,6 +1,7 @@
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveMonthSummary, getMonthHistory, formatMonthKey } from "@/lib/data/months";
+import { translate } from "@/lib/i18n/dictionary";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MonthActionButtons } from "./MonthActionButtons";
@@ -22,7 +23,7 @@ export default async function MonthsPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Months</h1>
+        <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "months")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {isSuperAdmin
             ? "Manage the active month and browse locked history. Setting a new active month locks this one into history and opens the one you pick (you can't open a month that hasn't started yet); resetting clears the active month's data without locking it. All actions require your password to confirm."
@@ -34,27 +35,27 @@ export default async function MonthsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardDescription className="text-xs font-medium tracking-wide uppercase">
-              Active month
+              {translate(profile.language, "active_month")}
             </CardDescription>
-            <Badge variant="default">Active</Badge>
+            <Badge variant="default">{translate(profile.language, "active")}</Badge>
           </div>
           <CardTitle className="text-2xl font-semibold">{formatMonthKey(monthKey)}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
           <div>
-            <p className="text-xs text-muted-foreground">Total utility due</p>
+            <p className="text-xs text-muted-foreground">{translate(profile.language, "total_utility_due")}</p>
             <p className="font-medium text-foreground">{summary.totalUtilityDue.toFixed(2)} tk</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total bazaar</p>
+            <p className="text-xs text-muted-foreground">{translate(profile.language, "total_bazaar")}</p>
             <p className="font-medium text-foreground">{summary.totalBazaar.toFixed(2)} tk</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total meals</p>
+            <p className="text-xs text-muted-foreground">{translate(profile.language, "total_meals")}</p>
             <p className="font-medium text-foreground">{summary.totalMeals}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Meal rate</p>
+            <p className="text-xs text-muted-foreground">{translate(profile.language, "meal_rate")}</p>
             <p className="font-medium text-foreground">{summary.mealRate.toFixed(2)} tk</p>
           </div>
         </CardContent>

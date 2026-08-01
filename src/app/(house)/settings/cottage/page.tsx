@@ -1,6 +1,7 @@
 import { requireSuperAdmin } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format-date";
+import { translate } from "@/lib/i18n/dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TransferOwnershipCard, DeleteCottageCard, PendingDeletionBanner, CottageNameForm } from "./CottageProfileControls";
 
@@ -34,7 +35,7 @@ export default async function CottageProfilePage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Cottage Profile</h1>
+        <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "cottage_profile")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Manage this Cottage&apos;s identity, ownership, and lifecycle.</p>
       </div>
 

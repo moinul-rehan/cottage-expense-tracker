@@ -2,6 +2,7 @@ import { requireSuperAdmin, getDisplayName, getActiveMembers } from "@/lib/data/
 import { createClient } from "@/lib/supabase/server";
 import { getMonthlyDues, getDefaultCosts, getCarryIns } from "@/lib/data/finance";
 import { formatMonthKey } from "@/lib/data/months";
+import { translate } from "@/lib/i18n/dictionary";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,7 +53,7 @@ export default async function UtilityStatementPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Member Utility Statements</h1>
+        <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "member_utility_statements")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Generate the final utility bill for {formatMonthKey(monthKey)} - every cost line,
           discount and manual adjustment shown here is what distributes money to members. Utility

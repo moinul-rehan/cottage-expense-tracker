@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { monthRange } from "@/lib/data/finance";
 import { formatDate, formatDateTime } from "@/lib/format-date";
 import { formatMonthKey } from "@/lib/data/months";
+import { translate } from "@/lib/i18n/dictionary";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -111,7 +112,7 @@ export default async function RequestPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Request</h1>
+        <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "request")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Meal and meal cost requests submitted by members without direct logging access.
           Approving writes straight into their meal history / deposit.

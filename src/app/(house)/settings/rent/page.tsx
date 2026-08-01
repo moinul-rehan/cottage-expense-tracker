@@ -1,6 +1,7 @@
 import { requireSuperAdmin, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getDefaultCosts } from "@/lib/data/finance";
+import { translate } from "@/lib/i18n/dictionary";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { DefaultCostForm } from "./DefaultCostForm";
 import { EditDefaultCostButton } from "./EditDefaultCostButton";
@@ -26,7 +27,7 @@ export default async function RentPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Default Cost</h1>
+          <h1 className="text-xl font-semibold text-foreground">{translate(profile.language, "default_cost")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Set each member&apos;s fixed monthly costs - rent, and any other utility that&apos;s the
             same every month. These auto-fill when generating the Utility Statement.
