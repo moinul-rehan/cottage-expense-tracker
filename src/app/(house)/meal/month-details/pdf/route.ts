@@ -1,7 +1,6 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveMonthKey } from "@/lib/data/months";
 import {
   getDailyMealRecords,
   getDepositRecords,
@@ -15,7 +14,7 @@ export async function GET() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
 
   const { data: members } = await supabase
     .from("profiles")

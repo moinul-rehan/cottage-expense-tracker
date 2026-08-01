@@ -1,7 +1,7 @@
-import { requireSuperAdmin, getDisplayName } from "@/lib/data/dal";
+import { requireSuperAdmin, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getMonthlyDues, getDefaultCosts, getCarryIns } from "@/lib/data/finance";
-import { getActiveMonthKey, formatMonthKey } from "@/lib/data/months";
+import { formatMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,14 +13,10 @@ import { cn } from "@/lib/utils";
 export default async function UtilityStatementPage() {
   const profile = await requireSuperAdmin();
   const supabase = await createClient();
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
 
-  const [{ data: members }, dues, adjustmentsQuery, defaultCosts, carryIns] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, first_name, last_name")
-      .eq("is_active", true)
-      .order("last_name"),
+  const [members, dues, adjustmentsQuery, defaultCosts, carryIns] = await Promise.all([
+    getActiveMembers(profile.cottage_id),
     getMonthlyDues(supabase, profile.cottage_id, monthKey),
     supabase
       .from("utility_adjustments")
@@ -64,12 +60,12 @@ export default async function UtilityStatementPage() {
         </p>
       </div>
 
-      <UtilityAdjustmentForm members={members ?? []} monthKey={monthKey} defaultCosts={defaultCostsByCategory} />
+      <UtilityAdjustmentForm members={members} monthKey={monthKey} defaultCosts={defaultCostsByCategory} />
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-foreground">Member Statements</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {(members ?? []).map((m) => {
+          {members.map((m) => {
             const lines = adjustmentsByUser.get(m.id) ?? [];
             const carryInLines = carryInsByUser.get(m.id) ?? [];
             const due = dues.get(m.id) ?? { rent: 0, expenses: 0, carryIn: 0, paid: 0, due: 0 };

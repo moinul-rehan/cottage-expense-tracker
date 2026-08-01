@@ -1,6 +1,6 @@
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveMonthKey, getActiveMonthSummary, getMonthHistory, formatMonthKey } from "@/lib/data/months";
+import { getActiveMonthSummary, getMonthHistory, formatMonthKey } from "@/lib/data/months";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MonthActionButtons } from "./MonthActionButtons";
@@ -13,7 +13,7 @@ export default async function MonthsPage() {
   const profile = await getCurrentProfile();
   const isSuperAdmin = profile.role === "super_admin";
   const supabase = await createClient();
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
   const [summary, history] = await Promise.all([
     getActiveMonthSummary(supabase, profile.cottage_id, monthKey),
     getMonthHistory(supabase, profile.cottage_id),

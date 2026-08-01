@@ -71,7 +71,11 @@ export async function getActiveMonthSummary(
   return { monthKey, closedAt: null, ...summary };
 }
 
-/** Locked (history) months for a cottage, newest first, each with a quick summary. */
+/** Locked (history) months for a cottage, newest first, each with a quick summary.
+ *
+ * Fetches every table once across ALL history months (not once per month -
+ * a cottage with a year of history previously cost 6 round trips per month,
+ * ~73 total; this costs 6 flat) and sums in memory per month_key. */
 export async function getMonthHistory(supabase: SupabaseClient, cottageId: string): Promise<MonthSummary[]> {
   const { data: closures } = await supabase
     .from("month_closures")
@@ -80,11 +84,44 @@ export async function getMonthHistory(supabase: SupabaseClient, cottageId: strin
     .order("month_key", { ascending: false });
 
   const rows = closures ?? [];
+  if (!rows.length) return [];
 
-  return Promise.all(
-    rows.map(async (row) => {
-      const summary = await getMonthSummary(supabase, cottageId, row.month_key);
-      return { monthKey: row.month_key, closedAt: row.closed_at, ...summary };
-    })
-  );
+  const monthKeys = rows.map((r) => r.month_key);
+
+  const [adjustments, deposits, carryIns, bazaar, meals] = await Promise.all([
+    supabase.from("utility_adjustments").select("amount, month_key").eq("cottage_id", cottageId).in("month_key", monthKeys),
+    supabase
+      .from("utility_deposits")
+      .select("amount, month_key")
+      .eq("cottage_id", cottageId)
+      .eq("source_type", "member")
+      .in("month_key", monthKeys),
+    supabase.from("utility_carry_ins").select("amount, month_key").eq("cottage_id", cottageId).in("month_key", monthKeys),
+    supabase.from("bazaar_entries").select("amount, month_key").eq("cottage_id", cottageId).in("month_key", monthKeys),
+    supabase.from("daily_meals").select("count, month_key").eq("cottage_id", cottageId).in("month_key", monthKeys),
+  ]);
+
+  function sumByMonth(data: { amount?: number; count?: number; month_key: string }[] | null, field: "amount" | "count") {
+    const byMonth = new Map<string, number>();
+    for (const row of data ?? []) {
+      byMonth.set(row.month_key, (byMonth.get(row.month_key) ?? 0) + Number(row[field] ?? 0));
+    }
+    return byMonth;
+  }
+
+  const adjByMonth = sumByMonth(adjustments.data, "amount");
+  const depByMonth = sumByMonth(deposits.data, "amount");
+  const carryByMonth = sumByMonth(carryIns.data, "amount");
+  const bazaarByMonth = sumByMonth(bazaar.data, "amount");
+  const mealsByMonth = sumByMonth(meals.data, "count");
+
+  return rows.map((row) => {
+    const totalUtilityDue =
+      (adjByMonth.get(row.month_key) ?? 0) + (carryByMonth.get(row.month_key) ?? 0) - (depByMonth.get(row.month_key) ?? 0);
+    const totalBazaar = bazaarByMonth.get(row.month_key) ?? 0;
+    const totalMeals = mealsByMonth.get(row.month_key) ?? 0;
+    const mealRate = totalMeals > 0 ? totalBazaar / totalMeals : 0;
+
+    return { monthKey: row.month_key, closedAt: row.closed_at, totalUtilityDue, totalBazaar, totalMeals, mealRate };
+  });
 }

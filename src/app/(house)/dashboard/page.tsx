@@ -1,8 +1,7 @@
 import { Wallet, Receipt, HandCoins, UtensilsCrossed, ShoppingBasket } from "lucide-react";
-import { getDisplayName, getFullName, getCurrentProfile } from "@/lib/data/dal";
+import { getDisplayName, getFullName, getCurrentProfile, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getCottageBalance, getMonthlyDues, getMonthlyExpenseTotal } from "@/lib/data/finance";
-import { getActiveMonthKey } from "@/lib/data/months";
 import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
 import { getMyNextBazaarDuty } from "@/lib/data/bazaar-duty";
 import { getNotices } from "@/lib/data/notice-board";
@@ -64,29 +63,24 @@ function StatCard({
 export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
 
   const [
     dues,
     cottageBalance,
     totalUtilityExpense,
-    { data: members },
+    members,
     myBazaarDuty,
     notices,
     dismissalsQuery,
     myAdjustmentsQuery,
     myDepositsQuery,
-    { data: cottage },
     mealTotals,
   ] = await Promise.all([
     getMonthlyDues(supabase, profile.cottage_id, monthKey),
     getCottageBalance(supabase, profile.cottage_id),
     getMonthlyExpenseTotal(supabase, monthKey),
-    supabase
-      .from("profiles")
-      .select("id, first_name, last_name, avatar_url")
-      .eq("is_active", true)
-      .order("last_name"),
+    getActiveMembers(profile.cottage_id),
     getMyNextBazaarDuty(supabase, profile.id),
     getNotices(supabase, profile.cottage_id),
     supabase.from("notice_dismissals").select("notice_id").eq("user_id", profile.id),
@@ -105,7 +99,6 @@ export default async function DashboardPage() {
       .eq("user_id", profile.id)
       .eq("source_type", "member")
       .order("deposit_date", { ascending: false }),
-    supabase.from("cottages").select("name").eq("id", profile.cottage_id).single(),
     // Independent of `members` (only zipped against it locally below), so it
     // runs alongside everything else instead of after members resolves.
     getMealTotals(supabase, monthKey),
@@ -130,10 +123,10 @@ export default async function DashboardPage() {
     note: d.note,
     amount: Number(d.amount),
   }));
-  const { rows: mealRows, mealRate, totalBazaar, totalMeals } = zipMemberMealSummary(members ?? [], mealTotals);
+  const { rows: mealRows, mealRate, totalBazaar, totalMeals } = zipMemberMealSummary(members, mealTotals);
   const myMealRow = mealRows.find((r) => r.id === profile.id);
 
-  const membersById = new Map((members ?? []).map((m) => [m.id, m]));
+  const membersById = new Map(members.map((m) => [m.id, m]));
   const pinnedNotices = sortForDisplay(
     notices.filter(
       (n) => computeStatus(n) === "published" && isEffectivelyPinned(n) && isVisibleTo(n, profile)
@@ -169,7 +162,7 @@ export default async function DashboardPage() {
       <MobileDashboardHero
         displayName={getDisplayName(profile)}
         profile={profile}
-        cottageName={cottage?.name ?? ""}
+        cottageName={profile.cottage_name}
         monthLabel={formatMonthKey(monthKey)}
         utility={{ assignedCost: myAssignedCost, paid: myDue.paid, due: myDue.due }}
         meal={{

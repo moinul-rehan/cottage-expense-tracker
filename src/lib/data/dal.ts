@@ -24,10 +24,19 @@ export type Profile = {
   can_add_meals: boolean
   can_add_deposit: boolean
   can_add_notice: boolean
+  /** Cottage fields fetched in the same round trip as the profile (see
+   * PROFILE_COLUMNS' embed below) - avoids every page re-querying `cottages`
+   * separately for the active month key or cottage name. */
+  cottage_name: string
+  active_month_key: string
 }
 
 const PROFILE_COLUMNS =
-  'id, cottage_id, first_name, last_name, email, role, room_label, is_active, avatar_url, gender, hometown, mobile_number, address, can_add_expenses, can_add_bazaar, can_add_meals, can_add_deposit, can_add_notice'
+  'id, cottage_id, first_name, last_name, email, role, room_label, is_active, avatar_url, gender, hometown, mobile_number, address, can_add_expenses, can_add_bazaar, can_add_meals, can_add_deposit, can_add_notice, cottage:cottages(name, active_month_key, status, suspended_at)'
+
+type ProfileQueryRow = Omit<Profile, 'cottage_name' | 'active_month_key'> & {
+  cottage: { name: string; active_month_key: string; status: string; suspended_at: string | null } | null
+}
 
 /**
  * Verifies the caller has an active Supabase session and loads their profile
@@ -45,13 +54,13 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/login')
   }
 
-  const { data: profile, error } = await supabase
+  const { data: row, error } = await supabase
     .from('profiles')
     .select(PROFILE_COLUMNS)
     .eq('id', user.id)
     .single()
 
-  if (error || !profile) {
+  if (error || !row) {
     // Sign out before redirecting: a lingering session with no matching
     // profile row (or a schema mismatch) would otherwise bounce forever
     // between the proxy's "authenticated -> /dashboard" and this
@@ -60,11 +69,7 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/login')
   }
 
-  const { data: cottage } = await supabase
-    .from('cottages')
-    .select('status, suspended_at')
-    .eq('id', profile.cottage_id)
-    .maybeSingle()
+  const { cottage, ...profileFields } = row as unknown as ProfileQueryRow
 
   if (cottage?.status === 'pending') {
     redirect('/pending-approval')
@@ -78,7 +83,30 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/suspended')
   }
 
-  return profile
+  return {
+    ...profileFields,
+    cottage_name: cottage?.name ?? '',
+    active_month_key: cottage?.active_month_key ?? new Date().toISOString().slice(0, 7),
+  }
+})
+
+export type ActiveMember = { id: string; first_name: string; last_name: string | null; avatar_url: string | null }
+
+/**
+ * Every active member of the cottage - dedupe point for the "members" list
+ * that both the shared (house) layout and most individual pages need each
+ * render. cache()-wrapped so calling it from the layout AND a page in the
+ * same request costs one round trip, not two.
+ */
+export const getActiveMembers = cache(async (cottageId: string): Promise<ActiveMember[]> => {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, avatar_url')
+    .eq('cottage_id', cottageId)
+    .eq('is_active', true)
+    .order('last_name')
+  return data ?? []
 })
 
 /** Same as getCurrentProfile but also enforces super_admin role. */

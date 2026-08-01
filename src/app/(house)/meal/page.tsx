@@ -1,6 +1,6 @@
-import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
+import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveMonthKey, defaultDateForMonth } from "@/lib/data/months";
+import { defaultDateForMonth } from "@/lib/data/months";
 import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
 import { BazaarForm } from "./BazaarForm";
 import { DepositForm } from "./DepositForm";
@@ -23,15 +23,15 @@ export default async function MealPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
   const defaultDate = defaultDateForMonth(monthKey);
 
   const canAddBazaar = profile.role === "super_admin" || profile.can_add_bazaar;
   const canAddMeals = profile.role === "super_admin" || profile.can_add_meals;
 
-  const [{ data: members }, mealTotals, { data: myPendingRequests }, { data: myPendingCostRequests }] =
+  const [members, mealTotals, { data: myPendingRequests }, { data: myPendingCostRequests }] =
     await Promise.all([
-      supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true).order("last_name"),
+      getActiveMembers(profile.cottage_id),
       getMealTotals(supabase, monthKey),
       canAddMeals
         ? Promise.resolve({ data: null })
@@ -51,7 +51,7 @@ export default async function MealPage() {
             .order("entry_date"),
     ]);
 
-  const { rows, mealRate, totalBazaar, totalMeals } = zipMemberMealSummary(members ?? [], mealTotals);
+  const { rows, mealRate, totalBazaar, totalMeals } = zipMemberMealSummary(members, mealTotals);
 
   return (
     <div className="flex flex-col gap-8">
@@ -90,7 +90,7 @@ export default async function MealPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div id="bazaar-form" className="scroll-mt-20">
           {canAddBazaar ? (
-            <BazaarForm members={members ?? []} defaultDate={defaultDate} />
+            <BazaarForm members={members} defaultDate={defaultDate} />
           ) : (
             <Card className="flex flex-col gap-3 p-4">
               <div>
@@ -122,7 +122,7 @@ export default async function MealPage() {
         </div>
         <div id="daily-meal-form" className="scroll-mt-20">
           {canAddMeals ? (
-            <DailyMealForm members={members ?? []} defaultDate={defaultDate} />
+            <DailyMealForm members={members} defaultDate={defaultDate} />
           ) : (
             <Card className="flex flex-col gap-3 p-4">
               <div>
@@ -155,7 +155,7 @@ export default async function MealPage() {
         </div>
         {profile.role === "super_admin" && (
           <div id="deposit-form" className="scroll-mt-20">
-            <DepositForm members={members ?? []} defaultDate={defaultDate} />
+            <DepositForm members={members} defaultDate={defaultDate} />
           </div>
         )}
       </div>

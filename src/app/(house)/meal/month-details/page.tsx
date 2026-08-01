@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
+import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveMonthKey, formatMonthKey } from "@/lib/data/months";
+import { formatMonthKey } from "@/lib/data/months";
 import {
   getDailyMealRecords,
   getDepositRecords,
@@ -58,21 +58,19 @@ export default async function MealMonthDetailsPage({
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
   const activeView: ViewValue = VIEWS.some((v) => v.value === view) ? (view as ViewValue) : "meal";
 
   const canEditMeals = profile.role === "super_admin" || profile.can_add_meals;
   const canEditBazaar = profile.role === "super_admin" || profile.can_add_bazaar;
   const canEditDeposits = profile.role === "super_admin";
 
-  const [{ data: members }, mealRecords, depositRecords, bazaarRecords] = await Promise.all([
-    supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true).order("last_name"),
+  const [memberList, mealRecords, depositRecords, bazaarRecords] = await Promise.all([
+    getActiveMembers(profile.cottage_id),
     activeView === "meal" ? getDailyMealRecords(supabase, monthKey) : Promise.resolve([]),
     activeView === "deposit" ? getDepositRecords(supabase, monthKey) : Promise.resolve([]),
     activeView === "cost" ? getBazaarRecords(supabase, monthKey) : Promise.resolve([]),
   ]);
-
-  const memberList = members ?? [];
   const { rows: pivotRows, totals } = pivotDailyMealsByDate(mealRecords, memberList);
 
   return (

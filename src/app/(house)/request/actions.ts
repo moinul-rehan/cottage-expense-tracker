@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveMonthKey } from "@/lib/data/months";
 import { notifyUsers } from "@/lib/data/notifications";
 import { formatDate } from "@/lib/format-date";
 
@@ -35,7 +34,7 @@ export async function approveMealRequest(requestId: string) {
 
   if (!request || request.status !== "pending") return;
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const { error: upsertError } = await supabase.from("daily_meals").upsert(
     {
@@ -107,7 +106,7 @@ export async function approveMealCostRequest(requestId: string) {
 
   if (!request || request.status !== "pending") return;
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   // Inserts the bazaar entry AND credits the same amount back into the
   // requester's meal deposit in one atomic call -- same RPC the "Cost

@@ -4,10 +4,10 @@ import { Pin } from "@/components/animate-ui/icons/pin";
 import { Users } from "@/components/animate-ui/icons/users";
 import { Settings as SettingsIcon } from "@/components/animate-ui/icons/settings";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
-import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
+import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount, getNotifications } from "@/lib/data/notifications";
-import { getActiveMonthKey, defaultDateForMonth, formatMonthKey } from "@/lib/data/months";
+import { defaultDateForMonth, formatMonthKey } from "@/lib/data/months";
 import { MealQuickAddMenu } from "./MealQuickAddMenu";
 import { UtilitiesQuickAddMenu } from "./UtilitiesQuickAddMenu";
 import { SidebarNavLink } from "./SidebarNavLink";
@@ -41,25 +41,22 @@ export default async function HouseLayout({
 }) {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
-  const [unreadCount, notifications, { data: members }, activeMonthKey, { data: cottage }] = await Promise.all([
-    getUnreadCount(supabase, profile.id),
-    getNotifications(supabase, profile.id, 30),
-    supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true).order("last_name"),
-    getActiveMonthKey(supabase, profile.cottage_id),
-    supabase.from("cottages").select("name").eq("id", profile.cottage_id).single(),
-  ]);
-  const defaultDate = defaultDateForMonth(activeMonthKey);
   const canManageMealRequests =
     profile.role === "super_admin" || profile.can_add_meals || profile.can_add_bazaar;
 
-  let pendingRequestCount = 0;
-  if (canManageMealRequests) {
-    const [mealPending, costPending] = await Promise.all([
-      supabase.from("meal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("meal_cost_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    ]);
-    pendingRequestCount = (mealPending.count ?? 0) + (costPending.count ?? 0);
-  }
+  const [unreadCount, notifications, members, mealPending, costPending] = await Promise.all([
+    getUnreadCount(supabase, profile.id),
+    getNotifications(supabase, profile.id, 30),
+    getActiveMembers(profile.cottage_id),
+    canManageMealRequests
+      ? supabase.from("meal_requests").select("id", { count: "exact", head: true }).eq("status", "pending")
+      : Promise.resolve({ count: 0 }),
+    canManageMealRequests
+      ? supabase.from("meal_cost_requests").select("id", { count: "exact", head: true }).eq("status", "pending")
+      : Promise.resolve({ count: 0 }),
+  ]);
+  const defaultDate = defaultDateForMonth(profile.active_month_key);
+  const pendingRequestCount = (mealPending.count ?? 0) + (costPending.count ?? 0);
 
   const topLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -96,7 +93,7 @@ export default async function HouseLayout({
               </div>
             </SidebarMenuItem>
             <MealQuickAddMenu
-              members={members ?? []}
+              members={members}
               defaultDate={defaultDate}
               canAddBazaar={profile.role === "super_admin" || profile.can_add_bazaar}
               canAddMeals={profile.role === "super_admin" || profile.can_add_meals}
@@ -112,7 +109,7 @@ export default async function HouseLayout({
               </div>
             </SidebarMenuItem>
             <UtilitiesQuickAddMenu
-              members={members ?? []}
+              members={members}
               defaultDate={defaultDate}
               isSuperAdmin={profile.role === "super_admin"}
               canAddExpenses={profile.role === "super_admin" || profile.can_add_expenses}
@@ -136,15 +133,15 @@ export default async function HouseLayout({
         <PageHeader
           profile={profile}
           displayName={getDisplayName(profile)}
-          monthLabel={formatMonthKey(activeMonthKey)}
-          cottageName={cottage?.name ?? ""}
+          monthLabel={formatMonthKey(profile.active_month_key)}
+          cottageName={profile.cottage_name}
           notifications={notifications}
           unreadCount={unreadCount}
         />
         <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-4 pb-24 sm:px-8 sm:pt-0 sm:pb-8 xl:px-12">{children}</main>
       </SidebarInset>
       <MobileBottomNav
-        members={members ?? []}
+        members={members}
         defaultDate={defaultDate}
         canAddBazaar={profile.role === "super_admin" || profile.can_add_bazaar}
         canAddMeals={profile.role === "super_admin" || profile.can_add_meals}

@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
+import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
   getMonthlyExpenseHistory,
   getUtilityDepositHistory,
   getCottageBalance,
   getMonthlyDues,
-  getMonthlyExpenseTotal,
 } from "@/lib/data/finance";
-import { getActiveMonthKey, formatMonthKey } from "@/lib/data/months";
+import { formatMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -43,18 +42,20 @@ export default async function UtilityHistoryPage({
 
   const profile = await getCurrentProfile();
   const supabase = await createClient();
-  const monthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const monthKey = profile.active_month_key;
 
-  const [{ data: members }, expenses, deposits, cottageBalance, totalUtilityExpense, dues] = await Promise.all([
-    supabase.from("profiles").select("id, first_name, last_name").eq("is_active", true).order("last_name"),
+  const [members, expenses, deposits, cottageBalance, dues] = await Promise.all([
+    getActiveMembers(profile.cottage_id),
     getMonthlyExpenseHistory(supabase, monthKey),
     getUtilityDepositHistory(supabase, profile.cottage_id, monthKey),
     getCottageBalance(supabase, profile.cottage_id),
-    getMonthlyExpenseTotal(supabase, monthKey),
     getMonthlyDues(supabase, profile.cottage_id, monthKey),
   ]);
+  // Same rows getMonthlyExpenseHistory already fetched - sum in memory
+  // instead of re-querying `expenses` for the exact same month range.
+  const totalUtilityExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-  const membersById = new Map((members ?? []).map((m) => [m.id, m]));
+  const membersById = new Map(members.map((m) => [m.id, m]));
   const memberDeposits = deposits.filter((d) => d.source_type === "member");
   const cottageDeposits = deposits.filter((d) => d.source_type === "addition");
   const outstandingFromMembers = Array.from(dues.values()).reduce((sum, d) => sum + Math.max(0, d.due), 0);

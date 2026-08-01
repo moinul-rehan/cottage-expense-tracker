@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { notifyUsers } from "@/lib/data/notifications";
-import { getActiveMonthKey } from "@/lib/data/months";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 
 function revalidateUtilityPaths() {
@@ -96,7 +95,7 @@ export async function addExpense(
       return { error: "Expense saved but Cottage Balance could not be updated. Contact admin." };
     }
   } else if (paymentSource === "member") {
-    const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+    const activeMonthKey = profile.active_month_key;
     const { error: adjError } = await supabase.from("utility_adjustments").insert({
       cottage_id: profile.cottage_id,
       month_key: activeMonthKey,
@@ -157,7 +156,7 @@ export async function addMemberUtilityDeposit(
     .maybeSingle();
   if (!member) return { error: "Pick a valid member." };
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const { error } = await supabase.from("utility_deposits").insert({
     cottage_id: profile.cottage_id,
@@ -211,7 +210,7 @@ export async function addCottageDeposit(
 
   if (!Number.isFinite(amount) || amount <= 0) return { error: "Enter a valid amount." };
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const { error } = await supabase.from("utility_deposits").insert({
     cottage_id: profile.cottage_id,

@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveMonthKey } from "@/lib/data/months";
-import { notifyUsers } from "@/lib/data/notifications";
+import { notifyUsers, notifyUsersIndividually } from "@/lib/data/notifications";
 
 export type MealActionState = { error?: string } | undefined;
 
@@ -36,7 +35,7 @@ export async function addBazaarEntry(
     return { error: "Enter a valid amount." };
   }
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const { error } = await supabase.rpc("add_bazaar_entry", {
     p_month_key: activeMonthKey,
@@ -125,7 +124,7 @@ export async function addMealDeposit(
   if (!userId) return { error: "Select a member." };
   if (!Number.isFinite(amount) || amount <= 0) return { error: "Enter a valid amount." };
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const { error } = await supabase.from("meal_deposits").insert({
     month_key: activeMonthKey,
@@ -217,7 +216,7 @@ export async function addDailyMealsForDate(
 
   if (!memberIds.length) return { error: "No members to save." };
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const rows = memberIds.map((userId) => {
     const lunch = Number(formData.get(`lunch_${userId}`) ?? 0) || 0;
@@ -237,17 +236,18 @@ export async function addDailyMealsForDate(
 
   if (error) return { error: "Could not save the meal counts." };
 
-  await Promise.all(
+  await notifyUsersIndividually(
+    supabase,
+    profile.cottage_id,
     rows
       .filter((row) => row.count > 0 && row.user_id !== profile.id)
-      .map((row) =>
-        notifyUsers(supabase, profile.cottage_id, [row.user_id], {
-          type: "daily_meal",
-          title: "Your meal count was logged",
-          body: `${row.count} meal${row.count === 1 ? "" : "s"} on ${mealDate}.`,
-          link: "/meal",
-        })
-      )
+      .map((row) => ({
+        userId: row.user_id,
+        type: "daily_meal",
+        title: "Your meal count was logged",
+        body: `${row.count} meal${row.count === 1 ? "" : "s"} on ${mealDate}.`,
+        link: "/meal",
+      }))
   );
 
   revalidatePath("/meal");
@@ -275,7 +275,7 @@ export async function updateDailyMealsForDate(
   if (!mealDate) return { error: "Missing date." };
   if (!memberIds.length) return { error: "No members to update." };
 
-  const activeMonthKey = await getActiveMonthKey(supabase, profile.cottage_id);
+  const activeMonthKey = profile.active_month_key;
 
   const rows = memberIds.map((userId) => {
     const count = Number(formData.get(`count_${userId}`) ?? 0);
@@ -296,17 +296,18 @@ export async function updateDailyMealsForDate(
     return { error: "Could not update meals for this date." };
   }
 
-  await Promise.all(
+  await notifyUsersIndividually(
+    supabase,
+    profile.cottage_id,
     rows
       .filter((row) => row.user_id !== profile.id)
-      .map((row) =>
-        notifyUsers(supabase, profile.cottage_id, [row.user_id], {
-          type: "daily_meal",
-          title: "Your meal count was updated",
-          body: `${row.count} meal${row.count === 1 ? "" : "s"} on ${mealDate}.`,
-          link: "/meal",
-        })
-      )
+      .map((row) => ({
+        userId: row.user_id,
+        type: "daily_meal",
+        title: "Your meal count was updated",
+        body: `${row.count} meal${row.count === 1 ? "" : "s"} on ${mealDate}.`,
+        link: "/meal",
+      }))
   );
 
   revalidatePath("/meal");

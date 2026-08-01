@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendPushToUsers } from "./push";
 
@@ -29,18 +30,44 @@ export async function notifyUsers(
   notification: { type: string; title: string; body?: string; link?: string }
 ) {
   if (userIds.length === 0) return;
-  // sendPushToUsers does its own independent subscription lookup and never
-  // reads the inserted row back, so it runs alongside the insert instead of
-  // after it -- this helper is called from nearly every mutation in the
-  // app, so this shaves a round-trip off every one of them.
-  await Promise.all([
-    supabase.from("notifications").insert(
-      userIds.map((userId) => ({
-        cottage_id: cottageId,
-        user_id: userId,
-        ...notification,
-      }))
-    ),
-    sendPushToUsers(userIds, notification),
-  ]);
+
+  await supabase.from("notifications").insert(
+    userIds.map((userId) => ({
+      cottage_id: cottageId,
+      user_id: userId,
+      ...notification,
+    }))
+  );
+
+  // Push delivery fans out to one third-party HTTPS request per
+  // subscription (see push.ts) - potentially slow, and never read back by
+  // the caller, so it runs after the response is sent instead of blocking
+  // whatever action called notifyUsers.
+  after(() => sendPushToUsers(userIds, notification));
+}
+
+/**
+ * Same as notifyUsers, but for the case where every recipient gets a
+ * *different* title/body (e.g. "your meal count was logged: 2 meals" - the
+ * count differs per member) - one batched insert instead of one insert per
+ * user. Call from server actions after the triggering write.
+ */
+export async function notifyUsersIndividually(
+  supabase: SupabaseClient,
+  cottageId: string,
+  rows: { userId: string; type: string; title: string; body?: string; link?: string }[]
+) {
+  if (!rows.length) return;
+
+  await supabase.from("notifications").insert(
+    rows.map(({ userId, ...notification }) => ({
+      cottage_id: cottageId,
+      user_id: userId,
+      ...notification,
+    }))
+  );
+
+  after(() =>
+    Promise.all(rows.map(({ userId, ...notification }) => sendPushToUsers([userId], notification)))
+  );
 }
