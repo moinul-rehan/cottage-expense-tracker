@@ -8,6 +8,7 @@ import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount, getNotifications } from "@/lib/data/notifications";
 import { defaultDateForMonth, formatMonthKey } from "@/lib/data/months";
+import { translate } from "@/lib/i18n/dictionary";
 import { MealQuickAddMenu } from "./MealQuickAddMenu";
 import { UtilitiesQuickAddMenu } from "./UtilitiesQuickAddMenu";
 import { SidebarNavLink } from "./SidebarNavLink";
@@ -26,13 +27,6 @@ import {
   SidebarProvider,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
-const bottomLinks = [
-  { href: "/members", label: "Members", icon: Users },
-  { href: "/months", label: "Months", icon: CalendarRange },
-  { href: "/contacts", label: "Contact", icon: Contact },
-  { href: "/feedback", label: "Feedback", icon: MessageSquareWarning },
-];
 
 export default async function HouseLayout({
   children,
@@ -57,11 +51,20 @@ export default async function HouseLayout({
   ]);
   const defaultDate = defaultDateForMonth(profile.active_month_key);
   const pendingRequestCount = (mealPending.count ?? 0) + (costPending.count ?? 0);
+  const lang = profile.language;
+  const t = (key: Parameters<typeof translate>[1]) => translate(lang, key);
 
   const topLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/notice-board", label: "Notice Board", icon: Pin },
-    ...(canManageMealRequests ? [{ href: "/request", label: "Request", icon: Inbox }] : []),
+    { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/notice-board", label: t("notice_board"), icon: Pin },
+    ...(canManageMealRequests ? [{ href: "/request", label: t("request"), icon: Inbox }] : []),
+  ];
+
+  const bottomLinks = [
+    { href: "/members", label: t("members"), icon: Users },
+    { href: "/months", label: t("months"), icon: CalendarRange },
+    { href: "/contacts", label: t("contact"), icon: Contact },
+    { href: "/feedback", label: t("feedback"), icon: MessageSquareWarning },
   ];
 
   return (
@@ -89,7 +92,7 @@ export default async function HouseLayout({
             <SidebarMenuItem>
               <div className="flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold text-sidebar-foreground/60 group-data-[collapsible=icon]:justify-center">
                 <UtensilsCrossed className="size-4" />
-                <span className="group-data-[collapsible=icon]:hidden">Meal</span>
+                <span className="group-data-[collapsible=icon]:hidden">{t("meal")}</span>
               </div>
             </SidebarMenuItem>
             <MealQuickAddMenu
@@ -105,7 +108,7 @@ export default async function HouseLayout({
             <SidebarMenuItem>
               <div className="flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold text-sidebar-foreground/60 group-data-[collapsible=icon]:justify-center">
                 <Zap className="size-4" />
-                <span className="group-data-[collapsible=icon]:hidden">Utilities</span>
+                <span className="group-data-[collapsible=icon]:hidden">{t("utilities")}</span>
               </div>
             </SidebarMenuItem>
             <UtilitiesQuickAddMenu
@@ -123,7 +126,7 @@ export default async function HouseLayout({
               </SidebarMenuItem>
             ))}
             <SidebarMenuItem>
-              <SidebarNavLink href="/settings/profile" label="Settings" icon={<SettingsIcon />} />
+              <SidebarNavLink href="/settings/profile" label={t("settings")} icon={<SettingsIcon />} />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
@@ -137,6 +140,7 @@ export default async function HouseLayout({
           cottageName={profile.cottage_name}
           notifications={notifications}
           unreadCount={unreadCount}
+          lang={lang}
         />
         <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-4 pb-24 sm:px-8 sm:pt-0 sm:pb-8 xl:px-12">{children}</main>
       </SidebarInset>
@@ -149,6 +153,7 @@ export default async function HouseLayout({
         canAddExpenses={profile.role === "super_admin" || profile.can_add_expenses}
         isSuperAdmin={profile.role === "super_admin"}
         pendingRequestCount={pendingRequestCount}
+        lang={lang}
       />
       <PushPermission />
     </SidebarProvider>

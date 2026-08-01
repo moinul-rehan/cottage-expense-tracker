@@ -8,6 +8,7 @@ import { LayoutDashboard } from "@/components/animate-ui/icons/layout-dashboard"
 import { Pin } from "@/components/animate-ui/icons/pin";
 import { Menu } from "@/components/animate-ui/icons/menu";
 import type { IconComponent } from "@/lib/icon-type";
+import { translate, type Lang, type DictionaryKey } from "@/lib/i18n/dictionary";
 import { MobileMealSheet } from "./MobileMealSheet";
 import { MobileUtilitiesSheet } from "./MobileUtilitiesSheet";
 import { MobileMenuSheet } from "./MobileMenuSheet";
@@ -111,6 +112,7 @@ export function MobileBottomNav({
   canAddExpenses,
   isSuperAdmin,
   pendingRequestCount = 0,
+  lang,
 }: {
   members: Member[];
   defaultDate: string;
@@ -120,7 +122,9 @@ export function MobileBottomNav({
   canAddExpenses: boolean;
   isSuperAdmin: boolean;
   pendingRequestCount?: number;
+  lang: Lang;
 }) {
+  const t = (key: DictionaryKey) => translate(lang, key);
   const pathname = usePathname();
   const [activeSheet, setActiveSheet] = useState<SheetKey | null>(null);
   const [origin, setOrigin] = useState<SpeedDialOrigin | null>(null);
@@ -153,7 +157,7 @@ export function MobileBottomNav({
       >
         <NavTab
           icon={LayoutDashboard}
-          label="Home"
+          label={t("home")}
           href="/dashboard"
           active={!anySheetOpen && pathname === "/dashboard"}
           onClick={() => setActiveSheet(null)}
@@ -162,7 +166,7 @@ export function MobileBottomNav({
         {canManageMealRequests ? (
           <NavTab
             icon={Inbox}
-            label="Request"
+            label={t("request")}
             href="/request"
             active={!anySheetOpen && pathname === "/request"}
             onClick={() => setActiveSheet(null)}
@@ -171,7 +175,7 @@ export function MobileBottomNav({
         ) : (
           <NavTab
             icon={Pin}
-            label="Notices"
+            label={t("notices")}
             href="/notice-board"
             active={!anySheetOpen && pathname === "/notice-board"}
             onClick={() => setActiveSheet(null)}
@@ -180,19 +184,19 @@ export function MobileBottomNav({
         )}
         <NavTab
           icon={UtensilsCrossed}
-          label="Meal"
+          label={t("meal")}
           active={mealActive || activeSheet === "meal"}
           onClick={(e) => toggleSheet("meal", e)}
         />
         <NavTab
           icon={Zap}
-          label="Utilities"
+          label={t("utilities")}
           active={utilitiesActive || activeSheet === "utilities"}
           onClick={(e) => toggleSheet("utilities", e)}
         />
         <NavTab
           icon={Menu}
-          label="Menu"
+          label={t("menu")}
           active={menuActive || activeSheet === "menu"}
           onClick={(e) => toggleSheet("menu", e)}
           animated

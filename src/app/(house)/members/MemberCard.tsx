@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { ShoppingBasket, Mail, Phone, Home, UserX } from "lucide-react";
 import { ChevronDown } from "@/components/animate-ui/icons/chevron-down";
 import { X } from "@/components/animate-ui/icons/x";
+import { RangeCalendar } from "@/components/ui/range-calendar";
 import { MapPin } from "@/components/animate-ui/icons/map-pin";
 import {
   setMemberActive,
@@ -265,13 +266,8 @@ function AssignDutyDialog({
 }) {
   const [state, action, pending] = useActionState(assignBazaarDuty, undefined);
   const today = new Date().toISOString().slice(0, 10);
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState("");
-
-  const conflict =
-    startDate && endDate && endDate >= startDate
-      ? otherDuties.find((d) => d.start_date <= endDate && d.end_date >= startDate)
-      : undefined;
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -281,45 +277,36 @@ function AssignDutyDialog({
         </DialogHeader>
         <form action={action} className="flex flex-col gap-4 p-4 pt-2">
           <input type="hidden" name="user_id" value={userId} />
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="start_date">Start date</Label>
-              <Input
-                id="start_date"
-                name="start_date"
-                type="date"
-                min={today}
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="end_date">End date</Label>
-              <Input
-                id="end_date"
-                name="end_date"
-                type="date"
-                min={startDate || today}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                required
-              />
-            </div>
+          <input type="hidden" name="start_date" value={startDate ?? ""} />
+          <input type="hidden" name="end_date" value={endDate ?? ""} />
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Dates (already-assigned dates are disabled)</Label>
+            <RangeCalendar
+              start={startDate}
+              end={endDate}
+              onChange={(s, e) => {
+                setStartDate(s);
+                setEndDate(e);
+              }}
+              disabledRanges={otherDuties}
+              minDate={today}
+            />
+            {startDate && (
+              <p className="text-xs text-muted-foreground">
+                {formatDate(startDate)}
+                {endDate ? ` – ${formatDate(endDate)}` : " – pick an end date"}
+              </p>
+            )}
           </div>
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="note">Note</Label>
             <Input id="note" name="note" placeholder="Optional" />
           </div>
-          {conflict && (
-            <p className="text-sm text-destructive">
-              {conflict.memberName} is already assigned {formatDate(conflict.start_date)} – {formatDate(conflict.end_date)}.
-              Pick a range that doesn&apos;t overlap.
-            </p>
-          )}
           {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
           {state?.success && <p className="text-sm text-emerald-600">{state.success}</p>}
-          <Button type="submit" disabled={pending || !!conflict} className="self-start">
+          <Button type="submit" disabled={pending || !startDate || !endDate} className="self-start">
             {pending ? "Assigning…" : "Assign duty"}
           </Button>
         </form>

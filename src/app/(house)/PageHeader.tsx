@@ -6,9 +6,11 @@ import { NotificationTray } from "./NotificationTray";
 import { ProfileMenu } from "./ProfileMenu";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { LocalClock } from "@/components/LocalClock";
 import { Logo } from "@/components/logo";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { translate, type Lang } from "@/lib/i18n/dictionary";
 
 type Profile = {
   role: "super_admin" | "member";
@@ -38,6 +40,7 @@ export function PageHeader({
   cottageName,
   notifications,
   unreadCount,
+  lang,
 }: {
   profile: Profile;
   displayName: string;
@@ -45,6 +48,7 @@ export function PageHeader({
   cottageName: string;
   notifications: Notification[];
   unreadCount: number;
+  lang: Lang;
 }) {
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
@@ -73,6 +77,7 @@ export function PageHeader({
           <div className="flex min-w-0 flex-1 items-center justify-between gap-3 sm:hidden">
             <Logo size={42} />
             <div className="flex items-center gap-2.5">
+              <LanguageToggle lang={lang} />
               <ThemeToggle />
               <NotificationTray notifications={notifications} unreadCount={unreadCount} />
               <ProfileMenu
@@ -87,7 +92,7 @@ export function PageHeader({
         {isDashboard && (
           <div className="hidden min-w-0 flex-col leading-tight sm:flex">
             <span className="flex items-center gap-1.5 truncate text-xl font-bold text-foreground sm:text-2xl">
-              Welcome, {displayName}
+              {translate(lang, "welcome")}, {displayName}
               <VerifiedBadge
                 role={profile.role}
                 can_add_expenses={profile.can_add_expenses}
@@ -110,6 +115,7 @@ export function PageHeader({
       {isDashboard && (
         <div className="hidden shrink-0 items-center gap-2.5 sm:flex">
           <LocalClock />
+          <LanguageToggle lang={lang} />
           <ThemeToggle />
           <NotificationTray notifications={notifications} unreadCount={unreadCount} />
           <ProfileMenu
