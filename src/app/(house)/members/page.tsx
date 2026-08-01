@@ -21,6 +21,16 @@ export default async function MembersPage() {
     getUpcomingBazaarDuties(supabase, profile.cottage_id),
   ]);
 
+  const membersById = new Map((members ?? []).map((m) => [m.id, m]));
+  const allDuties = Array.from(duties.values())
+    .flat()
+    .map((d) => ({
+      ...d,
+      memberName: membersById.get(d.user_id)
+        ? `${membersById.get(d.user_id)!.first_name}${membersById.get(d.user_id)!.last_name ? " " + membersById.get(d.user_id)!.last_name : ""}`
+        : "Another member",
+    }));
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -40,6 +50,7 @@ export default async function MembersPage() {
             key={member.id}
             member={member}
             duties={duties.get(member.id) ?? []}
+            otherDuties={allDuties.filter((d) => d.user_id !== member.id)}
             viewerIsAdmin={isSuperAdmin}
           />
         ))}

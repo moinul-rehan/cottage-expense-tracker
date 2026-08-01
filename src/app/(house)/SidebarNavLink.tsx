@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { cloneElement, isValidElement, type ReactNode } from "react";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,11 @@ export function SidebarNavLink({
   const isActive = pathname === href || pathname.startsWith(`${href}/`);
   const { setOpenMobile } = useSidebar();
 
+  // Nav icons should only animate while their route is active, not
+  // continuously like card/section icons - overrides the app-wide
+  // "always animate" default from the root layout for this one icon.
+  const animatedIcon = isValidElement(icon) ? cloneElement(icon, { animate: isActive } as object) : icon;
+
   return (
     <SidebarMenuButton
       render={<Link href={href} onClick={() => setOpenMobile(false)} />}
@@ -34,7 +39,7 @@ export function SidebarNavLink({
           : "font-normal text-sidebar-foreground"
       )}
     >
-      {icon}
+      {animatedIcon}
       {label}
       {unreadCount ? (
         <Badge variant="default" className="ml-auto">

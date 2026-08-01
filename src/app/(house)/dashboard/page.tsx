@@ -3,7 +3,8 @@ import { getDisplayName, getFullName, getCurrentProfile, getActiveMembers } from
 import { createClient } from "@/lib/supabase/server";
 import { getCottageBalance, getMonthlyDues, getMonthlyExpenseTotal } from "@/lib/data/finance";
 import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
-import { getMyNextBazaarDuty } from "@/lib/data/bazaar-duty";
+import { getCottageBazaarDuties } from "@/lib/data/bazaar-duty";
+import { BazaarDutyRoster } from "./BazaarDutyRoster";
 import { getNotices } from "@/lib/data/notice-board";
 import { UTILITY_CATEGORY_LABELS } from "@/lib/utility-categories";
 import { formatDate } from "@/lib/format-date";
@@ -70,7 +71,7 @@ export default async function DashboardPage() {
     cottageBalance,
     totalUtilityExpense,
     members,
-    myBazaarDuty,
+    bazaarDuties,
     notices,
     dismissalsQuery,
     myAdjustmentsQuery,
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
     getCottageBalance(supabase, profile.cottage_id),
     getMonthlyExpenseTotal(supabase, monthKey),
     getActiveMembers(profile.cottage_id),
-    getMyNextBazaarDuty(supabase, profile.id),
+    getCottageBazaarDuties(supabase, profile.cottage_id),
     getNotices(supabase, profile.cottage_id),
     supabase.from("notice_dismissals").select("notice_id").eq("user_id", profile.id),
     supabase
@@ -204,20 +205,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {myBazaarDuty && (
-        <Card className="flex-row items-center gap-4 border-none bg-accent p-5">
-          <div className="flex size-[54px] shrink-0 items-center justify-center rounded-xl bg-background/60 text-accent-foreground">
-            <ShoppingBasket className="size-6" />
-          </div>
-          <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-sm font-medium text-foreground">Your bazaar duty</p>
-            <p className="text-lg font-semibold text-foreground">
-              {formatDutyRange(myBazaarDuty.start_date, myBazaarDuty.end_date)}
-            </p>
-            {myBazaarDuty.note && <p className="text-sm text-foreground">{myBazaarDuty.note}</p>}
-          </div>
-        </Card>
-      )}
+      <BazaarDutyRoster duties={bazaarDuties} membersById={membersById} currentUserId={profile.id} />
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-foreground">Utility overview</h2>
@@ -376,8 +364,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-}
-
-function formatDutyRange(startIso: string, endIso: string) {
-  return `${formatDate(startIso)} – ${formatDate(endIso)}`;
 }

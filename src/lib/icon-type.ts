@@ -11,4 +11,8 @@ export type IconComponent = ComponentType<{
   className?: string;
   size?: number;
   strokeWidth?: number;
+  /** Animate UI icons only - ignored by plain lucide-react icons. Only pass
+   * this to a component known to be an Animate UI icon (see IconComponent
+   * callers gating it behind their own `animated`-style prop). */
+  animate?: boolean;
 }>;

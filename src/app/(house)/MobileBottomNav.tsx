@@ -39,6 +39,7 @@ function NavTab({
   href,
   onClick,
   badge,
+  animated = false,
 }: {
   icon: IconComponent;
   label: string;
@@ -46,6 +47,9 @@ function NavTab({
   href?: string;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
   badge?: number;
+  /** Only true for Animate UI icons - keeps them still until this tab is
+   * active instead of always-looping like card/section icons. */
+  animated?: boolean;
 }) {
   const inner = (
     <>
@@ -62,7 +66,7 @@ function NavTab({
           transitionTimingFunction: active ? SPEED_DIAL_EASE_OUT_BACK : SPEED_DIAL_EASE_IN_CUBIC,
         }}
       >
-        <Icon className={active ? "size-6" : "size-5"} />
+        <Icon className={active ? "size-6" : "size-5"} {...(animated ? { animate: active } : {})} />
         {!!badge && badge > 0 && (
           <span className="absolute -top-1 -right-1 flex size-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white ring-2 ring-neutral-900">
             {badge > 9 ? "9+" : badge}
@@ -153,6 +157,7 @@ export function MobileBottomNav({
           href="/dashboard"
           active={!anySheetOpen && pathname === "/dashboard"}
           onClick={() => setActiveSheet(null)}
+          animated
         />
         {canManageMealRequests ? (
           <NavTab
@@ -170,6 +175,7 @@ export function MobileBottomNav({
             href="/notice-board"
             active={!anySheetOpen && pathname === "/notice-board"}
             onClick={() => setActiveSheet(null)}
+            animated
           />
         )}
         <NavTab
@@ -189,6 +195,7 @@ export function MobileBottomNav({
           label="Menu"
           active={menuActive || activeSheet === "menu"}
           onClick={(e) => toggleSheet("menu", e)}
+          animated
         />
       </nav>
 

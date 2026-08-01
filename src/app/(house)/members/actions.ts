@@ -203,6 +203,33 @@ export async function assignBazaarDuty(
     return { error: "End date can't be in the past - the duty would never show up anywhere." };
   }
 
+  // No DB constraint prevents two members being assigned overlapping dates,
+  // so check for a conflict explicitly - a member can only ever be on duty
+  // one at a time. Two plain queries (no embed) - a PostgREST embed here
+  // previously caused a full outage elsewhere in the app, not worth the risk
+  // for a rarely-hit admin action.
+  const { data: conflicts } = await supabase
+    .from("bazaar_duties")
+    .select("user_id, start_date, end_date")
+    .eq("cottage_id", admin_.cottage_id)
+    .lte("start_date", endDate)
+    .gte("end_date", startDate);
+
+  if (conflicts?.length) {
+    const conflict = conflicts[0];
+    const { data: conflictMember } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", conflict.user_id)
+      .maybeSingle();
+    const conflictName = conflictMember
+      ? `${conflictMember.first_name}${conflictMember.last_name ? " " + conflictMember.last_name : ""}`
+      : "another member";
+    return {
+      error: `${conflictName} is already assigned ${formatDate(conflict.start_date)} – ${formatDate(conflict.end_date)}. Pick a range that doesn't overlap.`,
+    };
+  }
+
   const { error } = await supabase.from("bazaar_duties").insert({
     cottage_id: admin_.cottage_id,
     user_id: userId,

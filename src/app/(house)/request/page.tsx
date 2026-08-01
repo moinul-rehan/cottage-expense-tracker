@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile, getDisplayName } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
+import { monthRange } from "@/lib/data/finance";
 import { formatDate, formatDateTime } from "@/lib/format-date";
+import { formatMonthKey } from "@/lib/data/months";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -72,8 +74,14 @@ export default async function RequestPage() {
   const pending = (mealRequests.data ?? []).filter((r) => r.status === "pending");
   const costPending = (mealCostRequests.data ?? []).filter((r) => r.status === "pending");
 
+  // History is scoped to the active month only (by the request's own date,
+  // not when it was reviewed) - otherwise it silently mixes in every past
+  // month's decisions under one unlabeled "last 30" list.
+  const { start: monthStart, end: monthEnd } = monthRange(profile.active_month_key);
+  const inActiveMonth = (date: string) => date >= monthStart && date < monthEnd;
+
   const mealHistory: HistoryRow[] = (mealRequests.data ?? [])
-    .filter((r) => r.status !== "pending")
+    .filter((r) => r.status !== "pending" && inActiveMonth(r.request_date))
     .map((r) => ({
       id: r.id,
       type: "meal",
@@ -85,7 +93,7 @@ export default async function RequestPage() {
       reviewed_at: r.reviewed_at,
     }));
   const costHistory: HistoryRow[] = (mealCostRequests.data ?? [])
-    .filter((r) => r.status !== "pending")
+    .filter((r) => r.status !== "pending" && inActiveMonth(r.entry_date))
     .map((r) => ({
       id: r.id,
       type: "meal_cost",
@@ -96,9 +104,9 @@ export default async function RequestPage() {
       created_at: r.created_at,
       reviewed_at: r.reviewed_at,
     }));
-  const history = [...mealHistory, ...costHistory]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 30);
+  const history = [...mealHistory, ...costHistory].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -249,7 +257,9 @@ export default async function RequestPage() {
       )}
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-foreground">History</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">
+          History - {formatMonthKey(profile.active_month_key)}
+        </h2>
 
         <div className="flex flex-col gap-3 sm:hidden">
           {history.map((r) => {

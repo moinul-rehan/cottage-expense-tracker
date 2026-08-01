@@ -60,14 +60,17 @@ type Member = {
 };
 
 type Duty = { id: string; start_date: string; end_date: string; note: string | null };
+type OtherDuty = Duty & { user_id: string; memberName: string };
 
 export function MemberCard({
   member,
   duties,
+  otherDuties,
   viewerIsAdmin,
 }: {
   member: Member;
   duties: Duty[];
+  otherDuties: OtherDuty[];
   viewerIsAdmin: boolean;
 }) {
   const [pending, startTransition] = useTransition();
@@ -241,6 +244,7 @@ export function MemberCard({
         onOpenChange={setDutyOpen}
         userId={member.id}
         memberName={getDisplayName(member)}
+        otherDuties={otherDuties}
       />
     </Card>
   );
@@ -251,14 +255,23 @@ function AssignDutyDialog({
   onOpenChange,
   userId,
   memberName,
+  otherDuties,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
   memberName: string;
+  otherDuties: OtherDuty[];
 }) {
   const [state, action, pending] = useActionState(assignBazaarDuty, undefined);
   const today = new Date().toISOString().slice(0, 10);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState("");
+
+  const conflict =
+    startDate && endDate && endDate >= startDate
+      ? otherDuties.find((d) => d.start_date <= endDate && d.end_date >= startDate)
+      : undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -271,20 +284,42 @@ function AssignDutyDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="start_date">Start date</Label>
-              <Input id="start_date" name="start_date" type="date" min={today} defaultValue={today} required />
+              <Input
+                id="start_date"
+                name="start_date"
+                type="date"
+                min={today}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="end_date">End date</Label>
-              <Input id="end_date" name="end_date" type="date" min={today} required />
+              <Input
+                id="end_date"
+                name="end_date"
+                type="date"
+                min={startDate || today}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                required
+              />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="note">Note</Label>
             <Input id="note" name="note" placeholder="Optional" />
           </div>
+          {conflict && (
+            <p className="text-sm text-destructive">
+              {conflict.memberName} is already assigned {formatDate(conflict.start_date)} – {formatDate(conflict.end_date)}.
+              Pick a range that doesn&apos;t overlap.
+            </p>
+          )}
           {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
           {state?.success && <p className="text-sm text-emerald-600">{state.success}</p>}
-          <Button type="submit" disabled={pending} className="self-start">
+          <Button type="submit" disabled={pending || !!conflict} className="self-start">
             {pending ? "Assigning…" : "Assign duty"}
           </Button>
         </form>
