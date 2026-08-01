@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -22,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { Download } from "@/components/animate-ui/icons/download";
+import { TabTransitionProvider, TabTrigger, TabContent } from "@/components/ui/tab-transition";
+import { InlineRowsSkeleton } from "@/components/page-skeleton";
 import { UtilityDetailsMobile } from "./UtilityDetailsMobile";
 
 const TABS = [
@@ -64,7 +65,7 @@ export default async function UtilityHistoryPage({
   const canDownloadHistory = profile.role === "super_admin" || profile.can_add_expenses;
 
   return (
-    <>
+    <TabTransitionProvider>
       <UtilityDetailsMobile
         monthLabel={formatMonthKey(monthKey)}
         activeTab={tab}
@@ -150,19 +151,24 @@ export default async function UtilityHistoryPage({
 
       <div className="flex flex-wrap gap-1 text-sm">
         {TABS.map((t) => (
-          <Link
+          <TabTrigger
             key={t.value}
             href={`/utilities/history?tab=${t.value}`}
-            className={cn(
-              "rounded-md px-2.5 py-1",
-              tab === t.value ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
+            value={t.value}
+            activeValue={tab}
+            className={(active) =>
+              cn(
+                "rounded-md px-2.5 py-1",
+                active ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+              )
+            }
           >
             {t.label}
-          </Link>
+          </TabTrigger>
         ))}
       </div>
 
+      <TabContent skeleton={<InlineRowsSkeleton cols={4} />}>
       {tab === "expense" && (
         <Card className="p-0">
           <Table>
@@ -267,7 +273,8 @@ export default async function UtilityHistoryPage({
           </Table>
         </Card>
       )}
+      </TabContent>
       </div>
-    </>
+    </TabTransitionProvider>
   );
 }

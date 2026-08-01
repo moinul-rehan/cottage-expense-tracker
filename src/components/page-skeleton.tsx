@@ -51,6 +51,37 @@ export function FormSkeleton() {
   );
 }
 
+/** Bare rows/cards for swapping in place of already-loaded tab content while
+ * a tab switch is pending (no title - the page heading stays put). */
+export function InlineRowsSkeleton({ rows = 5, cols = 3 }: { rows?: number; cols?: number }) {
+  return (
+    <Card className="gap-0 p-0">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 border-b border-border px-5 py-4 last:border-b-0">
+          <Skeleton className="h-4 w-24 shrink-0 rounded-full" />
+          {Array.from({ length: cols }).map((_, j) => (
+            <Skeleton key={j} className="ml-auto h-4 w-16 rounded-full" />
+          ))}
+        </div>
+      ))}
+    </Card>
+  );
+}
+
+export function InlineCardsSkeleton({ cards = 4 }: { cards?: number }) {
+  return (
+    <div className="flex flex-col gap-4">
+      {Array.from({ length: cards }).map((_, i) => (
+        <div key={i} className="flex flex-col gap-3 rounded-[20px] bg-card p-3 shadow-[0_1px_3px_rgba(28,32,43,0.04)]">
+          <Skeleton className="h-11 w-full rounded-[10px]" />
+          <Skeleton className="h-16 w-full rounded-[10px]" />
+          <Skeleton className="h-11 w-full rounded-[10px]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function TableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="flex flex-col gap-6">

@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { Download } from "@/components/animate-ui/icons/download";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TabTrigger, TabContent } from "@/components/ui/tab-transition";
+import { InlineCardsSkeleton } from "@/components/page-skeleton";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { getDisplayName } from "@/lib/data/display-name";
@@ -120,24 +121,29 @@ export function UtilityDetailsMobile({
           )}
           <div className="flex gap-2">
             {TABS.map((t) => (
-              <Link
+              <TabTrigger
                 key={t.value}
                 href={`/utilities/history?tab=${t.value}`}
-                className={cn(
-                  "flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors",
-                  activeTab === t.value
-                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                    : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
-                )}
+                value={t.value}
+                activeValue={activeTab}
+                className={(active) =>
+                  cn(
+                    "flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
+                  )
+                }
               >
                 {t.label}
-              </Link>
+              </TabTrigger>
             ))}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 px-4 pt-6 pb-4">
+      <TabContent skeleton={<InlineCardsSkeleton />}>
         {activeTab === "expense" &&
           (expenses.length ? (
             expenses.map((e) => (
@@ -198,6 +204,7 @@ export function UtilityDetailsMobile({
           ) : (
             <p className="py-6 text-center text-sm text-muted-foreground">No Cottage Deposits yet.</p>
           ))}
+      </TabContent>
       </div>
     </div>
   );

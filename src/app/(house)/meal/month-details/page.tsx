@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { formatMonthKey } from "@/lib/data/months";
@@ -22,6 +21,8 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { Download } from "@/components/animate-ui/icons/download";
+import { TabTransitionProvider, TabTrigger, TabContent } from "@/components/ui/tab-transition";
+import { InlineRowsSkeleton } from "@/components/page-skeleton";
 import { EditMealRowDialog } from "./EditMealRowDialog";
 import { EditDepositDialog } from "./EditDepositDialog";
 import { EditBazaarDialog } from "./EditBazaarDialog";
@@ -74,7 +75,7 @@ export default async function MealMonthDetailsPage({
   const { rows: pivotRows, totals } = pivotDailyMealsByDate(mealRecords, memberList);
 
   return (
-    <>
+    <TabTransitionProvider>
       <MonthDetailsMobile
         monthLabel={formatMonthKey(monthKey)}
         activeView={activeView}
@@ -108,21 +109,24 @@ export default async function MealMonthDetailsPage({
 
       <div className="inline-flex w-fit gap-1 rounded-lg border p-1">
         {VIEWS.map((v) => (
-          <Link
+          <TabTrigger
             key={v.value}
             href={`/meal/month-details?view=${v.value}`}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium",
-              activeView === v.value
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
+            value={v.value}
+            activeValue={activeView}
+            className={(active) =>
+              cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+              )
+            }
           >
             {v.label}
-          </Link>
+          </TabTrigger>
         ))}
       </div>
 
+      <TabContent skeleton={<InlineRowsSkeleton cols={memberList.length} />}>
       {activeView === "meal" && (
         <Card className="overflow-x-auto p-0">
           <Table>
@@ -278,7 +282,8 @@ export default async function MealMonthDetailsPage({
           </Table>
         </Card>
       )}
+      </TabContent>
       </div>
-    </>
+    </TabTransitionProvider>
   );
 }

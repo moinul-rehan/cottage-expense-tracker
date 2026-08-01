@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { Download } from "@/components/animate-ui/icons/download";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { TabTrigger, TabContent } from "@/components/ui/tab-transition";
+import { InlineCardsSkeleton } from "@/components/page-skeleton";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format-date";
 import { getDisplayName } from "@/lib/data/display-name";
@@ -150,24 +151,29 @@ export function MonthDetailsMobile({
            * track -- matches the reference's segmented control exactly. */}
           <div className="flex gap-2">
             {MOBILE_VIEWS.map((v) => (
-              <Link
+              <TabTrigger
                 key={v.value}
                 href={`/meal/month-details?view=${v.value}`}
-                className={cn(
-                  "flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors",
-                  activeView === v.value
-                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                    : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
-                )}
+                value={v.value}
+                activeValue={activeView}
+                className={(active) =>
+                  cn(
+                    "flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
+                  )
+                }
               >
                 {v.label}
-              </Link>
+              </TabTrigger>
             ))}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 px-4 pt-6 pb-4">
+      <TabContent skeleton={<InlineCardsSkeleton />}>
         {activeView === "meal" &&
           (pivotRows.length ? (
             pivotRows.map((row) => (
@@ -270,6 +276,7 @@ export function MonthDetailsMobile({
           ) : (
             <p className="py-6 text-center text-sm text-muted-foreground">No deposits yet.</p>
           ))}
+      </TabContent>
       </div>
     </div>
   );
