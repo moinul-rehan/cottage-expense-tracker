@@ -32,11 +32,7 @@ export type Profile = {
 }
 
 const PROFILE_COLUMNS =
-  'id, cottage_id, first_name, last_name, email, role, room_label, is_active, avatar_url, gender, hometown, mobile_number, address, can_add_expenses, can_add_bazaar, can_add_meals, can_add_deposit, can_add_notice, cottage:cottages(name, active_month_key, status, suspended_at)'
-
-type ProfileQueryRow = Omit<Profile, 'cottage_name' | 'active_month_key'> & {
-  cottage: { name: string; active_month_key: string; status: string; suspended_at: string | null } | null
-}
+  'id, cottage_id, first_name, last_name, email, role, room_label, is_active, avatar_url, gender, hometown, mobile_number, address, can_add_expenses, can_add_bazaar, can_add_meals, can_add_deposit, can_add_notice'
 
 /**
  * Verifies the caller has an active Supabase session and loads their profile
@@ -54,13 +50,13 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/login')
   }
 
-  const { data: row, error } = await supabase
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select(PROFILE_COLUMNS)
     .eq('id', user.id)
     .single()
 
-  if (error || !row) {
+  if (error || !profile) {
     // Sign out before redirecting: a lingering session with no matching
     // profile row (or a schema mismatch) would otherwise bounce forever
     // between the proxy's "authenticated -> /dashboard" and this
@@ -69,7 +65,11 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
     redirect('/login')
   }
 
-  const { cottage, ...profileFields } = row as unknown as ProfileQueryRow
+  const { data: cottage } = await supabase
+    .from('cottages')
+    .select('name, active_month_key, status, suspended_at')
+    .eq('id', profile.cottage_id)
+    .maybeSingle()
 
   if (cottage?.status === 'pending') {
     redirect('/pending-approval')
@@ -84,7 +84,7 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
   }
 
   return {
-    ...profileFields,
+    ...profile,
     cottage_name: cottage?.name ?? '',
     active_month_key: cottage?.active_month_key ?? new Date().toISOString().slice(0, 7),
   }
