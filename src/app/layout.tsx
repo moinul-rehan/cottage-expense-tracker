@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { AnimateIcon } from "@/components/animate-ui/icons/icon";
 
 // Matches RumahTara's Figma type system (Font/Font Body: Plus Jakarta Sans).
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -57,7 +58,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        {children}
+        {/* className="contents" keeps this wrapper invisible to layout
+         * (display:contents) -- its only job is to give every animate-ui
+         * icon in the tree a shared "always animate, on loop" context, so
+         * icons don't need `animate loop` passed individually at 38 call
+         * sites. Any icon can still opt out/override locally. */}
+        <AnimateIcon animate loop loopDelay={1800} className="contents">
+          {children}
+        </AnimateIcon>
         <ServiceWorkerRegister />
       </body>
     </html>

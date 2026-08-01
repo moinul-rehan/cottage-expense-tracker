@@ -156,14 +156,8 @@ export function MonthDetailsMobile({
                 href={`/meal/month-details?view=${v.value}`}
                 value={v.value}
                 activeValue={activeView}
-                className={(active) =>
-                  cn(
-                    "flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
-                  )
-                }
+                activeClassName="flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors border-primary bg-primary text-primary-foreground shadow-sm"
+                inactiveClassName="flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors border-border bg-muted/20 text-foreground hover:bg-muted/40"
               >
                 {v.label}
               </TabTrigger>

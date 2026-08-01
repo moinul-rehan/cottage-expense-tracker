@@ -114,12 +114,8 @@ export default async function MealMonthDetailsPage({
             href={`/meal/month-details?view=${v.value}`}
             value={v.value}
             activeValue={activeView}
-            className={(active) =>
-              cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-              )
-            }
+            activeClassName="rounded-md px-3 py-1.5 text-sm font-medium transition-colors bg-accent text-accent-foreground"
+            inactiveClassName="rounded-md px-3 py-1.5 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
           >
             {v.label}
           </TabTrigger>

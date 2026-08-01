@@ -41,30 +41,37 @@ function useTabTransition() {
 }
 
 /** A tab button that shows immediate pressed/pending feedback (not just a
- * bare <Link> that appears to do nothing until the page finishes loading). */
+ * bare <Link> that appears to do nothing until the page finishes loading).
+ *
+ * `activeClassName`/`inactiveClassName` are plain strings rather than a
+ * className(active) => string callback - a function prop passed from a
+ * Server Component (every page using this) isn't serializable across the
+ * Server/Client boundary and crashes the page (same bug class as the
+ * "don't pass Lucide icon components as data" fix on /settings/*). */
 export function TabTrigger({
   href,
   value,
   activeValue,
-  className,
+  activeClassName,
+  inactiveClassName,
   children,
 }: {
   href: string;
   value: string;
   activeValue: string;
-  className: (active: boolean, pending: boolean) => string;
+  activeClassName: string;
+  inactiveClassName: string;
   children: ReactNode;
 }) {
   const { pendingValue, navigate, isPending } = useTabTransition();
   const displayActive = pendingValue ?? activeValue;
-  const isThisPending = pendingValue === value;
 
   return (
     <button
       type="button"
       disabled={isPending}
       onClick={() => navigate(href, value)}
-      className={cn(className(displayActive === value, isThisPending), isPending && "cursor-wait")}
+      className={cn(displayActive === value ? activeClassName : inactiveClassName, isPending && "cursor-wait")}
     >
       {children}
     </button>

@@ -156,12 +156,8 @@ export default async function UtilityHistoryPage({
             href={`/utilities/history?tab=${t.value}`}
             value={t.value}
             activeValue={tab}
-            className={(active) =>
-              cn(
-                "rounded-md px-2.5 py-1",
-                active ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-              )
-            }
+            activeClassName="rounded-md px-2.5 py-1 bg-accent font-medium text-accent-foreground"
+            inactiveClassName="rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground"
           >
             {t.label}
           </TabTrigger>

@@ -126,14 +126,8 @@ export function UtilityDetailsMobile({
                 href={`/utilities/history?tab=${t.value}`}
                 value={t.value}
                 activeValue={activeTab}
-                className={(active) =>
-                  cn(
-                    "flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
-                  )
-                }
+                activeClassName="flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors border-primary bg-primary text-primary-foreground shadow-sm"
+                inactiveClassName="flex-1 rounded-[12px] border py-2.5 text-center text-sm font-semibold transition-colors border-border bg-muted/20 text-foreground hover:bg-muted/40"
               >
                 {t.label}
               </TabTrigger>
