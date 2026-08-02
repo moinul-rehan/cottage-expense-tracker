@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/dashboard_data.dart';
-import '../models/profile.dart';
-import 'supabase_service.dart';
+import 'dashboard_data.dart';
+import '../../../core/models/profile.dart';
+import '../../../core/services/supabase_service.dart';
 
 /// Ports the aggregation logic in src/lib/data/finance.ts and
 /// src/lib/data/meal.ts. These are NOT Postgres RPCs on the web side --

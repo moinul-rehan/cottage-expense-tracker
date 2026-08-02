@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/dashboard_data.dart';
-import '../models/profile.dart';
-import '../services/dashboard_service.dart';
-import '../theme.dart';
-import '../widgets/app_scaffold.dart';
-import '../widgets/stat_card.dart';
+import '../data/dashboard_data.dart';
+import '../data/dashboard_service.dart';
+import '../../../core/models/profile.dart';
+import '../../../core/theme/theme.dart';
+import '../../../core/widgets/app_scaffold.dart';
+import '../../../core/widgets/stat_card.dart';
+import '../../../core/widgets/responsive_utils.dart';
 
 /// Phase 1 scope only: the "Utility overview", "Your utility summary",
 /// "Meal overview" stat-card rows and the "Member meal summary" grid from
@@ -70,11 +71,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           final (profile, data) = snapshot.data!;
           final surface = context.surface;
+          final columns = context.gridColumns;
+          final padding = context.responsivePadding;
 
           return RefreshIndicator(
             onRefresh: () async => _retry(),
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(padding),
               children: [
                 Text(
                   'Welcome, ${profile.displayName}',
@@ -89,89 +92,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 _SectionTitle('Utility overview'),
                 const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.account_balance_wallet_outlined,
-                  tone: StatTone.blue,
-                  label: 'Cottage Balance',
-                  value: _tk(data.cottageBalance),
-                  hint: 'Previous + deposits - cottage-paid expenses',
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.receipt_long_outlined,
-                  tone: StatTone.orange,
-                  label: 'Total Utility Expense',
-                  value: _tk(data.totalUtilityExpense),
-                  hint: 'All shared expenses this month',
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.payments_outlined,
-                  tone: StatTone.red,
-                  label: 'Outstanding From Members',
-                  value: _tk(data.outstandingFromMembers),
-                  hint: "Sum of every member's Remaining Due",
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.payments_outlined,
-                  tone: StatTone.green,
-                  label: 'Collected This Month',
-                  value: _tk(data.collectedThisMonth),
-                  hint: 'Member Utility Deposits received',
+                _ResponsiveCardGrid(
+                  columns: columns,
+                  children: [
+                    StatCard(
+                      icon: Icons.account_balance_wallet_outlined,
+                      tone: StatTone.blue,
+                      label: 'Cottage Balance',
+                      value: _tk(data.cottageBalance),
+                      hint: 'Previous + deposits - cottage-paid expenses',
+                    ),
+                    StatCard(
+                      icon: Icons.receipt_long_outlined,
+                      tone: StatTone.orange,
+                      label: 'Total Utility Expense',
+                      value: _tk(data.totalUtilityExpense),
+                      hint: 'All shared expenses this month',
+                    ),
+                    StatCard(
+                      icon: Icons.payments_outlined,
+                      tone: StatTone.red,
+                      label: 'Outstanding From Members',
+                      value: _tk(data.outstandingFromMembers),
+                      hint: "Sum of every member's Remaining Due",
+                    ),
+                    StatCard(
+                      icon: Icons.payments_outlined,
+                      tone: StatTone.green,
+                      label: 'Collected This Month',
+                      value: _tk(data.collectedThisMonth),
+                      hint: 'Member Utility Deposits received',
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 24),
                 _SectionTitle('Your utility summary'),
                 const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.receipt_long_outlined,
-                  tone: StatTone.blue,
-                  label: 'Assigned Cost',
-                  value: _tk(data.myAssignedCost),
-                  hint: 'Your utility costs this month',
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.payments_outlined,
-                  tone: StatTone.green,
-                  label: 'Paid',
-                  value: _tk(data.myDue.paid),
-                  hint: 'Deposits credited toward your due',
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.account_balance_wallet_outlined,
-                  tone: data.myDue.due > 0 ? StatTone.red : StatTone.orange,
-                  label: data.myDue.due < 0 ? 'Advance Balance' : 'Remaining Due',
-                  value: _tk(data.myDue.due.abs()),
-                  hint: 'Assigned Cost minus Paid',
-                  paid: data.myAssignedCost > 0 && data.myDue.due <= 0,
+                _ResponsiveCardGrid(
+                  columns: columns,
+                  children: [
+                    StatCard(
+                      icon: Icons.receipt_long_outlined,
+                      tone: StatTone.blue,
+                      label: 'Assigned Cost',
+                      value: _tk(data.myAssignedCost),
+                      hint: 'Your utility costs this month',
+                    ),
+                    StatCard(
+                      icon: Icons.payments_outlined,
+                      tone: StatTone.green,
+                      label: 'Paid',
+                      value: _tk(data.myDue.paid),
+                      hint: 'Deposits credited toward your due',
+                    ),
+                    StatCard(
+                      icon: Icons.account_balance_wallet_outlined,
+                      tone: data.myDue.due > 0 ? StatTone.red : StatTone.orange,
+                      label: data.myDue.due < 0 ? 'Advance Balance' : 'Remaining Due',
+                      value: _tk(data.myDue.due.abs()),
+                      hint: 'Assigned Cost minus Paid',
+                      paid: data.myAssignedCost > 0 && data.myDue.due <= 0,
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 24),
                 _SectionTitle('Meal overview'),
                 const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.restaurant_outlined,
-                  tone: StatTone.blue,
-                  label: 'Meal rate',
-                  value: data.mealRate.toStringAsFixed(2),
-                  hint: 'Total bazaar / total meals',
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.restaurant_outlined,
-                  tone: StatTone.green,
-                  label: 'Total meals',
-                  value: data.totalMeals.toStringAsFixed(data.totalMeals % 1 == 0 ? 0 : 1),
-                ),
-                const SizedBox(height: 12),
-                StatCard(
-                  icon: Icons.shopping_basket_outlined,
-                  tone: StatTone.orange,
-                  label: 'Total bazaar',
-                  value: data.totalBazaar.toStringAsFixed(2),
+                _ResponsiveCardGrid(
+                  columns: columns,
+                  children: [
+                    StatCard(
+                      icon: Icons.restaurant_outlined,
+                      tone: StatTone.blue,
+                      label: 'Meal rate',
+                      value: data.mealRate.toStringAsFixed(2),
+                      hint: 'Total bazaar / total meals',
+                    ),
+                    StatCard(
+                      icon: Icons.restaurant_outlined,
+                      tone: StatTone.green,
+                      label: 'Total meals',
+                      value: data.totalMeals.toStringAsFixed(data.totalMeals % 1 == 0 ? 0 : 1),
+                    ),
+                    StatCard(
+                      icon: Icons.shopping_basket_outlined,
+                      tone: StatTone.orange,
+                      label: 'Total bazaar',
+                      value: data.totalBazaar.toStringAsFixed(2),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 24),
@@ -185,16 +196,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   )
                 else
-                  ...data.memberMealRows.map((row) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _MemberMealCard(row: row, tk: _tk),
-                      )),
+                  _ResponsiveCardGrid(
+                    columns: columns,
+                    children: data.memberMealRows
+                        .map((row) => _MemberMealCard(row: row, tk: _tk))
+                        .toList(),
+                  ),
               ],
             ),
           );
         },
       ),
     );
+  }
+}
+
+/// Lays out children in a responsive grid: 1 column on phones, 2+ on tablets.
+class _ResponsiveCardGrid extends StatelessWidget {
+  final int columns;
+  final List<Widget> children;
+
+  const _ResponsiveCardGrid({required this.columns, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    if (columns <= 1) {
+      return Column(
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1) const SizedBox(height: 12),
+          ],
+        ],
+      );
+    }
+
+    final rows = <Widget>[];
+    for (int i = 0; i < children.length; i += columns) {
+      final rowChildren = <Widget>[];
+      for (int j = 0; j < columns; j++) {
+        if (i + j < children.length) {
+          rowChildren.add(Expanded(child: children[i + j]));
+        } else {
+          rowChildren.add(const Expanded(child: SizedBox.shrink()));
+        }
+        if (j < columns - 1) rowChildren.add(const SizedBox(width: 12));
+      }
+      rows.add(Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: rowChildren,
+      ));
+      if (i + columns < children.length) rows.add(const SizedBox(height: 12));
+    }
+    return Column(children: rows);
   }
 }
 

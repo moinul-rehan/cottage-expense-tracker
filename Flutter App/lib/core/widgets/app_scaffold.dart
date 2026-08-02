@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_service.dart';
-import '../screens/login_screen.dart';
-import '../theme.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../theme/theme.dart';
 
 /// Shared top bar for each tab under [BottomNavShell] -- Cottage wordmark,
 /// with sign-out surfaced only where [showLogout] is true (the Menu tab).
