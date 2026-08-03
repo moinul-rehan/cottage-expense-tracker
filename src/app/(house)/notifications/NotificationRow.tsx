@@ -31,8 +31,13 @@ export function NotificationRow({ notification }: { notification: Notification }
             <Icon className="size-3.5" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="flex items-center gap-2 font-medium text-foreground">
+            <span className="flex flex-wrap items-center gap-2 font-medium text-foreground">
               {notification.title}
+              {notification.type === "platform_announcement" && (
+                <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary uppercase">
+                  System
+                </span>
+              )}
               {!notification.is_read && <Badge variant="default">New</Badge>}
             </span>
             {notification.body && <span className="text-sm text-muted-foreground">{notification.body}</span>}

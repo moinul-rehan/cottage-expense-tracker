@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { Bell } from "@/components/animate-ui/icons/bell";
 import { markNotificationRead } from "./notifications/actions";
 import { getNotificationIcon } from "./notification-icons";
@@ -95,18 +96,36 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium text-foreground">{n.title}</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <p className="text-sm font-medium text-foreground">{n.title}</p>
+                  {n.type === "platform_announcement" && <SystemBadge />}
+                </div>
                 {!n.is_read && <MarkReadButton id={n.id} />}
               </div>
               {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
-              <p className="text-xs text-muted-foreground/70">
-                <LocalDateTime iso={n.created_at} />
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground/70">
+                  <LocalDateTime iso={n.created_at} />
+                </p>
+                {n.link && (
+                  <Link href={n.link} className="shrink-0 text-xs font-medium text-primary hover:underline">
+                    View →
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         );
       })}
     </>
+  );
+}
+
+function SystemBadge() {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary uppercase">
+      System
+    </span>
   );
 }
 
@@ -284,13 +303,23 @@ function NotificationSheetBody({
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">{n.title}</p>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="text-sm font-medium text-foreground">{n.title}</p>
+                      {n.type === "platform_announcement" && <SystemBadge />}
+                    </div>
                     {!n.is_read && <MarkReadButton id={n.id} />}
                   </div>
                   {n.body && <p className="text-xs text-muted-foreground">{n.body}</p>}
-                  <p className="text-xs text-muted-foreground/70">
-                    <LocalDateTime iso={n.created_at} />
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground/70">
+                      <LocalDateTime iso={n.created_at} />
+                    </p>
+                    {n.link && (
+                      <Link href={n.link} className="shrink-0 text-xs font-medium text-primary hover:underline">
+                        View →
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             );

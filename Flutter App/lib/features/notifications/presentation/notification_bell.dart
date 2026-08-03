@@ -180,7 +180,31 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                         backgroundColor: surface.accent,
                         child: Icon(notificationIconFor(n.type), size: 14, color: surface.accentForeground),
                       ),
-                      title: Text(n.title, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: surface.foreground)),
+                      title: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              n.title,
+                              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: surface.foreground),
+                            ),
+                          ),
+                          if (n.type == 'platform_announcement') ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: CottageColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'SYSTEM',
+                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: CottageColors.primary, letterSpacing: 0.4),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                       subtitle: n.body != null && n.body!.isNotEmpty
                           ? Text(n.body!, style: TextStyle(fontSize: 12, color: surface.mutedForeground))
                           : null,

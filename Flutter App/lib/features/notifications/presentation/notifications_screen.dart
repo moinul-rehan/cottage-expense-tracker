@@ -165,9 +165,27 @@ class _NotificationTile extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        notification.title,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: surface.foreground),
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        children: [
+                          Text(
+                            notification.title,
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: surface.foreground),
+                          ),
+                          if (notification.type == 'platform_announcement')
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: CottageColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                'SYSTEM',
+                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: CottageColors.primary, letterSpacing: 0.4),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     if (!notification.isRead)
