@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChartPie } from "lucide-react";
+import { ChartPie, Megaphone } from "lucide-react";
 import { Users } from "@/components/animate-ui/icons/users";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
 import { ArrowLeft } from "@/components/animate-ui/icons/arrow-left";
@@ -31,6 +31,7 @@ const NAV_SECTIONS: { label: string; links: NavLink[] }[] = [
     label: "Manage",
     links: [
       { href: "/platform-admin/users", label: "Users", icon: Users },
+      { href: "/platform-admin/notifications", label: "Notifications", icon: Megaphone },
       { href: "/platform-admin/feedback", label: "Feedback", icon: MessageSquareWarning },
     ],
   },

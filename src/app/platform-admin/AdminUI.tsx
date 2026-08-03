@@ -63,6 +63,30 @@ export function AdminInput({ className, ...props }: React.ComponentProps<"input"
   );
 }
 
+export function AdminTextarea({ className, ...props }: React.ComponentProps<"textarea">) {
+  return (
+    <textarea
+      className={cn(
+        "w-full rounded-lg border-[0.5px] border-black/10 bg-black/[0.02] px-3 py-2 text-sm text-black outline-none placeholder:text-black/40 focus-visible:border-black/30 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-white/40 dark:focus-visible:border-white/30",
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+export function AdminSelect({ className, ...props }: React.ComponentProps<"select">) {
+  return (
+    <select
+      className={cn(
+        "h-9 w-full rounded-lg border-[0.5px] border-black/10 bg-black/[0.02] px-3 text-sm text-black outline-none focus-visible:border-black/30 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus-visible:border-white/30",
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
 const badgeTones = {
   neutral: "bg-black/4 text-black/60 dark:bg-white/10 dark:text-white/60",
   good: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",

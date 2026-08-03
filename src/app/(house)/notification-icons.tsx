@@ -17,6 +17,7 @@ import {
   MessageSquareWarning,
   Crown,
   Skull,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -45,6 +46,7 @@ export const NOTIFICATION_ICONS: Record<string, LucideIcon> = {
   utility_month_reset: RotateCcw,
   meal_month_reset: RotateCcw,
   feedback_submitted: MessageSquareWarning,
+  platform_announcement: Megaphone,
 };
 
 export function getNotificationIcon(type: string): LucideIcon {

@@ -91,6 +91,8 @@ IconData notificationIconFor(String type) {
       return Icons.restore_outlined;
     case 'feedback_submitted':
       return Icons.report_gmailerrorred_outlined;
+    case 'platform_announcement':
+      return Icons.campaign_outlined;
     default:
       return Icons.notifications_outlined;
   }
