@@ -1,11 +1,16 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/bottom_nav_shell.dart';
+import 'forgot_password_screen.dart';
+import 'signup_screen.dart';
+import 'widgets/auth_widgets.dart';
 
-/// Mirrors src/app/login/LoginForm.tsx's email/password fields and copy.
-/// Google sign-in and "Forgot password" are deferred to a later phase.
+/// Pixel-faithful mobile port of src/app/login/page.tsx + LoginForm.tsx.
+/// Includes email/password sign-in, Google sign-in, "Forgot password?", and
+/// the "Sign up for a new Cottage" footer link -- all present, none deferred.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -13,31 +18,18 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _submitting = false;
+  bool _googleSubmitting = false;
   String? _error;
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
-    _fadeController.forward();
-  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _fadeController.dispose();
     super.dispose();
   }
 
@@ -65,61 +57,128 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
+  /// Mirrors LoginForm.tsx's handleGoogleLogin, using Supabase's OAuth flow.
+  ///
+  /// NOTE (follow-up, out of scope for this pass): completing this on mobile
+  /// needs a custom URL scheme / deep link registered so Supabase can redirect
+  /// back into the app after the browser round-trip -- see
+  /// android/app/src/main/AndroidManifest.xml (no such intent-filter exists
+  /// yet) and, for iOS, ios/Runner/Info.plist (no CFBundleURLTypes entry
+  /// exists yet either). The call below is fully wired and will launch the
+  /// Google OAuth flow, but the app can't currently receive the redirect back.
+  Future<void> _signInWithGoogle() async {
+    setState(() => _googleSubmitting = true);
+    try {
+      await SupabaseService.client.auth.signInWithOAuth(OAuthProvider.google);
+    } catch (_) {
+      if (mounted) setState(() => _error = 'Google sign-in failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _googleSubmitting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final horizontalPadding = width > 600 ? 48.0 : 24.0;
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 384),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const AuthWordmark(),
+                  const SizedBox(height: 32),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.home_rounded, size: 48, color: CottageColors.primary),
-                      const SizedBox(height: 8),
                       Text(
-                        'Cottage',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.surface.foreground),
+                        'Welcome back',
+                        style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: context.surface.foreground),
                       ),
-                      const SizedBox(height: 32),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        autofillHints: const [AutofillHints.email],
-                        decoration: const InputDecoration(labelText: 'Email'),
-                        validator: (value) => (value == null || value.trim().isEmpty) ? 'Email is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        autofillHints: const [AutofillHints.password],
-                        decoration: const InputDecoration(labelText: 'Password'),
-                        validator: (value) => (value == null || value.isEmpty) ? 'Password is required' : null,
-                      ),
-                      if (_error != null) ...[
-                        const SizedBox(height: 12),
-                        Text(_error!, style: const TextStyle(color: CottageColors.destructive, fontSize: 14)),
-                      ],
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: _submitting ? null : _submit,
-                        child: Text(_submitting ? 'Signing in...' : 'Sign in as Cottage member'),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Sign in with the account your admin created for you.',
+                        style: TextStyle(fontSize: 14, color: context.surface.mutedForeground),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 32),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AuthTextField(
+                          label: 'Email',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          textInputAction: TextInputAction.next,
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty) ? 'Email is required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        AuthTextField(
+                          label: 'Password',
+                          controller: _passwordController,
+                          obscureText: true,
+                          autofillHints: const [AutofillHints.password],
+                          textInputAction: TextInputAction.done,
+                          validator: (value) =>
+                              (value == null || value.isEmpty) ? 'Password is required' : null,
+                        ),
+                        const SizedBox(height: 6),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: GestureDetector(
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                            ),
+                            child: const Text(
+                              'Forgot password?',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: CottageColors.primary),
+                            ),
+                          ),
+                        ),
+                        if (_error != null) ...[
+                          const SizedBox(height: 10),
+                          Text(_error!, style: const TextStyle(color: CottageColors.destructive, fontSize: 14)),
+                        ],
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: _submitting ? null : _submit,
+                          child: Text(_submitting ? 'Signing in…' : 'Sign in as Cottage member'),
+                        ),
+                        const SizedBox(height: 20),
+                        const AuthOrDivider(),
+                        const SizedBox(height: 20),
+                        GoogleSignInButton(onPressed: _signInWithGoogle, enabled: !_googleSubmitting),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text.rich(
+                    TextSpan(
+                      style: TextStyle(fontSize: 14, color: context.surface.mutedForeground),
+                      children: [
+                        const TextSpan(text: 'Starting a new house? '),
+                        TextSpan(
+                          text: 'Sign up for a new Cottage',
+                          style: const TextStyle(fontWeight: FontWeight.w600, color: CottageColors.primary),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const SignupScreen()),
+                                ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
