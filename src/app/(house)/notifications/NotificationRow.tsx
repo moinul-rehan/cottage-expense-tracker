@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getNotificationIcon } from "../notification-icons";
+import { isExternalLink } from "../notification-link";
 import { LocalDateTime } from "@/components/LocalDateTime";
 
 type Notification = {
@@ -50,7 +51,18 @@ export function NotificationRow({ notification }: { notification: Notification }
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
           {notification.link && (
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href={notification.link} />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              nativeButton={false}
+              render={
+                isExternalLink(notification.link) ? (
+                  <a href={notification.link} target="_blank" rel="noopener noreferrer" />
+                ) : (
+                  <Link href={notification.link} />
+                )
+              }
+            >
               View
             </Button>
           )}

@@ -2,10 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
 import { Bell } from "@/components/animate-ui/icons/bell";
 import { markNotificationRead } from "./notifications/actions";
 import { getNotificationIcon } from "./notification-icons";
+import { NotificationLinkButton } from "./notification-link";
 import { LocalDateTime } from "@/components/LocalDateTime";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -108,9 +108,7 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
                   <LocalDateTime iso={n.created_at} />
                 </p>
                 {n.link && (
-                  <Link href={n.link} className="shrink-0 text-xs font-medium text-primary hover:underline">
-                    View →
-                  </Link>
+                  <NotificationLinkButton link={n.link} className="text-xs font-medium text-primary hover:underline" />
                 )}
               </div>
             </div>
@@ -315,9 +313,7 @@ function NotificationSheetBody({
                       <LocalDateTime iso={n.created_at} />
                     </p>
                     {n.link && (
-                      <Link href={n.link} className="shrink-0 text-xs font-medium text-primary hover:underline">
-                        View →
-                      </Link>
+                      <NotificationLinkButton link={n.link} className="text-xs font-medium text-primary hover:underline" />
                     )}
                   </div>
                 </div>

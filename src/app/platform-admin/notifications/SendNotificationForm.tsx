@@ -94,7 +94,11 @@ export function SendNotificationForm({ cottages, members }: { cottages: Cottage[
           <label className="text-sm font-medium" htmlFor="notif-link">
             Link (optional)
           </label>
-          <AdminInput id="notif-link" name="link" placeholder="/dashboard" />
+          <AdminInput id="notif-link" name="link" placeholder="/dashboard or facebook.com/groups/..." />
+          <p className="text-xs text-black/40 dark:text-white/40">
+            Use an in-app path like /dashboard, or paste any external URL (e.g. a Facebook group link) - it opens
+            directly, not through cottagee.me.
+          </p>
         </div>
 
         {state?.error && <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>}

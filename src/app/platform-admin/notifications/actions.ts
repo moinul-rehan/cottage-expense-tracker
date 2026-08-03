@@ -24,7 +24,14 @@ export async function sendPlatformNotification(
   const memberId = String(formData.get("member_id") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
-  const link = String(formData.get("link") ?? "").trim();
+  const linkInput = String(formData.get("link") ?? "").trim();
+  // A bare "/path" is an in-app route; anything else is a custom URL (e.g. a
+  // Facebook group invite) that should redirect straight there, not get
+  // resolved against this site's own origin -- so if it's missing a scheme,
+  // add one rather than let the browser treat it as a relative path.
+  const link = linkInput && !linkInput.startsWith("/") && !/^https?:\/\//i.test(linkInput)
+    ? `https://${linkInput}`
+    : linkInput;
 
   if (!title) return { error: "Title is required." };
   if (target === "cottage" && !cottageId) return { error: "Choose a Cottage." };
