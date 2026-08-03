@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_service.dart';
-import '../../features/auth/presentation/login_screen.dart';
 import '../../features/notifications/presentation/notification_bell.dart';
 import '../theme/theme.dart';
 
@@ -13,14 +12,10 @@ class AppScaffold extends StatelessWidget {
 
   const AppScaffold({super.key, required this.title, required this.body, this.showLogout = true});
 
-  Future<void> _logout(BuildContext context) async {
-    await SupabaseService.signOut();
-    if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
+  /// No manual navigation to LoginScreen here -- the root _AuthGate
+  /// (main.dart) listens to onAuthStateChange and swaps to it on its own,
+  /// same as the sign-in side of that flow.
+  Future<void> _logout(BuildContext context) => SupabaseService.signOut();
 
   @override
   Widget build(BuildContext context) {

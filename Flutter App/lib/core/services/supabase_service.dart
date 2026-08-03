@@ -6,6 +6,14 @@ const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 class SupabaseService {
   SupabaseService._();
 
+  /// Where Supabase redirects back to after a Google OAuth round-trip in the
+  /// browser. Must match the custom-scheme intent-filter registered in
+  /// android/app/src/main/AndroidManifest.xml and the CFBundleURLTypes entry
+  /// in ios/Runner/Info.plist, AND must be added to the Supabase project's
+  /// Auth > URL Configuration > Redirect URLs allow-list (that part can't be
+  /// done from the app - it's a Supabase dashboard setting).
+  static const oauthRedirectUrl = 'com.cottage.cottage://login-callback';
+
   static String? initializationError;
   static bool get isInitialized => initializationError == null && _isInitDone;
   static bool _isInitDone = false;

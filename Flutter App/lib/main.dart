@@ -1,8 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'core/services/supabase_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/bottom_nav_shell.dart';
+
+/// App-wide so [_AuthGate] can pop back to the root route from outside any
+/// widget's own BuildContext (needed for the Google OAuth deep-link case --
+/// see [_AuthGate]'s doc comment).
+final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +24,7 @@ class CottageApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Cottage',
       theme: buildCottageTheme(Brightness.light),
       darkTheme: buildCottageTheme(Brightness.dark),
@@ -23,7 +32,62 @@ class CottageApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: !SupabaseService.isInitialized
           ? _SupabaseErrorScreen(error: SupabaseService.initializationError)
-          : (SupabaseService.currentSession != null ? const BottomNavShell() : const LoginScreen()),
+          : const _AuthGate(),
+    );
+  }
+}
+
+/// Root auth-aware screen picker. Needed (rather than a one-off check at
+/// launch) because Google sign-in completes asynchronously: the browser
+/// closes, the OS hands control back to the app via the deep link registered
+/// in AndroidManifest.xml/Info.plist, and Supabase's client picks up the
+/// session from that redirect on its own -- nothing in the button's tap
+/// handler is still around to react to it. Listening to [onAuthStateChange]
+/// here means both that flow and plain email/password sign-in (and sign-out,
+/// from anywhere) all route through the same place.
+///
+/// Rebuilding alone isn't enough, though: if the user was on the pushed
+/// Signup or Forgot Password screen when a session appears (e.g. Google
+/// sign-in finishing while SignupScreen is on top), that pushed route would
+/// keep covering the now-rebuilt BottomNavShell underneath it. So on every
+/// signed-in transition, this also pops back to the root route via the
+/// global [navigatorKey], the same way a successful password sign-in/signup
+/// used to navigate manually.
+class _AuthGate extends StatefulWidget {
+  const _AuthGate();
+
+  @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  StreamSubscription<AuthState>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = SupabaseService.client.auth.onAuthStateChange.listen((state) {
+      if (state.session != null) {
+        navigatorKey.currentState?.popUntil((route) => route.isFirst);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<AuthState>(
+      stream: SupabaseService.client.auth.onAuthStateChange,
+      initialData: AuthState(AuthChangeEvent.initialSession, SupabaseService.currentSession),
+      builder: (context, snapshot) {
+        final session = snapshot.data?.session ?? SupabaseService.currentSession;
+        return session != null ? const BottomNavShell() : const LoginScreen();
+      },
     );
   }
 }

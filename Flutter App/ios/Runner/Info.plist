@@ -24,6 +24,23 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- Lets iOS hand control back to this app once Supabase's Google OAuth
+	     flow finishes in the browser and redirects to
+	     com.cottage.cottage://login-callback (see
+	     SupabaseService.oauthRedirectUrl). This exact URL must also be added
+	     to the Supabase project's Auth > URL Configuration > Redirect URLs
+	     allow-list, or Supabase will refuse the redirect. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.cottage.cottage.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.cottage.cottage</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

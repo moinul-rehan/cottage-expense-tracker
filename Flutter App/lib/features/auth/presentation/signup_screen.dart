@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/theme/theme.dart';
-import '../../../core/widgets/bottom_nav_shell.dart';
 import 'login_screen.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -69,9 +68,10 @@ class _SignupScreenState extends State<SignupScreen> {
       if (!mounted) return;
       if (response.session == null) {
         setState(() => _success = 'Check your email to confirm your account, then sign in.');
-      } else {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const BottomNavShell()));
       }
+      // If a session came back immediately (email confirmation disabled), no
+      // manual navigation needed -- the root _AuthGate (main.dart) picks up
+      // the new session via onAuthStateChange and pops back to it on its own.
     } on AuthException catch (e) {
       setState(() {
         _error = e.message.toLowerCase().contains('already registered')
@@ -85,13 +85,24 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  /// Mirrors SignupForm.tsx's handleGoogleSignup. See the same follow-up note
-  /// as LoginScreen._signInWithGoogle regarding the missing native OAuth
-  /// deep-link registration (AndroidManifest.xml / Info.plist).
+  /// Mirrors SignupForm.tsx's handleGoogleSignup -- see
+  /// LoginScreen._signInWithGoogle's doc comment for how the deep-link
+  /// redirect and auto-navigation work.
+  ///
+  /// NOTE (follow-up, still out of scope): unlike email/password signUp
+  /// above, there's no way to pass `mode: "create_cottage"` metadata through
+  /// Supabase's Google OAuth handshake from the client, so a Google account
+  /// with no existing cottage will sign in successfully here but land with no
+  /// cottage membership -- the web app handles this cottage-creation case in
+  /// its server-side `/auth/callback?mode=signup` route, which this client
+  /// button doesn't have an equivalent of yet.
   Future<void> _signUpWithGoogle() async {
     setState(() => _googleSubmitting = true);
     try {
-      await SupabaseService.client.auth.signInWithOAuth(OAuthProvider.google);
+      await SupabaseService.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: SupabaseService.oauthRedirectUrl,
+      );
     } catch (_) {
       if (mounted) setState(() => _error = 'Google sign-in failed. Please try again.');
     } finally {

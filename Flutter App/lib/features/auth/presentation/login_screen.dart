@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/theme/theme.dart';
-import '../../../core/widgets/bottom_nav_shell.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 import 'widgets/auth_widgets.dart';
@@ -42,12 +41,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // No manual navigation on success -- the root _AuthGate (main.dart)
+      // listens to onAuthStateChange and swaps to BottomNavShell on its own,
+      // the same mechanism Google sign-in's async deep-link return relies on.
       await SupabaseService.client.auth.signInWithPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const BottomNavShell()));
     } on AuthException {
       setState(() => _error = 'Invalid email or password.');
     } catch (_) {
@@ -58,18 +58,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   /// Mirrors LoginForm.tsx's handleGoogleLogin, using Supabase's OAuth flow.
-  ///
-  /// NOTE (follow-up, out of scope for this pass): completing this on mobile
-  /// needs a custom URL scheme / deep link registered so Supabase can redirect
-  /// back into the app after the browser round-trip -- see
-  /// android/app/src/main/AndroidManifest.xml (no such intent-filter exists
-  /// yet) and, for iOS, ios/Runner/Info.plist (no CFBundleURLTypes entry
-  /// exists yet either). The call below is fully wired and will launch the
-  /// Google OAuth flow, but the app can't currently receive the redirect back.
+  /// The browser round-trip redirects to [SupabaseService.oauthRedirectUrl],
+  /// which the OS hands back to this app via the intent-filter/URL-scheme
+  /// registered in AndroidManifest.xml/Info.plist; the root _AuthGate
+  /// (main.dart) then picks up the resulting session automatically.
   Future<void> _signInWithGoogle() async {
     setState(() => _googleSubmitting = true);
     try {
-      await SupabaseService.client.auth.signInWithOAuth(OAuthProvider.google);
+      await SupabaseService.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: SupabaseService.oauthRedirectUrl,
+      );
     } catch (_) {
       if (mounted) setState(() => _error = 'Google sign-in failed. Please try again.');
     } finally {

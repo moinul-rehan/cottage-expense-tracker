@@ -26,6 +26,18 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Lets the OS hand control back to this app once Supabase's Google
+                 OAuth flow finishes in the browser and redirects to
+                 com.cottage.cottage://login-callback (see
+                 SupabaseService.oauthRedirectUrl). This exact URL must also be
+                 added to the Supabase project's Auth > URL Configuration >
+                 Redirect URLs allow-list, or Supabase will refuse the redirect. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.cottage.cottage" android:host="login-callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
