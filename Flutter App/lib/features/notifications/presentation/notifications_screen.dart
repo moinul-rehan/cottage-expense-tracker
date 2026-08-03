@@ -140,6 +140,7 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categoryLabel = platformCategoryLabel(notification.type);
     return Container(
       decoration: BoxDecoration(
         color: notification.isRead ? surface.card : surface.accent.withValues(alpha: 0.4),
@@ -173,7 +174,7 @@ class _NotificationTile extends StatelessWidget {
                             notification.title,
                             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: surface.foreground),
                           ),
-                          if (notification.type == 'platform_announcement')
+                          if (categoryLabel != null)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                               decoration: BoxDecoration(
@@ -181,7 +182,7 @@ class _NotificationTile extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
-                                'SYSTEM',
+                                categoryLabel.toUpperCase(),
                                 style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: CottageColors.primary, letterSpacing: 0.4),
                               ),
                             ),

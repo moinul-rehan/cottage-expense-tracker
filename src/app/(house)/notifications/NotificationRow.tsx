@@ -6,7 +6,7 @@ import { markNotificationRead } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { getNotificationIcon } from "../notification-icons";
+import { getNotificationIcon, getPlatformCategoryLabel } from "../notification-icons";
 import { isExternalLink } from "../notification-link";
 import { LocalDateTime } from "@/components/LocalDateTime";
 
@@ -23,6 +23,7 @@ type Notification = {
 export function NotificationRow({ notification }: { notification: Notification }) {
   const [pending, startTransition] = useTransition();
   const Icon = getNotificationIcon(notification.type);
+  const categoryLabel = getPlatformCategoryLabel(notification.type);
 
   return (
     <TableRow className={notification.is_read ? undefined : "bg-accent/40"}>
@@ -34,9 +35,9 @@ export function NotificationRow({ notification }: { notification: Notification }
           <div className="flex flex-col gap-0.5">
             <span className="flex flex-wrap items-center gap-2 font-medium text-foreground">
               {notification.title}
-              {notification.type === "platform_announcement" && (
+              {categoryLabel && (
                 <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary uppercase">
-                  System
+                  {categoryLabel}
                 </span>
               )}
               {!notification.is_read && <Badge variant="default">New</Badge>}

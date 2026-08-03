@@ -3,6 +3,7 @@
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyUsers } from "@/lib/data/notifications";
+import { PLATFORM_NOTIFICATION_TYPE_PREFIX, isValidPlatformCategory } from "./categories";
 
 export type SendNotificationState = { error?: string; success?: string } | undefined;
 
@@ -20,6 +21,7 @@ export async function sendPlatformNotification(
   const admin = createAdminClient();
 
   const target = String(formData.get("target") ?? "");
+  const category = String(formData.get("category") ?? "");
   const cottageId = String(formData.get("cottage_id") ?? "").trim();
   const memberId = String(formData.get("member_id") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
@@ -34,6 +36,7 @@ export async function sendPlatformNotification(
     : linkInput;
 
   if (!title) return { error: "Title is required." };
+  if (!isValidPlatformCategory(category)) return { error: "Choose a category." };
   if (target === "cottage" && !cottageId) return { error: "Choose a Cottage." };
   if (target === "member" && !memberId) return { error: "Choose a member." };
 
@@ -65,7 +68,7 @@ export async function sendPlatformNotification(
   await Promise.all(
     Array.from(byCottage.entries()).map(([cid, userIds]) =>
       notifyUsers(admin, cid, userIds, {
-        type: "platform_announcement",
+        type: `${PLATFORM_NOTIFICATION_TYPE_PREFIX}${category}`,
         title,
         body: body || undefined,
         link: link || undefined,

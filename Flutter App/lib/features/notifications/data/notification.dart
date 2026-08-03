@@ -91,9 +91,30 @@ IconData notificationIconFor(String type) {
       return Icons.restore_outlined;
     case 'feedback_submitted':
       return Icons.report_gmailerrorred_outlined;
+    case 'platform_feature':
+      return Icons.auto_awesome_outlined;
+    case 'platform_update':
+      return Icons.refresh_outlined;
     case 'platform_announcement':
       return Icons.campaign_outlined;
+    case 'platform_maintenance':
+      return Icons.build_outlined;
+    case 'platform_alert':
+      return Icons.warning_amber_outlined;
     default:
       return Icons.notifications_outlined;
   }
+}
+
+const _platformTypePrefix = 'platform_';
+
+/// Category label for a platform-admin-sent notification's badge (e.g.
+/// "platform_feature" -> "Feature"), or null for regular in-app activity
+/// notifications. Mirrors getPlatformCategoryLabel in
+/// src/app/(house)/notification-icons.tsx.
+String? platformCategoryLabel(String type) {
+  if (!type.startsWith(_platformTypePrefix)) return null;
+  final category = type.substring(_platformTypePrefix.length);
+  if (category.isEmpty) return null;
+  return category[0].toUpperCase() + category.substring(1);
 }

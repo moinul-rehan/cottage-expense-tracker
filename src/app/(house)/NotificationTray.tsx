@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useTransition, type Point
 import { createPortal } from "react-dom";
 import { Bell } from "@/components/animate-ui/icons/bell";
 import { markNotificationRead } from "./notifications/actions";
-import { getNotificationIcon } from "./notification-icons";
+import { getNotificationIcon, getPlatformCategoryLabel } from "./notification-icons";
 import { NotificationLinkButton } from "./notification-link";
 import { LocalDateTime } from "@/components/LocalDateTime";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -98,7 +98,7 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <p className="text-sm font-medium text-foreground">{n.title}</p>
-                  {n.type === "platform_announcement" && <SystemBadge />}
+                  {getPlatformCategoryLabel(n.type) && <SystemBadge label={getPlatformCategoryLabel(n.type)!} />}
                 </div>
                 {!n.is_read && <MarkReadButton id={n.id} />}
               </div>
@@ -119,10 +119,10 @@ function NotificationList({ notifications }: { notifications: Notification[] }) 
   );
 }
 
-function SystemBadge() {
+function SystemBadge({ label }: { label: string }) {
   return (
     <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary uppercase">
-      System
+      {label}
     </span>
   );
 }
@@ -303,7 +303,7 @@ function NotificationSheetBody({
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <p className="text-sm font-medium text-foreground">{n.title}</p>
-                      {n.type === "platform_announcement" && <SystemBadge />}
+                      {getPlatformCategoryLabel(n.type) && <SystemBadge label={getPlatformCategoryLabel(n.type)!} />}
                     </div>
                     {!n.is_read && <MarkReadButton id={n.id} />}
                   </div>

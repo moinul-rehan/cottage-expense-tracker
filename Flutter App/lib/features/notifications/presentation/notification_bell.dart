@@ -171,6 +171,7 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                   separatorBuilder: (_, _) => const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     final n = notifications[index];
+                    final categoryLabel = platformCategoryLabel(n.type);
                     return ListTile(
                       onTap: () => _markRead(n),
                       tileColor: n.isRead ? null : surface.accent.withValues(alpha: 0.4),
@@ -189,7 +190,7 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                               style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: surface.foreground),
                             ),
                           ),
-                          if (n.type == 'platform_announcement') ...[
+                          if (categoryLabel != null) ...[
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
@@ -198,7 +199,7 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
-                                'SYSTEM',
+                                categoryLabel.toUpperCase(),
                                 style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: CottageColors.primary, letterSpacing: 0.4),
                               ),
                             ),

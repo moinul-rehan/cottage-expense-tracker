@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { getFullName } from "@/lib/data/display-name";
 import { sendPlatformNotification } from "./actions";
+import { PLATFORM_NOTIFICATION_CATEGORIES } from "./categories";
 import { AdminCard, AdminButton, AdminInput, AdminTextarea, AdminSelect } from "../AdminUI";
 
 type Cottage = { id: string; name: string };
@@ -75,6 +76,20 @@ export function SendNotificationForm({ cottages, members }: { cottages: Cottage[
             )}
           </div>
         )}
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium">Category</label>
+          <AdminSelect name="category" defaultValue={PLATFORM_NOTIFICATION_CATEGORIES[0].value}>
+            {PLATFORM_NOTIFICATION_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </AdminSelect>
+          <p className="text-xs text-black/40 dark:text-white/40">
+            Shown as a badge on the notification so members can tell what kind of update it is.
+          </p>
+        </div>
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium" htmlFor="notif-title">
