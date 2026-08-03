@@ -21,6 +21,18 @@ export function defaultDateForMonth(monthKey: string): string {
   return today.slice(0, 7) === monthKey ? today : `${monthKey}-01`;
 }
 
+/** When the cottage's current active month began - the `closed_at` of the most recently closed prior month, or null if no month has ever been closed yet. Used to scope things like notifications to "since the current month started". */
+export async function getActiveMonthStartedAt(supabase: SupabaseClient, cottageId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("month_closures")
+    .select("closed_at")
+    .eq("cottage_id", cottageId)
+    .order("closed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data?.closed_at ?? null;
+}
+
 export function nextMonthKey(monthKey: string) {
   const [year, month] = monthKey.split("-").map(Number);
   const d = new Date(Date.UTC(year, month, 1));

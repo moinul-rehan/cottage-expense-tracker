@@ -1,7 +1,7 @@
 import { Wallet, Receipt, HandCoins, UtensilsCrossed, ShoppingBasket } from "lucide-react";
 import { getDisplayName, getFullName, getCurrentProfile, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
-import { getCottageBalance, getMonthlyDues, getMonthlyExpenseTotal } from "@/lib/data/finance";
+import { getCottageBalance, getMonthlyDues, getMonthlyExpenseTotal, getCarryIns } from "@/lib/data/finance";
 import { getMealTotals, zipMemberMealSummary } from "@/lib/data/meal";
 import { getCottageBazaarDuties } from "@/lib/data/bazaar-duty";
 import { BazaarDutyRoster } from "./BazaarDutyRoster";
@@ -77,6 +77,7 @@ export default async function DashboardPage() {
     myAdjustmentsQuery,
     myDepositsQuery,
     mealTotals,
+    carryIns,
   ] = await Promise.all([
     getMonthlyDues(supabase, profile.cottage_id, monthKey),
     getCottageBalance(supabase, profile.cottage_id),
@@ -103,12 +104,22 @@ export default async function DashboardPage() {
     // Independent of `members` (only zipped against it locally below), so it
     // runs alongside everything else instead of after members resolves.
     getMealTotals(supabase, monthKey),
+    getCarryIns(supabase, profile.cottage_id, monthKey),
   ]);
 
   const outstandingFromMembers = Array.from(dues.values()).reduce((sum, d) => sum + Math.max(0, d.due), 0);
   const collectedThisMonth = Array.from(dues.values()).reduce((sum, d) => sum + d.paid, 0);
-  const myDue = dues.get(profile.id) ?? { rent: 0, expenses: 0, paid: 0, due: 0 };
-  const myAssignedCost = myDue.rent + myDue.expenses;
+  const myDue = dues.get(profile.id) ?? { rent: 0, expenses: 0, carryIn: 0, paid: 0, due: 0 };
+  const myAssignedCost = myDue.rent + myDue.expenses + myDue.carryIn;
+  const myCarryInLines = carryIns
+    .filter((c) => c.user_id === profile.id)
+    .map((c) => ({
+      id: c.id,
+      label: `${formatMonthKey(c.source_month_key)} ${c.kind === "utility" ? "Utility" : "Meal"} ${
+        c.amount >= 0 ? "Due" : c.kind === "utility" ? "Advanced" : "Balance"
+      }`,
+      amount: c.amount,
+    }));
   const myBreakdownLines = (myAdjustmentsQuery.data ?? []).map((a) => ({
     id: a.id,
     label: UTILITY_CATEGORY_LABELS[a.category] ?? a.category,
@@ -173,6 +184,7 @@ export default async function DashboardPage() {
         }}
         breakdown={{
           lines: myBreakdownLines,
+          carryInLines: myCarryInLines,
           adjustmentLines: myAdjustmentLines,
           depositLines: myDepositLines,
           invoiceMeta: {
@@ -247,6 +259,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-foreground">Your utility summary</h2>
           <UtilityBreakdownDialog
             lines={myBreakdownLines}
+            carryInLines={myCarryInLines}
             assignedCost={myAssignedCost}
             paid={myDue.paid}
             due={myDue.due}

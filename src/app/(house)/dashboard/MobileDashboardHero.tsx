@@ -2,7 +2,7 @@ import { Receipt, HandCoins, Wallet, UtensilsCrossed } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/verified-badge";
-import { UtilityBreakdownDialog, type InvoiceMeta } from "./UtilityBreakdownDialog";
+import { UtilityBreakdownDialog, type InvoiceMeta, type CarryInLine } from "./UtilityBreakdownDialog";
 
 type BadgeProfile = {
   role: "super_admin" | "member";
@@ -46,6 +46,7 @@ export function MobileDashboardHero({
   meal: { cost: number; deposit: number; balance: number };
   breakdown: {
     lines: Line[];
+    carryInLines: CarryInLine[];
     adjustmentLines: { date: string; label: string; amount: number }[];
     depositLines: { date: string; note: string | null; amount: number }[];
     invoiceMeta: InvoiceMeta;
@@ -102,6 +103,7 @@ export function MobileDashboardHero({
           <div className="flex justify-end">
             <UtilityBreakdownDialog
               lines={breakdown.lines}
+              carryInLines={breakdown.carryInLines}
               assignedCost={utility.assignedCost}
               paid={utility.paid}
               due={utility.due}

@@ -7,7 +7,7 @@ import { MessageSquareWarning } from "@/components/animate-ui/icons/message-squa
 import { getCurrentProfile, getDisplayName, getActiveMembers } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount, getNotifications } from "@/lib/data/notifications";
-import { defaultDateForMonth, formatMonthKey } from "@/lib/data/months";
+import { defaultDateForMonth, formatMonthKey, getActiveMonthStartedAt } from "@/lib/data/months";
 import { translate } from "@/lib/i18n/dictionary";
 import { MealQuickAddMenu } from "./MealQuickAddMenu";
 import { UtilitiesQuickAddMenu } from "./UtilitiesQuickAddMenu";
@@ -38,9 +38,8 @@ export default async function HouseLayout({
   const canManageMealRequests =
     profile.role === "super_admin" || profile.can_add_meals || profile.can_add_bazaar;
 
-  const [unreadCount, notifications, members, mealPending, costPending] = await Promise.all([
-    getUnreadCount(supabase, profile.id),
-    getNotifications(supabase, profile.id, 30),
+  const [monthStartedAt, members, mealPending, costPending] = await Promise.all([
+    getActiveMonthStartedAt(supabase, profile.cottage_id),
     getActiveMembers(profile.cottage_id),
     canManageMealRequests
       ? supabase.from("meal_requests").select("id", { count: "exact", head: true }).eq("status", "pending")
@@ -48,6 +47,10 @@ export default async function HouseLayout({
     canManageMealRequests
       ? supabase.from("meal_cost_requests").select("id", { count: "exact", head: true }).eq("status", "pending")
       : Promise.resolve({ count: 0 }),
+  ]);
+  const [unreadCount, notifications] = await Promise.all([
+    getUnreadCount(supabase, profile.id, monthStartedAt),
+    getNotifications(supabase, profile.id, monthStartedAt, 30),
   ]);
   const defaultDate = defaultDateForMonth(profile.active_month_key);
   const pendingRequestCount = (mealPending.count ?? 0) + (costPending.count ?? 0);

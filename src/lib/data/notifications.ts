@@ -3,22 +3,28 @@ import { after } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendPushToUsers } from "./push";
 
-export async function getUnreadCount(supabase: SupabaseClient, userId: string) {
-  const { count } = await supabase
+/** `since`: only count notifications from the current active month onward (see getActiveMonthStartedAt) - pass null to count everything. */
+export async function getUnreadCount(supabase: SupabaseClient, userId: string, since: string | null) {
+  let query = supabase
     .from("notifications")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .eq("is_read", false);
+  if (since) query = query.gte("created_at", since);
+  const { count } = await query;
   return count ?? 0;
 }
 
-export async function getNotifications(supabase: SupabaseClient, userId: string, limit = 30) {
-  const { data } = await supabase
+/** `since`: only return notifications from the current active month onward (see getActiveMonthStartedAt) - pass null to return everything. */
+export async function getNotifications(supabase: SupabaseClient, userId: string, since: string | null, limit = 30) {
+  let query = supabase
     .from("notifications")
     .select("id, type, title, body, link, is_read, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (since) query = query.gte("created_at", since);
+  const { data } = await query;
   return data ?? [];
 }
 

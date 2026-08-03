@@ -1,6 +1,7 @@
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { getNotifications } from "@/lib/data/notifications";
+import { getActiveMonthStartedAt } from "@/lib/data/months";
 import { translate } from "@/lib/i18n/dictionary";
 import { NotificationRow } from "./NotificationRow";
 import { MarkAllReadButton } from "./MarkAllReadButton";
@@ -10,7 +11,8 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 export default async function NotificationsPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
-  const notifications = await getNotifications(supabase, profile.id);
+  const monthStartedAt = await getActiveMonthStartedAt(supabase, profile.cottage_id);
+  const notifications = await getNotifications(supabase, profile.id, monthStartedAt);
   const hasUnread = notifications.some((n) => !n.is_read);
 
   return (

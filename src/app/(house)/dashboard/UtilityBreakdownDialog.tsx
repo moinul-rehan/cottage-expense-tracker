@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { ShareInvoiceButton } from "./ShareInvoiceButton";
 
 type Line = { id: string; label: string; amount: number };
+export type CarryInLine = { id: string; label: string; amount: number };
 
 export type InvoiceMeta = {
   memberName: string;
@@ -22,6 +23,7 @@ export type InvoiceMeta = {
 
 export function UtilityBreakdownDialog({
   lines,
+  carryInLines,
   assignedCost,
   paid,
   due,
@@ -30,6 +32,7 @@ export function UtilityBreakdownDialog({
   depositLines,
 }: {
   lines: Line[];
+  carryInLines: CarryInLine[];
   assignedCost: number;
   paid: number;
   due: number;
@@ -42,6 +45,19 @@ export function UtilityBreakdownDialog({
 
   const body = (
     <div className="flex flex-col gap-3 p-4 pt-2 text-sm">
+      {!!carryInLines.length && (
+        <div className="flex flex-col gap-1.5 border-b pb-2">
+          {carryInLines.map((c) => (
+            <div key={c.id} className="flex justify-between">
+              <span className="text-muted-foreground">{c.label}</span>
+              <span className={cn("font-medium", c.amount >= 0 ? "text-destructive" : "text-emerald-600")}>
+                {c.amount >= 0 ? "+" : "−"}
+                {Math.abs(c.amount).toFixed(2)} tk
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex flex-col gap-1.5">
         {lines.map((l) => (
           <div key={l.id} className="flex justify-between">
@@ -79,6 +95,7 @@ export function UtilityBreakdownDialog({
         <ShareInvoiceButton
           invoice={{
             ...invoiceMeta,
+            carryInLines: carryInLines.map((c) => ({ label: c.label, amount: c.amount })),
             adjustmentLines,
             depositLines,
             assignedCost,

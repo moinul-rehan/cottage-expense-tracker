@@ -1,5 +1,6 @@
 export type InvoiceAdjustmentLine = { date: string; label: string; amount: number };
 export type InvoiceDepositLine = { date: string; note: string | null; amount: number };
+export type InvoiceCarryInLine = { label: string; amount: number };
 
 export type InvoiceData = {
   memberName: string;
@@ -8,6 +9,7 @@ export type InvoiceData = {
   address: string | null;
   avatarUrl: string | null;
   monthLabel: string;
+  carryInLines: InvoiceCarryInLine[];
   adjustmentLines: InvoiceAdjustmentLine[];
   depositLines: InvoiceDepositLine[];
   assignedCost: number;
@@ -53,6 +55,7 @@ export async function generateInvoicePng(data: InvoiceData): Promise<Blob> {
   const infoLineCount = 1 + [data.email, data.phone, data.address].filter(Boolean).length;
   const preparedForHeight = 22 + Math.max(AVATAR_SIZE, infoLineCount * 20);
 
+  const carryInsHeight = data.carryInLines.length ? tableHeight(data.carryInLines.length) : 0;
   const adjustmentsHeight = tableHeight(data.adjustmentLines.length);
   const depositsHeight = tableHeight(data.depositLines.length);
 
@@ -67,6 +70,7 @@ export async function generateInvoicePng(data: InvoiceData): Promise<Blob> {
     TITLE_OFFSET +
     STAT_CARD_HEIGHT +
     SECTION_GAP +
+    (carryInsHeight ? TITLE_TEXT_HEIGHT + TITLE_OFFSET + carryInsHeight + SECTION_GAP : 0) +
     TITLE_TEXT_HEIGHT +
     TITLE_OFFSET +
     adjustmentsHeight +
@@ -106,6 +110,21 @@ export async function generateInvoicePng(data: InvoiceData): Promise<Blob> {
   drawSummaryCards(ctx, data, dueLabel, dueColor, dueTint, y);
   y += STAT_CARD_HEIGHT;
   y += SECTION_GAP;
+
+  if (data.carryInLines.length) {
+    y = drawSectionTitle(ctx, "Carried Over", y);
+    y = drawStripedTable(
+      ctx,
+      ["", "SOURCE", "AMOUNT"],
+      data.carryInLines.map((l) => ["", l.label, formatSigned(l.amount)]),
+      data.carryInLines.map((l) => (l.amount >= 0 ? COLORS.red : COLORS.green)),
+      "Nothing carried over.",
+      "Total",
+      formatSigned(data.carryInLines.reduce((sum, l) => sum + l.amount, 0)),
+      y
+    );
+    y += SECTION_GAP;
+  }
 
   y = drawSectionTitle(ctx, "Assigned Utilities", y);
   y = drawStripedTable(
