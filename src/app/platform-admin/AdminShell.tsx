@@ -33,7 +33,7 @@ export async function AdminShell({
           </div>
           <span className="text-sm font-medium">Cottage Admin</span>
         </Link>
-        <AdminSidebarNav />
+        <AdminSidebarNav isOwner={user.isOwner} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -56,6 +56,9 @@ export async function AdminShell({
                 {(user.email ?? "?")[0]?.toUpperCase()}
               </div>
               <span className="hidden max-w-32 truncate text-xs font-medium sm:inline">{user.email}</span>
+              <span className="hidden shrink-0 rounded-full bg-black/4 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-black/50 uppercase sm:inline dark:bg-white/10 dark:text-white/50">
+                {user.isOwner ? "Owner" : "Moderator"}
+              </span>
             </div>
           </div>
         </header>

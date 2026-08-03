@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isPlatformAdminEmail } from "@/lib/platform-admin";
+import { isPlatformStaffEmail } from "@/lib/platform-admin";
 
 export type PlatformAdminLoginState = { error?: string } | undefined;
 
@@ -24,7 +24,7 @@ export async function platformAdminLogin(
     return { error: "Invalid email or password." };
   }
 
-  if (!isPlatformAdminEmail(email)) {
+  if (!(await isPlatformStaffEmail(email))) {
     await supabase.auth.signOut();
     return { error: "This account isn't authorized for platform admin." };
   }

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isPlatformAdminEmail } from "@/lib/platform-admin";
+import { isPlatformStaffEmail } from "@/lib/platform-admin";
 import { Logo } from "@/components/logo";
 import { PlatformAdminLoginForm } from "./PlatformAdminLoginForm";
 
@@ -10,7 +10,7 @@ export default async function PlatformAdminLoginPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user && isPlatformAdminEmail(user.email)) {
+  if (user && (await isPlatformStaffEmail(user.email))) {
     redirect("/platform-admin");
   }
 
