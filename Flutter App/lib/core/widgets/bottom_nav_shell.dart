@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/meal/presentation/meal_screen.dart';
@@ -17,7 +19,9 @@ final _tabs = <_NavTabData>[
   _NavTabData(icon: Icons.dashboard_rounded, label: 'Home', builder: (_) => const DashboardScreen()),
   _NavTabData(icon: Icons.push_pin_rounded, label: 'Notices', builder: (_) => const NoticesScreen()),
   _NavTabData(
-    icon: Icons.restaurant_rounded,
+    // Matches web's lucide `UtensilsCrossed` glyph (crossed fork+knife, no
+    // plate) more closely than Icons.restaurant_rounded (a plated meal).
+    icon: Icons.local_dining_rounded,
     label: 'Meal',
     builder: (_) => MealScreen(key: MealScreen.mealScreenKey),
   ),
@@ -322,7 +326,6 @@ class _FloatingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = context.surface;
-    final showLabels = MediaQuery.sizeOf(context).width >= 400;
     return Container(
       height: 64,
       decoration: BoxDecoration(
@@ -343,7 +346,6 @@ class _FloatingNavBar extends StatelessWidget {
                     (activeSheet == 'meal' && i == 2) ||
                     (activeSheet == 'utilities' && i == 3) ||
                     (activeSheet == 'menu' && i == 4),
-                showLabel: showLabels && i != index,
                 onTap: () => onTap(i),
               ),
             ),
@@ -353,39 +355,90 @@ class _FloatingNavBar extends StatelessWidget {
   }
 }
 
-class _NavTab extends StatelessWidget {
+/// No visible text label is ever rendered here -- mirrors the web's
+/// `<span className="sr-only">{label}</span>` (icon-only bar; the label
+/// exists only for screen readers).
+class _NavTab extends StatefulWidget {
   final _NavTabData data;
   final bool active;
-  final bool showLabel;
   final VoidCallback onTap;
 
-  const _NavTab({required this.data, required this.active, required this.onTap, this.showLabel = false});
+  const _NavTab({required this.data, required this.active, required this.onTap});
+
+  @override
+  State<_NavTab> createState() => _NavTabState();
+}
+
+class _NavTabState extends State<_NavTab> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  // Web's SpeedDialMenu constants: 320ms ease-out-back (overshoot) expanding
+  // into the active state, 260ms ease-in-cubic collapsing out of it.
+  static const _expandMs = 320;
+  static const _collapseMs = 260;
+  static const _expandCurve = Cubic(0.34, 1.56, 0.64, 1);
+  static const _collapseCurve = Cubic(0.32, 0, 0.67, 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _expandMs),
+      reverseDuration: const Duration(milliseconds: _collapseMs),
+      value: widget.active ? 1 : 0,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _NavTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active != oldWidget.active) {
+      widget.active ? _controller.forward() : _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final data = widget.data;
     final surface = context.surface;
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
       child: Center(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutBack,
-          margin: EdgeInsets.only(bottom: active ? 28 : 0),
-          width: active ? 56 : 36,
-          height: active ? 56 : 36,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: active ? CottageColors.primary : Colors.transparent,
-            boxShadow: active ? [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))] : null,
-            border: active ? Border.all(color: surface.background, width: 4) : null,
-          ),
-          child: Icon(
-            data.icon,
-            size: active ? 24 : 20,
-            color: active ? CottageColors.primaryForeground : surface.navInactive,
-          ),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final curve = _controller.status == AnimationStatus.reverse ? _collapseCurve : _expandCurve;
+            final t = curve.transform(_controller.value).clamp(0.0, 1.0);
+            final active = widget.active;
+            final size = lerpDouble(36, 56, t)!;
+            return Container(
+              margin: EdgeInsets.only(bottom: lerpDouble(0, 32, t)!),
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: active ? CottageColors.primary : Colors.transparent,
+                boxShadow: active
+                    ? [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))]
+                    : null,
+                border: active ? Border.all(color: surface.background, width: 4) : null,
+              ),
+              child: Icon(
+                data.icon,
+                size: active ? 24 : 20,
+                color: active ? CottageColors.primaryForeground : surface.navInactive,
+              ),
+            );
+          },
         ),
       ),
     );

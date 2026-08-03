@@ -73,7 +73,7 @@ class CottageSurface extends ThemeExtension<CottageSurface> {
     secondary: Color(0xFFF4F4F6),
     muted: Color(0xFFE4E5E8),
     navBackground: Color(0xFF171717),
-    navInactive: Color(0xFF9CA3AF),
+    navInactive: Color(0xFFA3A3A3),
     toneBlueBg: Color(0xFFFBEAE5),
     toneBlueFg: CottageColors.primary,
     toneGreenBg: Color(0x2663B64E),
@@ -94,8 +94,10 @@ class CottageSurface extends ThemeExtension<CottageSurface> {
     accentForeground: CottageColors.primary,
     secondary: Color(0xFF292929),
     muted: Color(0xFF3D3D3D),
-    navBackground: Color(0xFF141414),
-    navInactive: Color(0xFF888888),
+    // Web's MobileBottomNav hardcodes `bg-neutral-900`/`text-neutral-400`
+    // literally (not a CSS var), so the bar looks identical in light/dark.
+    navBackground: Color(0xFF171717),
+    navInactive: Color(0xFFA3A3A3),
     toneBlueBg: Color(0x33DE7356),
     toneBlueFg: CottageColors.primary,
     toneGreenBg: Color(0x3363B64E),
