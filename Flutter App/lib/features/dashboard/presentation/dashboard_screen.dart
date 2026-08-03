@@ -6,11 +6,16 @@ import '../../../core/theme/theme.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/responsive_utils.dart';
+import '../../bazaar_duty/presentation/bazaar_duty_roster.dart';
+import '../../notices/presentation/pinned_notices_section.dart';
+import 'utility_breakdown_sheet.dart';
 
 /// Phase 1 scope only: the "Utility overview", "Your utility summary",
 /// "Meal overview" stat-card rows and the "Member meal summary" grid from
-/// src/app/(house)/dashboard/page.tsx. Pinned notices, bazaar duty, and the
-/// utility breakdown/invoice-share dialog are deferred to a later phase.
+/// src/app/(house)/dashboard/page.tsx, plus the Bazaar Duty Roster card, the
+/// Pinned Notices strip, and the "See details" utility breakdown /
+/// invoice-share sheet (mirrors UtilityBreakdownDialog.tsx). The "just
+/// posted" notice popup is deferred to a later phase.
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -88,7 +93,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   "Here's where things stand for ${data.monthKey}.",
                   style: TextStyle(fontSize: 13, color: surface.mutedForeground),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                PinnedNoticesSection(profile: profile),
+                if (data.bazaarDuties.isNotEmpty) ...[
+                  BazaarDutyRoster(
+                    duties: data.bazaarDuties,
+                    membersById: data.membersById,
+                    currentUserId: profile.id,
+                  ),
+                  const SizedBox(height: 24),
+                ] else
+                  const SizedBox(height: 24),
 
                 _SectionTitle('Utility overview'),
                 const SizedBox(height: 12),
@@ -127,7 +142,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
                 const SizedBox(height: 24),
-                _SectionTitle('Your utility summary'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _SectionTitle('Your utility summary'),
+                    TextButton.icon(
+                      onPressed: () => showUtilityBreakdownSheet(context, profile: profile, data: data),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: CottageColors.primary,
+                      ),
+                      icon: const Text('See details', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      label: const Icon(Icons.chevron_right, size: 16),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 _ResponsiveCardGrid(
                   columns: columns,

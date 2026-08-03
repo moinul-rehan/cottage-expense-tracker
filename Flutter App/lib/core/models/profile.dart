@@ -8,6 +8,12 @@ class Profile {
   final String? lastName;
   final String? email;
   final String? avatarUrl;
+  final String? mobileNumber;
+  final String? address;
+
+  /// 'super_admin' | 'member' -- mirrors profiles.role, used by notice-board
+  /// visibility/management checks (see src/lib/notice-types.tsx).
+  final String role;
 
   const Profile({
     required this.id,
@@ -16,7 +22,12 @@ class Profile {
     this.lastName,
     this.email,
     this.avatarUrl,
+    this.mobileNumber,
+    this.address,
+    this.role = 'member',
   });
+
+  bool get isSuperAdmin => role == 'super_admin';
 
   factory Profile.fromMap(Map<String, dynamic> map) {
     return Profile(
@@ -26,6 +37,9 @@ class Profile {
       lastName: map['last_name'] as String?,
       email: map['email'] as String?,
       avatarUrl: map['avatar_url'] as String?,
+      mobileNumber: map['mobile_number'] as String?,
+      address: map['address'] as String?,
+      role: map['role'] as String? ?? 'member',
     );
   }
 

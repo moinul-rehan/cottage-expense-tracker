@@ -2,6 +2,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dashboard_data.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/utils/format_month.dart';
+import '../../../core/utils/utility_categories.dart';
+import '../../bazaar_duty/data/bazaar_duty_service.dart';
 
 /// Ports the aggregation logic in src/lib/data/finance.ts and
 /// src/lib/data/meal.ts. These are NOT Postgres RPCs on the web side --
@@ -9,6 +12,7 @@ import '../../../core/services/supabase_service.dart';
 /// on the same tables, to stay in sync with the web app's numbers.
 class DashboardService {
   final SupabaseClient _client = SupabaseService.client;
+  final BazaarDutyService _bazaarDutyService = BazaarDutyService();
 
   /// The signed-in member's own profile row -- mirrors getCurrentProfile in
   /// src/lib/data/dal.ts (a smaller column slice for Phase 1).
@@ -16,7 +20,7 @@ class DashboardService {
     final userId = SupabaseService.currentUser!.id;
     final row = await _client
         .from('profiles')
-        .select('id, cottage_id, first_name, last_name, email, avatar_url')
+        .select('id, cottage_id, first_name, last_name, email, avatar_url, mobile_number, address, role')
         .eq('id', userId)
         .single();
     return Profile.fromMap(row);
@@ -69,40 +73,96 @@ class DashboardService {
 
   /// Just this member's due -- mirrors getMonthlyDues in finance.ts, scoped
   /// to one user instead of building the whole-cottage map (the Dashboard
-  /// only ever needs "my" row).
-  Future<MemberDue> _getMyDue(String cottageId, String monthKey, String userId) async {
+  /// only ever needs "my" row). Also keeps the raw adjustment/deposit/
+  /// carry-in rows (not just totals) for the utility breakdown sheet and
+  /// invoice export -- mirrors the queries in
+  /// src/app/(house)/dashboard/page.tsx (myAdjustmentsQuery, myDepositsQuery,
+  /// getCarryIns filtered to this member).
+  Future<(MemberDue, List<AdjustmentLine>, List<DepositLine>, List<CarryInLine>)> _getMyDue(
+    String cottageId,
+    String monthKey,
+    String userId,
+  ) async {
     final adjustments = await _client
         .from('utility_adjustments')
-        .select('category, amount')
+        .select('id, category, amount, created_at')
         .eq('cottage_id', cottageId)
         .eq('month_key', monthKey)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .order('created_at');
 
     double rent = 0;
     double expenses = 0;
+    final adjustmentLines = <AdjustmentLine>[];
     for (final row in adjustments as List) {
       final amount = (row['amount'] as num).toDouble();
-      if (row['category'] == 'house_rent') {
+      final category = row['category'] as String;
+      if (category == 'house_rent') {
         rent += amount;
       } else {
         expenses += amount;
       }
+      adjustmentLines.add(AdjustmentLine(
+        id: row['id'] as String,
+        date: DateTime.parse(row['created_at'] as String),
+        label: utilityCategoryLabel(category),
+        amount: amount,
+      ));
     }
 
     final deposits = await _client
         .from('utility_deposits')
-        .select('amount')
+        .select('id, deposit_date, amount, note')
         .eq('cottage_id', cottageId)
         .eq('month_key', monthKey)
         .eq('user_id', userId)
-        .eq('source_type', 'member');
+        .eq('source_type', 'member')
+        .order('deposit_date', ascending: false);
 
     double paid = 0;
+    final depositLines = <DepositLine>[];
     for (final row in deposits as List) {
-      paid += (row['amount'] as num).toDouble();
+      final amount = (row['amount'] as num).toDouble();
+      paid += amount;
+      depositLines.add(DepositLine(
+        id: row['id'] as String,
+        date: DateTime.parse(row['deposit_date'] as String),
+        note: row['note'] as String?,
+        amount: amount,
+      ));
     }
 
-    return MemberDue(rent: rent, expenses: expenses, paid: paid, due: rent + expenses - paid);
+    final carryInRows = await _client
+        .from('utility_carry_ins')
+        .select('id, amount, source_month_key, kind')
+        .eq('cottage_id', cottageId)
+        .eq('month_key', monthKey)
+        .eq('user_id', userId);
+
+    double carryIn = 0;
+    final carryInLines = <CarryInLine>[];
+    for (final row in carryInRows as List) {
+      final amount = (row['amount'] as num).toDouble();
+      final kind = row['kind'] as String;
+      carryIn += amount;
+      final sourceLabel = formatMonthKey(row['source_month_key'] as String);
+      final kindLabel = kind == 'utility' ? 'Utility' : 'Meal';
+      final stateLabel = amount >= 0 ? 'Due' : (kind == 'utility' ? 'Advanced' : 'Balance');
+      carryInLines.add(CarryInLine(
+        id: row['id'] as String,
+        label: '$sourceLabel $kindLabel $stateLabel',
+        amount: amount,
+      ));
+    }
+
+    final due = MemberDue(
+      rent: rent,
+      expenses: expenses,
+      carryIn: carryIn,
+      paid: paid,
+      due: rent + expenses + carryIn - paid,
+    );
+    return (due, adjustmentLines, depositLines, carryInLines);
   }
 
   Future<List<Profile>> _getActiveMembers(String cottageId) async {
@@ -149,18 +209,21 @@ class DashboardService {
   Future<DashboardData> load(Profile me) async {
     final monthKey = await getActiveMonthKey(me.cottageId);
 
-    final futures = <Future<dynamic>>[
-      _getCottageBalance(me.cottageId),
-      _getMonthlyExpenseTotal(monthKey),
-      _getMyDue(me.cottageId, monthKey, me.id),
-      _getActiveMembers(me.cottageId),
-    ];
-    final results = await Future.wait(futures);
+    final cottageBalanceFuture = _getCottageBalance(me.cottageId);
+    final totalUtilityExpenseFuture = _getMonthlyExpenseTotal(monthKey);
+    final myDueFuture = _getMyDue(me.cottageId, monthKey, me.id);
+    final membersFuture = _getActiveMembers(me.cottageId);
+    // Shared roster of every member's upcoming/current bazaar duty -- mirrors
+    // getCottageBazaarDuties in src/lib/data/bazaar-duty.ts, fetched
+    // alongside everything else like the web dashboard does.
+    final bazaarDutiesFuture = _bazaarDutyService.getCottageBazaarDuties(me.cottageId);
 
-    final cottageBalance = results[0] as double;
-    final totalUtilityExpense = results[1] as double;
-    final myDue = results[2] as MemberDue;
-    final members = results[3] as List<Profile>;
+    final cottageBalance = await cottageBalanceFuture;
+    final totalUtilityExpense = await totalUtilityExpenseFuture;
+    final (myDue, myAdjustmentLines, myDepositLines, myCarryInLines) = await myDueFuture;
+    final members = await membersFuture;
+    final bazaarDuties = await bazaarDutiesFuture;
+    final membersById = {for (final m in members) m.id: m};
 
     final (mealRate, totalMeals, totalBazaar, mealsByUser, depositsByUser) = await _getMealTotals(monthKey);
 
@@ -230,6 +293,11 @@ class DashboardService {
       totalMeals: totalMeals,
       totalBazaar: totalBazaar,
       memberMealRows: memberMealRows,
+      myCarryInLines: myCarryInLines,
+      myAdjustmentLines: myAdjustmentLines,
+      myDepositLines: myDepositLines,
+      bazaarDuties: bazaarDuties,
+      membersById: membersById,
     );
   }
 }

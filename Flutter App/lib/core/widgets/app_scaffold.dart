@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_service.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/notifications/presentation/notification_bell.dart';
 import '../theme/theme.dart';
 
 /// Shared top bar for each tab under [BottomNavShell] -- Cottage wordmark,
@@ -34,6 +35,7 @@ class AppScaffold extends StatelessWidget {
           ],
         ),
         actions: [
+          const NotificationBell(),
           if (showLogout)
             IconButton(
               onPressed: () => _logout(context),
