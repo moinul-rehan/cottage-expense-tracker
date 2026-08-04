@@ -27,6 +27,22 @@ every screen that talks to Supabase (starting with login) fails.
    flutter build apk --release --dart-define-from-file=env.json
    ```
 
+## Push notifications (Firebase Cloud Messaging)
+
+Native push to the device's system notification tray needs a Firebase
+project, separate from Supabase:
+
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com).
+2. Add an Android app with package name `com.cottage.cottage`.
+3. Download the generated `google-services.json` and place it at
+   `android/app/google-services.json`. It's gitignored (environment-specific,
+   like `env.json`) - the app still builds without it, just with push disabled
+   (`PushNotificationService` fails soft, see its doc comment).
+4. For the backend to actually *send* pushes: Firebase Console > Project
+   Settings > Service Accounts > Generate new private key, then set the
+   full JSON contents as `FIREBASE_SERVICE_ACCOUNT` in the web app's
+   `.env.local` (see `src/lib/data/fcm.ts`).
+
 ## Getting Started
 
 For help getting started with Flutter development, view the

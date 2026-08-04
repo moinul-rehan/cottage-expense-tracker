@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'features/auth/presentation/login_screen.dart';
+import 'core/services/push_notification_service.dart';
 import 'core/services/supabase_service.dart';
 import 'core/theme/theme.dart';
 import 'core/widgets/bottom_nav_shell.dart';
@@ -15,6 +16,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseService.initialize();
+  await PushNotificationService.initialize();
   runApp(const CottageApp());
 }
 
@@ -69,6 +71,9 @@ class _AuthGateState extends State<_AuthGate> {
     _subscription = SupabaseService.client.auth.onAuthStateChange.listen((state) {
       if (state.session != null) {
         navigatorKey.currentState?.popUntil((route) => route.isFirst);
+        PushNotificationService.registerToken();
+      } else if (state.event == AuthChangeEvent.signedOut) {
+        PushNotificationService.unregisterToken();
       }
     });
   }

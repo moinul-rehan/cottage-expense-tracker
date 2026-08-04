@@ -2,6 +2,7 @@ import "server-only";
 import { after } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendPushToUsers } from "./push";
+import { sendFcmToUsers } from "./fcm";
 
 /** `since`: only count notifications from the current active month onward (see getActiveMonthStartedAt) - pass null to count everything. */
 export async function getUnreadCount(supabase: SupabaseClient, userId: string, since: string | null) {
@@ -46,10 +47,11 @@ export async function notifyUsers(
   );
 
   // Push delivery fans out to one third-party HTTPS request per
-  // subscription (see push.ts) - potentially slow, and never read back by
-  // the caller, so it runs after the response is sent instead of blocking
-  // whatever action called notifyUsers.
-  after(() => sendPushToUsers(userIds, notification));
+  // subscription/device (browser Web Push via push.ts, native Android via
+  // fcm.ts) - potentially slow, and never read back by the caller, so it
+  // runs after the response is sent instead of blocking whatever action
+  // called notifyUsers.
+  after(() => Promise.all([sendPushToUsers(userIds, notification), sendFcmToUsers(userIds, notification)]));
 }
 
 /**
@@ -74,6 +76,10 @@ export async function notifyUsersIndividually(
   );
 
   after(() =>
-    Promise.all(rows.map(({ userId, ...notification }) => sendPushToUsers([userId], notification)))
+    Promise.all(
+      rows.map(({ userId, ...notification }) =>
+        Promise.all([sendPushToUsers([userId], notification), sendFcmToUsers([userId], notification)])
+      )
+    )
   );
 }

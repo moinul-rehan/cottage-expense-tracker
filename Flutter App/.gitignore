@@ -27,6 +27,12 @@ migrate_working_dir/
 env.json
 .env
 
+# Firebase config -- get this from Firebase Console > Project Settings >
+# Your apps > Android app > google-services.json, and drop it in
+# android/app/ before building. Not committed since it's environment-
+# specific (and app builds without it, just with FCM push disabled).
+android/app/google-services.json
+
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id

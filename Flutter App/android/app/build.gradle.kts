@@ -4,6 +4,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// google-services.json is gitignored (see .gitignore) since it's
+// environment-specific, so this only applies the Firebase/FCM Gradle
+// plugin when the file has actually been dropped in -- otherwise the
+// plugin throws a hard build failure on a fresh clone that doesn't have it
+// yet, breaking `flutter build` entirely instead of just disabling push.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.cottage.cottage"
     compileSdk = flutter.compileSdkVersion
