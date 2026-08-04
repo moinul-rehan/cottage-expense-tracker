@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Mail, Megaphone, ShieldUser } from "lucide-react";
+import { House, Mail, Megaphone, ShieldUser, Smartphone } from "lucide-react";
 import { Users } from "@/components/animate-ui/icons/users";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
 import { ArrowLeft } from "@/components/animate-ui/icons/arrow-left";
@@ -14,6 +14,7 @@ type NavLink = { href: string; label: string; icon: IconComponent; matchPrefix?:
 const FEATURE_LINKS: NavLink[] = [
   { href: "/platform-admin", label: "Cottages", icon: House, matchPrefix: "/platform-admin/cottages" },
   { href: "/platform-admin/users", label: "Users", icon: Users },
+  { href: "/platform-admin/releases", label: "App Releases", icon: Smartphone },
   { href: "/platform-admin/email", label: "Send Email", icon: Mail },
   { href: "/platform-admin/notifications", label: "Notifications", icon: Megaphone },
   { href: "/platform-admin/feedback", label: "Feedback", icon: MessageSquareWarning },
