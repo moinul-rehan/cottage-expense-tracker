@@ -42,31 +42,27 @@ async function subscribe() {
  * browsers won't let a site re-prompt once "Block" is tapped, so once
  * denied this falls back to a dismissible hint instead of nagging. */
 export function PushPermission() {
-  const [status, setStatus] = useState<NotificationPermission | "unsupported">("default");
+  const [status, setStatus] = useState<NotificationPermission | "unsupported">(() => {
+    if (!isSupported()) return "unsupported";
+    return Notification.permission;
+  });
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (!isSupported()) {
-      setStatus("unsupported");
+    if (!isSupported()) return;
+
+    if (Notification.permission === "granted") {
+      subscribe().catch((err) => console.error("[push] subscribe failed", err));
+      return;
+    }
+
+    if (Notification.permission === "denied") {
       return;
     }
 
     let cancelled = false;
 
     async function run() {
-      if (Notification.permission === "granted") {
-        setStatus("granted");
-        subscribe().catch((err) => console.error("[push] subscribe failed", err));
-        return;
-      }
-
-      if (Notification.permission === "denied") {
-        setStatus("denied");
-        return;
-      }
-
-      // "default" -- undecided. Auto-prompt; on iOS Safari this can silently
-      // no-op without a real user gesture, hence the fallback button below.
       try {
         const result = await Notification.requestPermission();
         if (cancelled) return;

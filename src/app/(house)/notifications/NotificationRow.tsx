@@ -6,8 +6,9 @@ import { markNotificationRead } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { getNotificationIcon, getPlatformCategoryLabel } from "../notification-icons";
+import { NOTIFICATION_ICONS, getPlatformCategoryLabel } from "../notification-icons";
 import { isExternalLink } from "../notification-link";
+import { Bell } from "lucide-react";
 import { LocalDateTime } from "@/components/LocalDateTime";
 
 type Notification = {
@@ -22,7 +23,7 @@ type Notification = {
 
 export function NotificationRow({ notification }: { notification: Notification }) {
   const [pending, startTransition] = useTransition();
-  const Icon = getNotificationIcon(notification.type);
+  const NotificationIcon = NOTIFICATION_ICONS[notification.type] ?? Bell;
   const categoryLabel = getPlatformCategoryLabel(notification.type);
 
   return (
@@ -30,7 +31,7 @@ export function NotificationRow({ notification }: { notification: Notification }
       <TableCell>
         <div className="flex items-start gap-2.5">
           <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
-            <Icon className="size-3.5" />
+            <NotificationIcon className="size-3.5" />
           </div>
           <div className="flex flex-col gap-0.5">
             <span className="flex flex-wrap items-center gap-2 font-medium text-foreground">

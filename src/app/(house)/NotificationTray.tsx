@@ -150,7 +150,7 @@ function NotificationSheetBody({
   const [peekOffsetPx, setPeekOffsetPx] = useState(0);
   const [translateY, setTranslateY] = useState(0);
   const [animate, setAnimate] = useState(false);
-  const ready = useRef(false);
+  const [ready, setReady] = useState(false);
 
   const dragState = useRef<{ startY: number; startTranslate: number } | null>(null);
 
@@ -167,8 +167,6 @@ function NotificationSheetBody({
   // the collapsed "peek" position.
   useLayoutEffect(() => {
     const expanded = Math.round(window.innerHeight * 0.92);
-    setExpandedPx(expanded);
-
     let peekHeight = 220;
     const list = listRef.current;
     const lastItem = itemRefs.current.get(Math.min(COLLAPSED_PEEK_COUNT, notifications.length) - 1);
@@ -178,14 +176,17 @@ function NotificationSheetBody({
       peekHeight = Math.min(expanded - 40, Math.max(240, headerHeight + itemsHeight + 24));
     }
     const offset = expanded - peekHeight;
-    setPeekOffsetPx(offset);
 
-    setTranslateY(expanded); // fully off-screen
     requestAnimationFrame(() => {
-      setAnimate(true);
+      setExpandedPx(expanded);
+      setPeekOffsetPx(offset);
+      setTranslateY(expanded); // fully off-screen
       requestAnimationFrame(() => {
-        setTranslateY(offset);
-        ready.current = true;
+        setAnimate(true);
+        requestAnimationFrame(() => {
+          setTranslateY(offset);
+          setReady(true);
+        });
       });
     });
   }, [notifications.length]);
@@ -250,7 +251,7 @@ function NotificationSheetBody({
       <div
         className="fixed inset-0 z-[80] bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
         onClick={dismiss}
-        style={{ opacity: ready.current ? 1 : 0, transition: `opacity ${TRANSITION_MS}ms ease` }}
+        style={{ opacity: ready ? 1 : 0, transition: `opacity ${TRANSITION_MS}ms ease` }}
       />
       <div
         ref={containerRef}

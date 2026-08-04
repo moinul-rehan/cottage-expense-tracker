@@ -99,15 +99,23 @@ export function CreateNoticeForm({
   // Live preview so the creator can see exactly what will be submitted,
   // in their own local time, before publishing - catches mismatched
   // dates/times immediately instead of discovering them on the board.
-  const effectivePublishMs = publishMode === "now" ? Date.now() : publishAtIso ? new Date(publishAtIso).getTime() : NaN;
-  const effectiveExpireMs =
-    expireMode === "custom"
-      ? expiresAtIso
-        ? new Date(expiresAtIso).getTime()
-        : NaN
-      : Number.isFinite(effectivePublishMs)
-        ? effectivePublishMs + 7 * 24 * 3600 * 1000
-        : NaN;
+  const [nowMs] = useState<number>(() => Date.now());
+
+  const effectivePublishMs = useMemo(
+    () => (publishMode === "now" ? nowMs : publishAtIso ? new Date(publishAtIso).getTime() : NaN),
+    [publishMode, publishAtIso, nowMs]
+  );
+  const effectiveExpireMs = useMemo(
+    () =>
+      expireMode === "custom"
+        ? expiresAtIso
+          ? new Date(expiresAtIso).getTime()
+          : NaN
+        : Number.isFinite(effectivePublishMs)
+          ? effectivePublishMs + 7 * 24 * 3600 * 1000
+          : NaN,
+    [expireMode, expiresAtIso, effectivePublishMs]
+  );
 
   if (!allowedTypes.length) {
     return (
