@@ -206,8 +206,17 @@ class DashboardService {
     return (mealRate, totalMeals, totalBazaar, mealsByUser, depositsByUser);
   }
 
+  /// cottages.name -- mirrors profile.cottage_name in src/lib/data/dal.ts
+  /// (there, joined onto the profile row; here, a small standalone lookup
+  /// alongside active_month_key).
+  Future<String> _getCottageName(String cottageId) async {
+    final row = await _client.from('cottages').select('name').eq('id', cottageId).single();
+    return row['name'] as String? ?? '';
+  }
+
   Future<DashboardData> load(Profile me) async {
     final monthKey = await getActiveMonthKey(me.cottageId);
+    final cottageName = await _getCottageName(me.cottageId);
 
     final cottageBalanceFuture = _getCottageBalance(me.cottageId);
     final totalUtilityExpenseFuture = _getMonthlyExpenseTotal(monthKey);
@@ -284,6 +293,7 @@ class DashboardService {
 
     return DashboardData(
       monthKey: monthKey,
+      cottageName: cottageName,
       cottageBalance: cottageBalance,
       totalUtilityExpense: totalUtilityExpense,
       outstandingFromMembers: outstandingFromMembers,

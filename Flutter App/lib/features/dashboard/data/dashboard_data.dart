@@ -82,6 +82,7 @@ class DepositLine {
 /// Everything the Dashboard screen renders, assembled by DashboardService.
 class DashboardData {
   final String monthKey;
+  final String cottageName;
   final double cottageBalance;
   final double totalUtilityExpense;
   final double outstandingFromMembers;
@@ -99,6 +100,7 @@ class DashboardData {
 
   const DashboardData({
     required this.monthKey,
+    this.cottageName = '',
     required this.cottageBalance,
     required this.totalUtilityExpense,
     required this.outstandingFromMembers,

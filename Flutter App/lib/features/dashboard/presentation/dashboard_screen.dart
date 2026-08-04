@@ -4,17 +4,22 @@ import '../data/dashboard_service.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/responsive_utils.dart';
 import '../../bazaar_duty/presentation/bazaar_duty_roster.dart';
-import '../../notices/presentation/pinned_notices_section.dart';
-import 'utility_breakdown_sheet.dart';
+import 'dashboard_header.dart';
+import 'dashboard_summary_card.dart';
+import 'member_meal_summary_list.dart';
+import 'pin_notice_card.dart';
+import 'utility_expense_list.dart';
 
-/// Phase 1 scope only: the "Utility overview", "Your utility summary",
-/// "Meal overview" stat-card rows and the "Member meal summary" grid from
-/// src/app/(house)/dashboard/page.tsx, plus the Bazaar Duty Roster card, the
-/// Pinned Notices strip, and the "See details" utility breakdown /
-/// invoice-share sheet (mirrors UtilityBreakdownDialog.tsx). The "just
+/// Rento Figma-kit-styled Dashboard/home screen: an orange header band
+/// (nav row + centered greeting) bleeding behind a large floating white
+/// "your meal" + "your utility" summary card, then Pin Notice, Bazaar Duty
+/// Roster, and Utility Expense sections. Presentation-only redesign --
+/// still driven by [DashboardService]/[DashboardData], [BazaarDutyRoster]'s
+/// own data flow, and (via [PinNoticeCard]) the same notice fetch/filter
+/// pipeline as the notices tab. Mirrors
+/// src/app/(house)/dashboard/page.tsx + MobileDashboardHero.tsx. The "just
 /// posted" notice popup is deferred to a later phase.
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -43,13 +48,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() => _future = _load());
   }
 
-  String _tk(double value) => '${value.toStringAsFixed(2)} tk';
-
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Cottage',
       showLogout: false,
+      // The header band + overlapping card need to run edge-to-edge and
+      // control their own top spacing, so the body opts out of AppScaffold's
+      // default content padding instead of the ListView carrying it.
       body: FutureBuilder<(Profile, DashboardData)>(
         future: _future,
         builder: (context, snapshot) {
@@ -75,164 +81,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
 
           final (profile, data) = snapshot.data!;
-          final surface = context.surface;
-          final columns = context.gridColumns;
           final padding = context.responsivePadding;
 
           return RefreshIndicator(
             onRefresh: () async => _retry(),
             child: ListView(
-              padding: EdgeInsets.all(padding),
+              padding: EdgeInsets.zero,
               children: [
-                Text(
-                  'Welcome, ${profile.displayName}',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: surface.foreground),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Here's where things stand for ${data.monthKey}.",
-                  style: TextStyle(fontSize: 13, color: surface.mutedForeground),
-                ),
-                const SizedBox(height: 16),
-                PinnedNoticesSection(profile: profile),
-                if (data.bazaarDuties.isNotEmpty) ...[
-                  BazaarDutyRoster(
-                    duties: data.bazaarDuties,
-                    membersById: data.membersById,
-                    currentUserId: profile.id,
+                DashboardHeader(profile: profile, cottageName: data.cottageName, monthKey: data.monthKey),
+                Transform.translate(
+                  offset: const Offset(0, -48),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: padding),
+                    child: DashboardSummaryCard(profile: profile, data: data),
                   ),
-                  const SizedBox(height: 24),
-                ] else
-                  const SizedBox(height: 24),
-
-                _SectionTitle('Utility overview'),
-                const SizedBox(height: 12),
-                _ResponsiveCardGrid(
-                  columns: columns,
-                  children: [
-                    StatCard(
-                      icon: Icons.account_balance_wallet_outlined,
-                      tone: StatTone.blue,
-                      label: 'Cottage Balance',
-                      value: _tk(data.cottageBalance),
-                      hint: 'Previous + deposits - cottage-paid expenses',
-                    ),
-                    StatCard(
-                      icon: Icons.receipt_long_outlined,
-                      tone: StatTone.orange,
-                      label: 'Total Utility Expense',
-                      value: _tk(data.totalUtilityExpense),
-                      hint: 'All shared expenses this month',
-                    ),
-                    StatCard(
-                      icon: Icons.payments_outlined,
-                      tone: StatTone.red,
-                      label: 'Outstanding From Members',
-                      value: _tk(data.outstandingFromMembers),
-                      hint: "Sum of every member's Remaining Due",
-                    ),
-                    StatCard(
-                      icon: Icons.payments_outlined,
-                      tone: StatTone.green,
-                      label: 'Collected This Month',
-                      value: _tk(data.collectedThisMonth),
-                      hint: 'Member Utility Deposits received',
-                    ),
-                  ],
                 ),
-
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _SectionTitle('Your utility summary'),
-                    TextButton.icon(
-                      onPressed: () => showUtilityBreakdownSheet(context, profile: profile, data: data),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        foregroundColor: CottageColors.primary,
-                      ),
-                      icon: const Text('See details', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                      label: const Icon(Icons.chevron_right, size: 16),
+                Transform.translate(
+                  offset: const Offset(0, -32),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(padding, 0, padding, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PinNoticeCard(profile: profile),
+                        const SizedBox(height: 24),
+                        _BazaarDutySection(data: data, profile: profile),
+                        const SizedBox(height: 24),
+                        UtilityExpenseList(data: data),
+                        const SizedBox(height: 24),
+                        MemberMealSummaryList(rows: data.memberMealRows),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _ResponsiveCardGrid(
-                  columns: columns,
-                  children: [
-                    StatCard(
-                      icon: Icons.receipt_long_outlined,
-                      tone: StatTone.blue,
-                      label: 'Assigned Cost',
-                      value: _tk(data.myAssignedCost),
-                      hint: 'Your utility costs this month',
-                    ),
-                    StatCard(
-                      icon: Icons.payments_outlined,
-                      tone: StatTone.green,
-                      label: 'Paid',
-                      value: _tk(data.myDue.paid),
-                      hint: 'Deposits credited toward your due',
-                    ),
-                    StatCard(
-                      icon: Icons.account_balance_wallet_outlined,
-                      tone: data.myDue.due > 0 ? StatTone.red : StatTone.orange,
-                      label: data.myDue.due < 0 ? 'Advance Balance' : 'Remaining Due',
-                      value: _tk(data.myDue.due.abs()),
-                      hint: 'Assigned Cost minus Paid',
-                      paid: data.myAssignedCost > 0 && data.myDue.due <= 0,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-                _SectionTitle('Meal overview'),
-                const SizedBox(height: 12),
-                _ResponsiveCardGrid(
-                  columns: columns,
-                  children: [
-                    StatCard(
-                      icon: Icons.restaurant_outlined,
-                      tone: StatTone.blue,
-                      label: 'Meal rate',
-                      value: data.mealRate.toStringAsFixed(2),
-                      hint: 'Total bazaar / total meals',
-                    ),
-                    StatCard(
-                      icon: Icons.restaurant_outlined,
-                      tone: StatTone.green,
-                      label: 'Total meals',
-                      value: data.totalMeals.toStringAsFixed(data.totalMeals % 1 == 0 ? 0 : 1),
-                    ),
-                    StatCard(
-                      icon: Icons.shopping_basket_outlined,
-                      tone: StatTone.orange,
-                      label: 'Total bazaar',
-                      value: data.totalBazaar.toStringAsFixed(2),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-                _SectionTitle('Member meal summary'),
-                const SizedBox(height: 12),
-                if (data.memberMealRows.isEmpty)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text('No meal data yet.', style: TextStyle(color: surface.mutedForeground)),
-                    ),
-                  )
-                else
-                  _ResponsiveCardGrid(
-                    columns: columns,
-                    children: data.memberMealRows
-                        .map((row) => _MemberMealCard(row: row, tk: _tk))
-                        .toList(),
                   ),
+                ),
               ],
             ),
           );
@@ -242,140 +124,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-/// Lays out children in a responsive grid: 1 column on phones, 2+ on tablets.
-class _ResponsiveCardGrid extends StatelessWidget {
-  final int columns;
-  final List<Widget> children;
+/// "Bazaar Duty Roster" section title + icon-in-rounded-square per the
+/// spec, wrapping the existing [BazaarDutyRoster] widget/data flow as-is --
+/// its current card styling (title + avatar rows + green "On duty" pill)
+/// already matches the target design closely enough that only the outer
+/// section heading needed to move here from inside the card.
+class _BazaarDutySection extends StatelessWidget {
+  final DashboardData data;
+  final Profile profile;
 
-  const _ResponsiveCardGrid({required this.columns, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    if (columns <= 1) {
-      return Column(
-        children: [
-          for (int i = 0; i < children.length; i++) ...[
-            children[i],
-            if (i < children.length - 1) const SizedBox(height: 12),
-          ],
-        ],
-      );
-    }
-
-    final rows = <Widget>[];
-    for (int i = 0; i < children.length; i += columns) {
-      final rowChildren = <Widget>[];
-      for (int j = 0; j < columns; j++) {
-        if (i + j < children.length) {
-          rowChildren.add(Expanded(child: children[i + j]));
-        } else {
-          rowChildren.add(const Expanded(child: SizedBox.shrink()));
-        }
-        if (j < columns - 1) rowChildren.add(const SizedBox(width: 12));
-      }
-      rows.add(Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: rowChildren,
-      ));
-      if (i + columns < children.length) rows.add(const SizedBox(height: 12));
-    }
-    return Column(children: rows);
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
+  const _BazaarDutySection({required this.data, required this.profile});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.surface.foreground),
-    );
-  }
-}
-
-class _MemberMealCard extends StatelessWidget {
-  final MemberMealRow row;
-  final String Function(double) tk;
-
-  const _MemberMealCard({required this.row, required this.tk});
-
-  @override
-  Widget build(BuildContext context) {
-    final balancePositive = row.balance >= 0;
-    final surface = context.surface;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: surface.accent,
-                  backgroundImage: row.avatarUrl != null ? NetworkImage(row.avatarUrl!) : null,
-                  child: row.avatarUrl == null
-                      ? Text(
-                          row.firstName.isNotEmpty ? row.firstName[0].toUpperCase() : '?',
-                          style: TextStyle(color: surface.accentForeground, fontWeight: FontWeight.w600),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 10),
-                Text(row.displayName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: _Field(label: 'Total meals', value: row.meals.toStringAsFixed(row.meals % 1 == 0 ? 0 : 1))),
-                Expanded(child: _Field(label: 'Deposit', value: tk(row.deposit))),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: _Field(label: 'Meal cost', value: tk(row.cost))),
-                Expanded(
-                  child: _Field(
-                    label: 'Balance',
-                    value: tk(row.balance),
-                    valueColor: balancePositive ? const Color(0xFF059669) : CottageColors.destructive,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Field extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  const _Field({required this.label, required this.value, this.valueColor});
-
-  @override
-  Widget build(BuildContext context) {
-    final surface = context.surface;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: TextStyle(fontSize: 11, color: surface.mutedForeground)),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: valueColor ?? surface.foreground),
-        ),
-      ],
+    if (data.bazaarDuties.isEmpty) return const SizedBox.shrink();
+    return BazaarDutyRoster(
+      duties: data.bazaarDuties,
+      membersById: data.membersById,
+      currentUserId: profile.id,
     );
   }
 }

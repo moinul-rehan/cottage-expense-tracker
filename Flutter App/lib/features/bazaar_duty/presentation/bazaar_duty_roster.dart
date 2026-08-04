@@ -90,27 +90,36 @@ class _DutyRow extends StatelessWidget {
     final status = bazaarDutyStatus(duty.startDate, duty.endDate);
     final name = member?.displayName ?? 'Member';
     final initial = (member?.firstName.isNotEmpty ?? false) ? member!.firstName[0].toUpperCase() : '?';
+    // Highlight follows who's actually on duty right now (matches the
+    // Figma spec's bg/border tint), not who's viewing the roster --
+    // "(you)" is a separate, always-shown suffix when it applies.
+    final highlighted = status == BazaarDutyStatus.active;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isMe ? surface.accent.withValues(alpha: 0.6) : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        color: highlighted ? CottageColors.primary.withValues(alpha: 0.08) : Colors.transparent,
+        border: highlighted ? Border.all(color: CottageColors.primary) : null,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: surface.accent,
-            backgroundImage: member?.avatarUrl != null && member!.avatarUrl!.isNotEmpty
-                ? NetworkImage(member!.avatarUrl!)
-                : null,
-            child: member?.avatarUrl == null || member!.avatarUrl!.isEmpty
-                ? Text(initial, style: TextStyle(color: surface.accentForeground, fontWeight: FontWeight.w600, fontSize: 13))
-                : null,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: member?.avatarUrl != null && member!.avatarUrl!.isNotEmpty
+                  ? Image.network(
+                      member!.avatarUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _AvatarInitial(initial: initial),
+                    )
+                  : _AvatarInitial(initial: initial),
+            ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,26 +130,41 @@ class _DutyRow extends StatelessWidget {
                       child: Text(
                         name,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500, color: surface.foreground),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: surface.foreground),
                       ),
                     ),
                     if (isMe)
-                      Text(' (you)', style: TextStyle(fontSize: 13, color: surface.mutedForeground)),
+                      Text(' (you)', style: TextStyle(fontSize: 14, color: surface.mutedForeground)),
                   ],
                 ),
                 Text(
                   '${_formatDate(duty.startDate)} – ${_formatDate(duty.endDate)}'
                   '${duty.note != null && duty.note!.isNotEmpty ? " · ${duty.note}" : ""}',
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11.5, color: surface.mutedForeground),
+                  style: TextStyle(fontSize: 14, color: surface.mutedForeground),
                 ),
               ],
             ),
           ),
-          if (status == BazaarDutyStatus.active) _StatusBadge(text: 'On duty', color: const Color(0xFF059669)),
+          if (status == BazaarDutyStatus.active) _StatusBadge(text: 'On Duty', color: const Color(0xFF289029)),
           if (status == BazaarDutyStatus.today) _StatusBadge(text: 'Today', color: const Color(0xFFFA9033)),
         ],
       ),
+    );
+  }
+}
+
+class _AvatarInitial extends StatelessWidget {
+  final String initial;
+  const _AvatarInitial({required this.initial});
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = context.surface;
+    return Container(
+      color: surface.accent,
+      alignment: Alignment.center,
+      child: Text(initial, style: TextStyle(color: surface.accentForeground, fontWeight: FontWeight.w600, fontSize: 18)),
     );
   }
 }
