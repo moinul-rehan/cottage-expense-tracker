@@ -3,9 +3,13 @@ import '../theme/theme.dart';
 
 /// Opens a themed modal bottom sheet with the Cottage design language.
 ///
-/// The sheet has a drag handle, rounded top corners, and uses the theme's
-/// card color. The [builder] receives the sheet's [BuildContext] so
-/// downstream widgets can still use `context.surface`.
+/// Sizing mirrors the web app's mobile sheets exactly (see
+/// UtilityBreakdownDialog's `Sheet` usage and NotificationTray's custom
+/// drawer in src/app/(house)/): full width, 24px top corner radius, capped
+/// at 85% of the screen height (`max-h-[85dvh]`) so content never runs
+/// under the status bar, and a 40x6 drag handle (`h-1.5 w-10`). The
+/// [builder] receives the sheet's [BuildContext] so downstream widgets can
+/// still use `context.surface`.
 Future<T?> showCottageSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -19,8 +23,9 @@ Future<T?> showCottageSheet<T>({
     useSafeArea: useSafeArea,
     backgroundColor: surface.card,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
+    constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.85),
     builder: (ctx) {
       return Padding(
         padding: EdgeInsets.only(
@@ -31,15 +36,15 @@ Future<T?> showCottageSheet<T>({
           children: [
             const SizedBox(height: 12),
             Container(
-              width: 36,
-              height: 4,
+              width: 40,
+              height: 6,
               decoration: BoxDecoration(
                 color: surface.muted,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(3),
               ),
             ),
             const SizedBox(height: 8),
-            builder(ctx),
+            Flexible(child: builder(ctx)),
           ],
         ),
       );
