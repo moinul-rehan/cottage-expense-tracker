@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, QrCode, Apple, ArrowRight } from "lucide-react";
+import { Download, QrCode, Apple } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ActiveRelease } from "./page";
 
@@ -57,7 +57,6 @@ export function DownloadClientFeatures({ activeRelease }: { activeRelease: Activ
           >
             <Download className="size-5" />
             Download for Android
-            <ArrowRight className="size-4" />
           </Button>
 
           {/* Metadata Pill */}
