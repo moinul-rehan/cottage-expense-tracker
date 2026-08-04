@@ -1,6 +1,7 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/meal/presentation/meal_screen.dart';
 import '../../features/menu/presentation/menu_screen.dart';
@@ -15,23 +16,28 @@ class _NavTabData {
   const _NavTabData({required this.icon, required this.label, required this.builder});
 }
 
+// Uses the `lucide_icons` package (the exact icon set MobileBottomNav.tsx
+// uses on web, via lucide-react) instead of Material Icons -- Material's
+// filled/rounded glyphs are a fundamentally different visual language
+// (heavier weight, different proportions) than Lucide's 2px-stroke outline
+// icons, so no Material substitute ever reads as "the same icon" at a
+// glance. This is a direct swap of each web glyph:
+// LayoutDashboard/Pin/UtensilsCrossed/Zap/Menu.
 final _tabs = <_NavTabData>[
-  _NavTabData(icon: Icons.dashboard_rounded, label: 'Home', builder: (_) => const DashboardScreen()),
-  _NavTabData(icon: Icons.push_pin_rounded, label: 'Notices', builder: (_) => const NoticesScreen()),
+  _NavTabData(icon: LucideIcons.layoutDashboard, label: 'Home', builder: (_) => const DashboardScreen()),
+  _NavTabData(icon: LucideIcons.pin, label: 'Notices', builder: (_) => const NoticesScreen()),
   _NavTabData(
-    // Matches web's lucide `UtensilsCrossed` glyph (crossed fork+knife, no
-    // plate) more closely than Icons.restaurant_rounded (a plated meal).
-    icon: Icons.local_dining_rounded,
+    icon: LucideIcons.utensilsCrossed,
     label: 'Meal',
     builder: (_) => MealScreen(key: MealScreen.mealScreenKey),
   ),
   _NavTabData(
-    icon: Icons.bolt_rounded,
+    icon: LucideIcons.zap,
     label: 'Utilities',
     builder: (_) => UtilitiesScreen(key: UtilitiesScreen.utilitiesScreenKey),
   ),
   _NavTabData(
-    icon: Icons.menu_rounded,
+    icon: LucideIcons.menu,
     label: 'Menu',
     builder: (_) => MenuScreen(key: MenuScreen.menuScreenKey),
   ),
