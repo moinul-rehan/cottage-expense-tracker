@@ -6,11 +6,12 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { login } from "@/app/login/actions";
 import { signup } from "@/app/signup/actions";
+import { requestPasswordReset } from "@/app/forgot-password/actions";
 import { createClient } from "@/lib/supabase/client";
 import { GoogleIcon } from "@/components/google-icon";
-import { AtSign, Lock, Eye, EyeOff, Home, User } from "lucide-react";
+import { AtSign, Lock, Eye, EyeOff, Home, User, ArrowLeft } from "lucide-react";
 
-type AuthMode = "login" | "signup";
+type AuthMode = "login" | "signup" | "forgot-password";
 
 interface AuthSliderContainerProps {
   initialMode: AuthMode;
@@ -27,18 +28,23 @@ export function AuthSliderContainer({
 }: AuthSliderContainerProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const isSignup = mode === "signup";
+  const isForgotPassword = mode === "forgot-password";
 
-  // Form states
+  // Login form state
   const [loginState, loginAction, loginPending] = useActionState(login, undefined);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
+  // Signup form state
   const [signupState, signupAction, signupPending] = useActionState(signup, undefined);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Forgot password form state
+  const [forgotState, forgotAction, forgotPending] = useActionState(requestPasswordReset, undefined);
+
   function toggleMode(targetMode: AuthMode) {
     setMode(targetMode);
-    const newPath = targetMode === "signup" ? "/signup" : "/login";
+    const newPath = targetMode === "signup" ? "/signup" : targetMode === "forgot-password" ? "/forgot-password" : "/login";
     window.history.pushState(null, "", newPath);
   }
 
@@ -110,7 +116,7 @@ export function AuthSliderContainer({
                     name="cottage_name"
                     type="text"
                     required
-                    placeholder="johndoe@gmail.com"
+                    placeholder="e.g. Green Villa Cottage"
                     className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                   />
                 </div>
@@ -129,7 +135,7 @@ export function AuthSliderContainer({
                       name="first_name"
                       type="text"
                       required
-                      placeholder="johndoe@gmail.com"
+                      placeholder="e.g. John"
                       className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-3 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                   </div>
@@ -145,7 +151,7 @@ export function AuthSliderContainer({
                       id="signup_last_name"
                       name="last_name"
                       type="text"
-                      placeholder="johndoe@gmail.com"
+                      placeholder="e.g. Doe"
                       className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-3 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                   </div>
@@ -165,7 +171,7 @@ export function AuthSliderContainer({
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="johndoe@gmail.com"
+                    placeholder="e.g. john@example.com"
                     className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                   />
                 </div>
@@ -185,7 +191,7 @@ export function AuthSliderContainer({
                       type={showSignupPassword ? "text" : "password"}
                       required
                       minLength={8}
-                      placeholder="••••"
+                      placeholder="Min 8 characters"
                       className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-9 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                     <button
@@ -210,7 +216,7 @@ export function AuthSliderContainer({
                       type={showConfirmPassword ? "text" : "password"}
                       required
                       minLength={8}
-                      placeholder="••••"
+                      placeholder="Confirm password"
                       className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-9 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                     <button
@@ -254,113 +260,201 @@ export function AuthSliderContainer({
           </div>
         </div>
 
-        {/* ================= LOGIN FORM (RIGHT SIDE in Login Mode) ================= */}
+        {/* ================= LOGIN & FORGOT PASSWORD FORM (RIGHT SIDE in Login/Forgot Mode) ================= */}
         <div
           className={`flex w-1/2 flex-col justify-center px-12 xl:px-20 py-12 transition-all duration-500 ${
             isSignup ? "pointer-events-none opacity-0 invisible" : "pointer-events-auto opacity-100 visible"
           }`}
         >
           <div className="mx-auto flex w-full max-w-[480px] flex-col gap-6">
-            {/* Header Title & Subtitle matching Figma */}
-            <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-4xl font-bold tracking-[2px] text-[#D1593B]">
-                Login
-              </h1>
-              <div className="flex items-center gap-1.5 text-base text-[#6B727E]">
-                <span>Sign in to your</span>
-                <span className="flex items-center gap-1 font-bold text-[#D1593B]">
-                  <img src="https://cottagee.me/logo.png" alt="" className="size-6 rounded-md object-cover" />
-                  Cottage
-                </span>
-                <span>account as a member</span>
-              </div>
-            </div>
+            <AnimatePresence mode="wait">
+              {!isForgotPassword ? (
+                /* LOGIN FORM */
+                <motion.div
+                  key="login-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col gap-6"
+                >
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <h1 className="text-4xl font-bold tracking-[2px] text-[#D1593B]">
+                      Login
+                    </h1>
+                    <div className="flex items-center gap-1.5 text-base text-[#6B727E]">
+                      <span>Sign in to your</span>
+                      <span className="flex items-center gap-1 font-bold text-[#D1593B]">
+                        <img src="https://cottagee.me/logo.png" alt="" className="size-6 rounded-md object-cover" />
+                        Cottage
+                      </span>
+                      <span>account as a member</span>
+                    </div>
+                  </div>
 
-            {(loginError || loginState?.error) && (
-              <p className="rounded-xl bg-red-50 p-3.5 text-center text-xs font-medium text-[#CC4F4F] border border-red-100">
-                {loginError || loginState?.error}
-              </p>
-            )}
+                  {(loginError || loginState?.error) && (
+                    <p className="rounded-xl bg-red-50 p-3.5 text-center text-xs font-medium text-[#CC4F4F] border border-red-100">
+                      {loginError || loginState?.error}
+                    </p>
+                  )}
 
-            <form action={loginAction} className="flex flex-col gap-5">
-              {/* Email Input */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="login_email" className="text-sm font-normal text-[#404040]">
-                  Email <span className="text-[#CC4F4F]">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <AtSign className="absolute left-3.5 size-5 text-[#9CA3AF]" />
-                  <input
-                    id="login_email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    placeholder="johndoe@gmail.com"
-                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
-                  />
-                </div>
-              </div>
+                  <form action={loginAction} className="flex flex-col gap-5">
+                    {/* Email Input */}
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="login_email" className="text-sm font-normal text-[#404040]">
+                        Email <span className="text-[#CC4F4F]">*</span>
+                      </label>
+                      <div className="relative flex items-center">
+                        <AtSign className="absolute left-3.5 size-5 text-[#9CA3AF]" />
+                        <input
+                          id="login_email"
+                          name="email"
+                          type="email"
+                          required
+                          autoComplete="email"
+                          placeholder="e.g. member@example.com"
+                          className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                        />
+                      </div>
+                    </div>
 
-              {/* Password Input */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="login_password" className="text-sm font-normal text-[#404040]">
-                  Password <span className="text-[#CC4F4F]">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-3.5 size-5 text-[#9CA3AF]" />
-                  <input
-                    id="login_password"
-                    name="password"
-                    type={showLoginPassword ? "text" : "password"}
-                    required
-                    autoComplete="current-password"
-                    placeholder="johndoe@gmail.com"
-                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-10 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
-                  />
+                    {/* Password Input */}
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="login_password" className="text-sm font-normal text-[#404040]">
+                        Password <span className="text-[#CC4F4F]">*</span>
+                      </label>
+                      <div className="relative flex items-center">
+                        <Lock className="absolute left-3.5 size-5 text-[#9CA3AF]" />
+                        <input
+                          id="login_password"
+                          name="password"
+                          type={showLoginPassword ? "text" : "password"}
+                          required
+                          autoComplete="current-password"
+                          placeholder="Enter your password"
+                          className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-10 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowLoginPassword(!showLoginPassword)}
+                          className="absolute right-3.5 text-[#9CA3AF] hover:text-[#404040]"
+                        >
+                          {showLoginPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleMode("forgot-password")}
+                        className="self-start text-sm font-normal text-[#D40924] hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={loginPending}
+                      className="mt-2 h-12 w-full rounded-full bg-[#D1593B] font-semibold text-base text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
+                    >
+                      {loginPending ? "Signing in…" : "Sign In"}
+                    </button>
+                  </form>
+
+                  {/* Divider */}
+                  <div className="relative flex items-center py-1">
+                    <div className="w-full border-t border-[#EEEEEE]" />
+                    <span className="absolute left-1/2 -translate-x-1/2 bg-white px-3 text-sm text-[#EEEEEE]">
+                      Or
+                    </span>
+                  </div>
+
+                  {/* Google OAuth Button */}
                   <button
                     type="button"
-                    onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute right-3.5 text-[#9CA3AF] hover:text-[#404040]"
+                    onClick={handleGoogleLogin}
+                    className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#EEEEEE] font-semibold text-base text-[#242424] transition-all hover:bg-[#E2E2E2] active:scale-[0.99]"
                   >
-                    {showLoginPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                    <GoogleIcon className="size-5" />
+                    Continue with Google
                   </button>
-                </div>
-                <Link
-                  href="/forgot-password"
-                  className="self-start text-sm font-normal text-[#D40924] hover:underline"
+                </motion.div>
+              ) : (
+                /* FORGOT PASSWORD FORM */
+                <motion.div
+                  key="forgot-password-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col gap-6"
                 >
-                  Forgot password?
-                </Link>
-              </div>
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <h1 className="text-4xl font-bold tracking-[2px] text-[#D1593B]">
+                      Reset Password
+                    </h1>
+                    <div className="flex items-center gap-1.5 text-base text-[#6B727E]">
+                      <span>Enter your email to reset password for your</span>
+                      <span className="flex items-center gap-1 font-bold text-[#D1593B]">
+                        <img src="https://cottagee.me/logo.png" alt="" className="size-6 rounded-md object-cover" />
+                        Cottage
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loginPending}
-                className="mt-2 h-12 w-full rounded-full bg-[#D1593B] font-semibold text-base text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
-              >
-                {loginPending ? "Signing in…" : "Sign In"}
-              </button>
-            </form>
+                  {forgotState?.success ? (
+                    <div className="rounded-xl bg-emerald-50 p-4 text-center text-sm font-medium text-emerald-800 border border-emerald-200">
+                      {forgotState.success}
+                    </div>
+                  ) : (
+                    <form action={forgotAction} className="flex flex-col gap-5">
+                      {forgotState?.error && (
+                        <p className="rounded-xl bg-red-50 p-3.5 text-center text-xs font-medium text-[#CC4F4F] border border-red-100">
+                          {forgotState.error}
+                        </p>
+                      )}
 
-            {/* Divider */}
-            <div className="relative flex items-center py-1">
-              <div className="w-full border-t border-[#EEEEEE]" />
-              <span className="absolute left-1/2 -translate-x-1/2 bg-white px-3 text-sm text-[#EEEEEE]">
-                Or
-              </span>
-            </div>
+                      {/* Email Input */}
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="forgot_email" className="text-sm font-normal text-[#404040]">
+                          Email <span className="text-[#CC4F4F]">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <AtSign className="absolute left-3.5 size-5 text-[#9CA3AF]" />
+                          <input
+                            id="forgot_email"
+                            name="email"
+                            type="email"
+                            required
+                            autoComplete="email"
+                            placeholder="e.g. member@example.com"
+                            className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                          />
+                        </div>
+                      </div>
 
-            {/* Google OAuth Button */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#EEEEEE] font-semibold text-base text-[#242424] transition-all hover:bg-[#E2E2E2] active:scale-[0.99]"
-            >
-              <GoogleIcon className="size-5" />
-              Continue with Google
-            </button>
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        disabled={forgotPending}
+                        className="mt-2 h-12 w-full rounded-full bg-[#D1593B] font-semibold text-base text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
+                      >
+                        {forgotPending ? "Sending reset link…" : "Send reset link"}
+                      </button>
+                    </form>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => toggleMode("login")}
+                    className="flex items-center justify-center gap-2 text-sm font-semibold text-[#D1593B] hover:underline"
+                  >
+                    <ArrowLeft className="size-4" />
+                    Back to Sign In
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -382,27 +476,13 @@ export function AuthSliderContainer({
           }}
           className="absolute top-0 left-0 z-30 flex h-full w-1/2 flex-col items-center justify-center overflow-hidden bg-[#D1593B] px-12 text-white shadow-2xl"
         >
-          {/* Detailed Cottage Vector Artwork Line Art in Background matching Figma */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
-            <svg width="640" height="540" viewBox="0 0 640 540" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* House Outline */}
-              <path d="M100 280L320 120L540 280V500H100V280Z" stroke="white" strokeWidth="4" strokeLinejoin="round" />
-              {/* Roof Line */}
-              <path d="M70 300L320 100L570 300" stroke="white" strokeWidth="6" strokeLinecap="round" />
-              {/* Door */}
-              <path d="M260 500V350H380V500" stroke="white" strokeWidth="4" />
-              {/* Left Window */}
-              <rect x="140" y="320" width="80" height="80" rx="6" stroke="white" strokeWidth="4" />
-              <line x1="180" y1="320" x2="180" y2="400" stroke="white" strokeWidth="3" />
-              <line x1="140" y1="360" x2="220" y2="360" stroke="white" strokeWidth="3" />
-              {/* Right Window */}
-              <rect x="420" y="320" width="80" height="80" rx="6" stroke="white" strokeWidth="4" />
-              <line x1="460" y1="320" x2="460" y2="400" stroke="white" strokeWidth="3" />
-              <line x1="420" y1="360" x2="500" y2="360" stroke="white" strokeWidth="3" />
-              {/* Large Magnifying Glass Overlay */}
-              <circle cx="440" cy="240" r="110" stroke="white" strokeWidth="6" />
-              <line x1="518" y1="318" x2="610" y2="410" stroke="white" strokeWidth="16" strokeLinecap="round" />
-            </svg>
+          {/* User's Exact Vector Artwork in Background */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-8">
+            <img
+              src="/auth-vector.png"
+              alt=""
+              className="max-h-[85%] max-w-[90%] object-contain opacity-100"
+            />
           </div>
 
           {/* Logo Card in Center */}
@@ -426,14 +506,14 @@ export function AuthSliderContainer({
                     Welcome to Cottage!
                   </h2>
                   <p className="text-2xl font-normal text-white/90">
-                    Don&apos;t have an Cottage?
+                    {isForgotPassword ? "Remember your password?" : "Don't have an Cottage?"}
                   </p>
                   <button
                     type="button"
-                    onClick={() => toggleMode("signup")}
+                    onClick={() => toggleMode(isForgotPassword ? "login" : "signup")}
                     className="mt-4 rounded-xl border border-white bg-transparent px-12 py-4 font-medium text-xl text-white transition-all hover:bg-white hover:text-[#D1593B] active:scale-95 shadow-md"
                   >
-                    Create your own Cottage
+                    {isForgotPassword ? "Log In" : "Create your own Cottage"}
                   </button>
                 </motion.div>
               ) : (
@@ -482,7 +562,46 @@ export function AuthSliderContainer({
         </div>
 
         <div className="my-auto mx-auto w-full max-w-sm py-6">
-          {!isSignup ? (
+          {isForgotPassword ? (
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col items-center gap-1.5 text-center">
+                <h1 className="text-3xl font-bold text-[#D1593B]">Reset Password</h1>
+                <p className="text-xs text-[#6B727E]">Enter your email to receive a password reset link</p>
+              </div>
+              {forgotState?.success ? (
+                <div className="rounded-xl bg-emerald-50 p-4 text-center text-xs font-medium text-emerald-800">
+                  {forgotState.success}
+                </div>
+              ) : (
+                <form action={forgotAction} className="flex flex-col gap-3.5">
+                  <div className="relative flex items-center">
+                    <AtSign className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                    <input
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="e.g. member@example.com"
+                      className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-4 text-sm"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={forgotPending}
+                    className="h-11 w-full rounded-full bg-[#D1593B] font-semibold text-white text-xs"
+                  >
+                    {forgotPending ? "Sending reset link…" : "Send reset link"}
+                  </button>
+                </form>
+              )}
+              <button
+                type="button"
+                onClick={() => toggleMode("login")}
+                className="flex items-center justify-center gap-1 text-xs font-semibold text-[#D1593B]"
+              >
+                <ArrowLeft className="size-3.5" /> Back to Sign In
+              </button>
+            </div>
+          ) : !isSignup ? (
             <div className="flex flex-col gap-5">
               <div className="flex flex-col items-center gap-1.5 text-center">
                 <h1 className="text-3xl font-bold text-[#D1593B]">Login</h1>
@@ -521,6 +640,13 @@ export function AuthSliderContainer({
                     {showLoginPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => toggleMode("forgot-password")}
+                  className="self-start text-xs font-medium text-[#D40924]"
+                >
+                  Forgot password?
+                </button>
                 <button
                   type="submit"
                   disabled={loginPending}
