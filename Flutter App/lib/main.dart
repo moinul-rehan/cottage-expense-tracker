@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'features/auth/presentation/login_screen.dart';
+import 'core/services/supabase_service.dart';
+import 'core/theme/theme.dart';
+import 'core/widgets/bottom_nav_shell.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseService.initialize();
+  runApp(const CottageApp());
+}
+
+class CottageApp extends StatelessWidget {
+  const CottageApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Cottage',
+      theme: buildCottageTheme(Brightness.light),
+      darkTheme: buildCottageTheme(Brightness.dark),
+      themeMode: ThemeMode.system,
+      debugShowCheckedModeBanner: false,
+      home: !SupabaseService.isInitialized
+          ? _SupabaseErrorScreen(error: SupabaseService.initializationError)
+          : (SupabaseService.currentSession != null ? const BottomNavShell() : const LoginScreen()),
+    );
+  }
+}
+
+class _SupabaseErrorScreen extends StatelessWidget {
+  final String? error;
+  const _SupabaseErrorScreen({this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 64,
+                    color: CottageColors.destructive,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Configuration Required',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    error ?? 'Unknown initialization error.',
+                    style: const TextStyle(fontSize: 14, height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'To run the application, make sure to pass your env.json configurations to the run command:',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const SelectableText(
+                      'flutter run --dart-define-from-file=env.json',
+                      style: TextStyle(fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
