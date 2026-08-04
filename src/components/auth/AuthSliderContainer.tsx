@@ -8,7 +8,6 @@ import { login } from "@/app/login/actions";
 import { signup } from "@/app/signup/actions";
 import { createClient } from "@/lib/supabase/client";
 import { GoogleIcon } from "@/components/google-icon";
-import { Logo } from "@/components/logo";
 import { AtSign, Lock, Eye, EyeOff, Home, User } from "lucide-react";
 
 type AuthMode = "login" | "signup";
@@ -29,11 +28,10 @@ export function AuthSliderContainer({
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const isSignup = mode === "signup";
 
-  // Login form state
+  // Form states
   const [loginState, loginAction, loginPending] = useActionState(login, undefined);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
-  // Signup form state
   const [signupState, signupAction, signupPending] = useActionState(signup, undefined);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -66,137 +64,30 @@ export function AuthSliderContainer({
   }
 
   return (
-    <div className="relative flex min-h-svh w-full items-center justify-center bg-[#FDFBF9] overflow-hidden selection:bg-[#D1593B] selection:text-white">
+    <div className="relative flex min-h-svh w-full items-center justify-center bg-white overflow-hidden selection:bg-[#D1593B] selection:text-white">
       {/* Desktop Container (lg screens and above) */}
       <div className="relative hidden w-full min-h-svh lg:flex">
-        {/* ================= LOGIN FORM (LEFT SIDE in Login Mode) ================= */}
-        <div
-          className={`flex w-1/2 flex-col justify-center px-12 xl:px-24 py-12 transition-all duration-700 ${
-            isSignup ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100"
-          }`}
-        >
-          <div className="mx-auto flex w-full max-w-md flex-col gap-6">
-            {/* Header Title & Subtitle matching Figma */}
-            <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-[#D1593B] sm:text-4xl">
-                Login
-              </h1>
-              <p className="flex items-center gap-1.5 text-sm text-[#6B727E]">
-                Sign in to your{" "}
-                <span className="inline-flex items-center gap-1 rounded-md bg-[#D1593B] px-2 py-0.5 text-xs font-semibold text-white">
-                  <Logo size={14} /> Cottage
-                </span>{" "}
-                account as a member
-              </p>
-            </div>
-
-            {(loginError || loginState?.error) && (
-              <p className="rounded-xl bg-red-50 p-3.5 text-center text-xs font-medium text-[#CC4F4F] border border-red-100">
-                {loginError || loginState?.error}
-              </p>
-            )}
-
-            <form action={loginAction} className="flex flex-col gap-4">
-              {/* Email Input */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="login_email" className="text-xs font-medium text-[#404040]">
-                  Email <span className="text-[#CC4F4F]">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <AtSign className="absolute left-3.5 size-4 text-[#9CA3AF]" />
-                  <input
-                    id="login_email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    placeholder="johndoe@gmail.com"
-                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
-                  />
-                </div>
-              </div>
-
-              {/* Password Input */}
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="login_password" className="text-xs font-medium text-[#404040]">
-                  Password <span className="text-[#CC4F4F]">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-3.5 size-4 text-[#9CA3AF]" />
-                  <input
-                    id="login_password"
-                    name="password"
-                    type={showLoginPassword ? "text" : "password"}
-                    required
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-10 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute right-3.5 text-[#9CA3AF] hover:text-[#404040]"
-                  >
-                    {showLoginPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-                <Link
-                  href="/forgot-password"
-                  className="self-start text-xs font-medium text-[#CC4F4F] hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loginPending}
-                className="mt-2 h-12 w-full rounded-full bg-[#D1593B] font-semibold text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
-              >
-                {loginPending ? "Signing in…" : "Sign In"}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="relative flex items-center py-1">
-              <div className="w-full border-t border-[#EEEEEE]" />
-              <span className="absolute left-1/2 -translate-x-1/2 bg-[#FDFBF9] px-3 text-xs text-[#9CA3AF]">
-                Or
-              </span>
-            </div>
-
-            {/* Google OAuth Button */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full border border-[#EEEEEE] bg-[#EEEEEE]/70 font-semibold text-xs text-[#242424] transition-all hover:bg-[#EEEEEE] active:scale-[0.99]"
-            >
-              <GoogleIcon className="size-4" />
-              Continue with Google
-            </button>
-          </div>
-        </div>
-
+        
         {/* ================= REGISTER FORM (LEFT SIDE in Signup Mode) ================= */}
         <div
-          className={`flex w-1/2 flex-col justify-center px-12 xl:px-24 py-12 transition-all duration-700 ${
-            !isSignup ? "pointer-events-none opacity-0" : "pointer-events-auto opacity-100"
+          className={`flex w-1/2 flex-col justify-center px-12 xl:px-20 py-12 transition-all duration-500 ${
+            !isSignup ? "pointer-events-none opacity-0 invisible" : "pointer-events-auto opacity-100 visible"
           }`}
         >
-          <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+          <div className="mx-auto flex w-full max-w-[480px] flex-col gap-6">
             {/* Header Title & Subtitle matching Figma */}
             <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-[#D1593B] sm:text-4xl">
+              <h1 className="text-4xl font-bold tracking-[2px] text-[#D1593B]">
                 Register
               </h1>
-              <p className="flex items-center gap-1.5 text-sm text-[#6B727E]">
-                Sign up for new{" "}
-                <span className="inline-flex items-center gap-1 rounded-md bg-[#D1593B] px-2 py-0.5 text-xs font-semibold text-white">
-                  <Logo size={14} /> Cottage
-                </span>{" "}
-                • You&apos;ll be its admin
-              </p>
+              <div className="flex items-center gap-1.5 text-base text-[#6B727E]">
+                <span>Sign up for new</span>
+                <span className="flex items-center gap-1 font-bold text-[#D1593B]">
+                  <img src="https://cottagee.me/logo.png" alt="" className="size-6 rounded-md object-cover" />
+                  Cottage
+                </span>
+                <span>• You&apos;ll be its admin</span>
+              </div>
             </div>
 
             {(signupError || signupState?.error) && (
@@ -206,68 +97,68 @@ export function AuthSliderContainer({
               </p>
             )}
 
-            <form action={signupAction} className="flex flex-col gap-3.5">
+            <form action={signupAction} className="flex flex-col gap-4">
               {/* Cottage Name Input */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="signup_cottage_name" className="text-xs font-medium text-[#404040]">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="signup_cottage_name" className="text-sm font-normal text-[#404040]">
                   Cottage Name
                 </label>
                 <div className="relative flex items-center">
-                  <Home className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                  <Home className="absolute left-3.5 size-5 text-[#9CA3AF]" />
                   <input
                     id="signup_cottage_name"
                     name="cottage_name"
                     type="text"
                     required
-                    placeholder="e.g. Green Road Cottage"
-                    className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                    placeholder="johndoe@gmail.com"
+                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                   />
                 </div>
               </div>
 
               {/* First Name & Last Name (2 columns) */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="signup_first_name" className="text-xs font-medium text-[#404040]">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="signup_first_name" className="text-sm font-normal text-[#404040]">
                     First Name
                   </label>
                   <div className="relative flex items-center">
-                    <User className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                    <User className="absolute left-3.5 size-5 text-[#9CA3AF]" />
                     <input
                       id="signup_first_name"
                       name="first_name"
                       type="text"
                       required
-                      placeholder="John"
-                      className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-3 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                      placeholder="johndoe@gmail.com"
+                      className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-3 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="signup_last_name" className="text-xs font-medium text-[#404040]">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="signup_last_name" className="text-sm font-normal text-[#404040]">
                     Last Name
                   </label>
                   <div className="relative flex items-center">
-                    <User className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                    <User className="absolute left-3.5 size-5 text-[#9CA3AF]" />
                     <input
                       id="signup_last_name"
                       name="last_name"
                       type="text"
-                      placeholder="Doe"
-                      className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-3 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                      placeholder="johndoe@gmail.com"
+                      className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-3 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Email Input */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="signup_email" className="text-xs font-medium text-[#404040]">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="signup_email" className="text-sm font-normal text-[#404040]">
                   Email <span className="text-[#CC4F4F]">*</span>
                 </label>
                 <div className="relative flex items-center">
-                  <AtSign className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                  <AtSign className="absolute left-3.5 size-5 text-[#9CA3AF]" />
                   <input
                     id="signup_email"
                     name="email"
@@ -275,19 +166,19 @@ export function AuthSliderContainer({
                     required
                     autoComplete="email"
                     placeholder="johndoe@gmail.com"
-                    className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                   />
                 </div>
               </div>
 
               {/* Password & Confirm Password (2 columns) */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="signup_password" className="text-xs font-medium text-[#404040]">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="signup_password" className="text-sm font-normal text-[#404040]">
                     Password <span className="text-[#CC4F4F]">*</span>
                   </label>
                   <div className="relative flex items-center">
-                    <Lock className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                    <Lock className="absolute left-3.5 size-5 text-[#9CA3AF]" />
                     <input
                       id="signup_password"
                       name="password"
@@ -295,24 +186,24 @@ export function AuthSliderContainer({
                       required
                       minLength={8}
                       placeholder="••••"
-                      className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-8 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                      className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-9 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      className="absolute right-2.5 text-[#9CA3AF] hover:text-[#404040]"
+                      className="absolute right-3 text-[#9CA3AF] hover:text-[#404040]"
                     >
-                      {showSignupPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                      {showSignupPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="signup_confirm_password" className="text-xs font-medium text-[#404040]">
-                    Confirm <span className="text-[#CC4F4F]">*</span>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="signup_confirm_password" className="text-sm font-normal text-[#404040]">
+                    Confirm Password <span className="text-[#CC4F4F]">*</span>
                   </label>
                   <div className="relative flex items-center">
-                    <Lock className="absolute left-3.5 size-4 text-[#9CA3AF]" />
+                    <Lock className="absolute left-3.5 size-5 text-[#9CA3AF]" />
                     <input
                       id="signup_confirm_password"
                       name="confirm_password"
@@ -320,14 +211,14 @@ export function AuthSliderContainer({
                       required
                       minLength={8}
                       placeholder="••••"
-                      className="h-11 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-10 pr-8 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                      className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-9 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-2.5 text-[#9CA3AF] hover:text-[#404040]"
+                      className="absolute right-3 text-[#9CA3AF] hover:text-[#404040]"
                     >
-                      {showConfirmPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                      {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
                 </div>
@@ -337,16 +228,16 @@ export function AuthSliderContainer({
               <button
                 type="submit"
                 disabled={signupPending}
-                className="mt-1.5 h-11 w-full rounded-full bg-[#D1593B] font-semibold text-xs text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
+                className="mt-2 h-12 w-full rounded-full bg-[#D1593B] font-semibold text-base text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
               >
                 {signupPending ? "Creating your cottage…" : "Sign up for a new Cottage"}
               </button>
             </form>
 
             {/* Divider */}
-            <div className="relative flex items-center py-0.5">
+            <div className="relative flex items-center py-1">
               <div className="w-full border-t border-[#EEEEEE]" />
-              <span className="absolute left-1/2 -translate-x-1/2 bg-[#FDFBF9] px-3 text-xs text-[#9CA3AF]">
+              <span className="absolute left-1/2 -translate-x-1/2 bg-white px-3 text-sm text-[#EEEEEE]">
                 Or
               </span>
             </div>
@@ -355,9 +246,119 @@ export function AuthSliderContainer({
             <button
               type="button"
               onClick={handleGoogleSignup}
-              className="flex h-11 w-full items-center justify-center gap-2.5 rounded-full border border-[#EEEEEE] bg-[#EEEEEE]/70 font-semibold text-xs text-[#242424] transition-all hover:bg-[#EEEEEE] active:scale-[0.99]"
+              className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#EEEEEE] font-semibold text-base text-[#242424] transition-all hover:bg-[#E2E2E2] active:scale-[0.99]"
             >
-              <GoogleIcon className="size-4" />
+              <GoogleIcon className="size-5" />
+              Continue with Google
+            </button>
+          </div>
+        </div>
+
+        {/* ================= LOGIN FORM (RIGHT SIDE in Login Mode) ================= */}
+        <div
+          className={`flex w-1/2 flex-col justify-center px-12 xl:px-20 py-12 transition-all duration-500 ${
+            isSignup ? "pointer-events-none opacity-0 invisible" : "pointer-events-auto opacity-100 visible"
+          }`}
+        >
+          <div className="mx-auto flex w-full max-w-[480px] flex-col gap-6">
+            {/* Header Title & Subtitle matching Figma */}
+            <div className="flex flex-col items-center gap-2 text-center">
+              <h1 className="text-4xl font-bold tracking-[2px] text-[#D1593B]">
+                Login
+              </h1>
+              <div className="flex items-center gap-1.5 text-base text-[#6B727E]">
+                <span>Sign in to your</span>
+                <span className="flex items-center gap-1 font-bold text-[#D1593B]">
+                  <img src="https://cottagee.me/logo.png" alt="" className="size-6 rounded-md object-cover" />
+                  Cottage
+                </span>
+                <span>account as a member</span>
+              </div>
+            </div>
+
+            {(loginError || loginState?.error) && (
+              <p className="rounded-xl bg-red-50 p-3.5 text-center text-xs font-medium text-[#CC4F4F] border border-red-100">
+                {loginError || loginState?.error}
+              </p>
+            )}
+
+            <form action={loginAction} className="flex flex-col gap-5">
+              {/* Email Input */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="login_email" className="text-sm font-normal text-[#404040]">
+                  Email <span className="text-[#CC4F4F]">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <AtSign className="absolute left-3.5 size-5 text-[#9CA3AF]" />
+                  <input
+                    id="login_email"
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder="johndoe@gmail.com"
+                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-4 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="login_password" className="text-sm font-normal text-[#404040]">
+                  Password <span className="text-[#CC4F4F]">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3.5 size-5 text-[#9CA3AF]" />
+                  <input
+                    id="login_password"
+                    name="password"
+                    type={showLoginPassword ? "text" : "password"}
+                    required
+                    autoComplete="current-password"
+                    placeholder="johndoe@gmail.com"
+                    className="h-12 w-full rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] pl-11 pr-10 text-sm text-[#242424] placeholder:text-[#9CA3AF] transition-all focus:border-[#D1593B] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#D1593B]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3.5 text-[#9CA3AF] hover:text-[#404040]"
+                  >
+                    {showLoginPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  </button>
+                </div>
+                <Link
+                  href="/forgot-password"
+                  className="self-start text-sm font-normal text-[#D40924] hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loginPending}
+                className="mt-2 h-12 w-full rounded-full bg-[#D1593B] font-semibold text-base text-white transition-all hover:bg-[#B8472C] active:scale-[0.99] disabled:opacity-70 shadow-md shadow-[#D1593B]/20"
+              >
+                {loginPending ? "Signing in…" : "Sign In"}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative flex items-center py-1">
+              <div className="w-full border-t border-[#EEEEEE]" />
+              <span className="absolute left-1/2 -translate-x-1/2 bg-white px-3 text-sm text-[#EEEEEE]">
+                Or
+              </span>
+            </div>
+
+            {/* Google OAuth Button */}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#EEEEEE] font-semibold text-base text-[#242424] transition-all hover:bg-[#E2E2E2] active:scale-[0.99]"
+            >
+              <GoogleIcon className="size-5" />
               Continue with Google
             </button>
           </div>
@@ -368,58 +369,69 @@ export function AuthSliderContainer({
           initial={false}
           animate={{
             x: isSignup ? "100%" : "0%",
-            borderTopLeftRadius: isSignup ? "140px" : "0px",
-            borderBottomLeftRadius: isSignup ? "140px" : "0px",
-            borderTopRightRadius: !isSignup ? "140px" : "0px",
-            borderBottomRightRadius: !isSignup ? "140px" : "0px",
+            borderTopLeftRadius: isSignup ? "250px" : "0px",
+            borderBottomLeftRadius: isSignup ? "250px" : "0px",
+            borderTopRightRadius: !isSignup ? "250px" : "0px",
+            borderBottomRightRadius: !isSignup ? "250px" : "0px",
           }}
           transition={{
             type: "spring",
-            stiffness: 240,
-            damping: 30,
+            stiffness: 220,
+            damping: 28,
             mass: 0.9,
           }}
-          className="absolute top-0 left-0 z-20 flex h-full w-1/2 flex-col items-center justify-center overflow-hidden bg-[#D1593B] px-12 text-white shadow-2xl"
+          className="absolute top-0 left-0 z-30 flex h-full w-1/2 flex-col items-center justify-center overflow-hidden bg-[#D1593B] px-12 text-white shadow-2xl"
         >
-          {/* Background Vector Cottage & Magnifying Glass Illustration matching Figma */}
-          <div className="pointer-events-none absolute inset-0 opacity-15 flex items-center justify-center">
-            <svg width="480" height="420" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M60 200L240 60L420 200V380H60V200Z" stroke="white" strokeWidth="4" strokeLinejoin="round" />
-              <path d="M190 380V250H290V380" stroke="white" strokeWidth="4" />
-              <rect x="100" y="230" width="60" height="60" rx="4" stroke="white" strokeWidth="4" />
-              <rect x="320" y="230" width="60" height="60" rx="4" stroke="white" strokeWidth="4" />
-              <circle cx="340" cy="180" r="80" stroke="white" strokeWidth="4" />
-              <line x1="395" y1="235" x2="455" y2="295" stroke="white" strokeWidth="12" strokeLinecap="round" />
+          {/* Detailed Cottage Vector Artwork Line Art in Background matching Figma */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-25">
+            <svg width="640" height="540" viewBox="0 0 640 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* House Outline */}
+              <path d="M100 280L320 120L540 280V500H100V280Z" stroke="white" strokeWidth="4" strokeLinejoin="round" />
+              {/* Roof Line */}
+              <path d="M70 300L320 100L570 300" stroke="white" strokeWidth="6" strokeLinecap="round" />
+              {/* Door */}
+              <path d="M260 500V350H380V500" stroke="white" strokeWidth="4" />
+              {/* Left Window */}
+              <rect x="140" y="320" width="80" height="80" rx="6" stroke="white" strokeWidth="4" />
+              <line x1="180" y1="320" x2="180" y2="400" stroke="white" strokeWidth="3" />
+              <line x1="140" y1="360" x2="220" y2="360" stroke="white" strokeWidth="3" />
+              {/* Right Window */}
+              <rect x="420" y="320" width="80" height="80" rx="6" stroke="white" strokeWidth="4" />
+              <line x1="460" y1="320" x2="460" y2="400" stroke="white" strokeWidth="3" />
+              <line x1="420" y1="360" x2="500" y2="360" stroke="white" strokeWidth="3" />
+              {/* Large Magnifying Glass Overlay */}
+              <circle cx="440" cy="240" r="110" stroke="white" strokeWidth="6" />
+              <line x1="518" y1="318" x2="610" y2="410" stroke="white" strokeWidth="16" strokeLinecap="round" />
             </svg>
           </div>
 
-          {/* Logo Badge in Center */}
-          <div className="relative z-10 mb-8 flex size-20 items-center justify-center rounded-2xl border-2 border-white/80 bg-white/10 backdrop-blur-md shadow-lg">
-            <Logo size={42} />
+          {/* Logo Card in Center */}
+          <div className="relative z-10 mb-10 flex size-28 items-center justify-center rounded-[30px] border-2 border-white/90 bg-white p-3 shadow-xl">
+            <img src="https://cottagee.me/logo.png" alt="Cottage" className="size-full rounded-[20px] object-cover" />
           </div>
 
           {/* Dynamic Content Switching inside Slider */}
-          <div className="relative z-10 flex flex-col items-center text-center max-w-sm">
+          <div className="relative z-10 flex flex-col items-center text-center max-w-md">
             <AnimatePresence mode="wait">
               {!isSignup ? (
                 <motion.div
                   key="login-slider"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.25 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
                   className="flex flex-col items-center gap-4"
                 >
-                  <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                  <h2 className="text-4xl font-extrabold tracking-[2px] text-white">
                     Welcome to Cottage!
                   </h2>
-                  <p className="text-sm font-normal text-white/80">
+                  <p className="text-2xl font-normal text-white/90">
                     Don&apos;t have an Cottage?
                   </p>
                   <button
                     type="button"
                     onClick={() => toggleMode("signup")}
-                    className="mt-2 rounded-full border-2 border-white/90 bg-transparent px-8 py-3 font-semibold text-sm text-white transition-all hover:bg-white hover:text-[#D1593B] active:scale-95 shadow-md"
+                    className="mt-4 rounded-xl border border-white bg-transparent px-12 py-4 font-medium text-xl text-white transition-all hover:bg-white hover:text-[#D1593B] active:scale-95 shadow-md"
                   >
                     Create your own Cottage
                   </button>
@@ -427,22 +439,22 @@ export function AuthSliderContainer({
               ) : (
                 <motion.div
                   key="signup-slider"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.25 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
                   className="flex flex-col items-center gap-4"
                 >
-                  <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                  <h2 className="text-4xl font-extrabold tracking-[2px] text-white">
                     Welcome to Cottage!
                   </h2>
-                  <p className="text-sm font-normal text-white/80">
+                  <p className="text-2xl font-normal text-white/90">
                     Already have a member of any Cottage?
                   </p>
                   <button
                     type="button"
                     onClick={() => toggleMode("login")}
-                    className="mt-2 rounded-full border-2 border-white/90 bg-transparent px-10 py-3 font-semibold text-sm text-white transition-all hover:bg-white hover:text-[#D1593B] active:scale-95 shadow-md"
+                    className="mt-4 rounded-xl border border-white bg-transparent px-14 py-4 font-medium text-xl text-white transition-all hover:bg-white hover:text-[#D1593B] active:scale-95 shadow-md"
                   >
                     Log In
                   </button>
@@ -453,11 +465,11 @@ export function AuthSliderContainer({
         </motion.div>
       </div>
 
-      {/* Mobile / Small Screen Layout */}
+      {/* Mobile Fallback */}
       <div className="flex w-full flex-col justify-between px-6 py-10 lg:hidden min-h-svh">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-2xl font-bold tracking-tight text-[#D1593B]">
-            <Logo size={30} />
+            <img src="https://cottagee.me/logo.png" alt="Cottage" className="size-8 rounded-lg object-cover" />
             Cottage
           </div>
           <button
@@ -520,7 +532,7 @@ export function AuthSliderContainer({
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#EEEEEE] bg-[#EEEEEE]/70 font-semibold text-xs"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#EEEEEE] bg-[#EEEEEE] font-semibold text-xs"
               >
                 <GoogleIcon className="size-4" /> Continue with Google
               </button>
@@ -593,7 +605,7 @@ export function AuthSliderContainer({
               <button
                 type="button"
                 onClick={handleGoogleSignup}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#EEEEEE] bg-[#EEEEEE]/70 font-semibold text-xs"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[#EEEEEE] bg-[#EEEEEE] font-semibold text-xs"
               >
                 <GoogleIcon className="size-4" /> Continue with Google
               </button>
