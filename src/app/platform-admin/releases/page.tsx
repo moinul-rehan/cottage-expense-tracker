@@ -1,130 +1,62 @@
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatDateTime } from "@/lib/format-date";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  getLatestPublishedRelease,
-  getDownloadAnalytics,
-  getDownloadTrend,
-  listReleases,
-  formatFileSize,
-} from "@/lib/data/releases";
 import { AdminShell } from "../AdminShell";
-import { AdminCard, AdminCardTitle, AdminBadge } from "../AdminUI";
-import { StatTile, TrendBarChart } from "../AdminCharts";
-import { UploadReleaseForm } from "./UploadReleaseForm";
-import { ReleaseRowActions } from "./ReleaseRowActions";
+import { ReleaseManagementUI, type ReleaseRow, type AnalyticsSummary } from "./ReleaseManagementUI";
 
-export default async function PlatformAdminReleasesPage() {
+export default async function AdminReleasesPage() {
   await requirePlatformAdmin();
-
   const admin = createAdminClient();
-  const [latest, analytics, trend, releases] = await Promise.all([
-    getLatestPublishedRelease(admin, "android"),
-    getDownloadAnalytics(admin, "android"),
-    getDownloadTrend(admin, "android", 14),
-    listReleases(admin, "android"),
+
+  const [{ data: releases }, { data: logs }] = await Promise.all([
+    admin.from("app_releases").select("*").order("created_at", { ascending: false }),
+    admin.from("app_download_logs").select("created_at"),
   ]);
 
-  const uploaderIds = Array.from(new Set(releases.map((r) => r.uploaded_by).filter(Boolean))) as string[];
-  const emailById = new Map<string, string>();
-  if (uploaderIds.length) {
-    const { data: users } = await admin.auth.admin.listUsers();
-    for (const u of users.users) {
-      if (uploaderIds.includes(u.id)) emailById.set(u.id, u.email ?? u.id);
-    }
+  const allReleases: ReleaseRow[] = (releases ?? []).map((r) => ({
+    id: r.id,
+    platform: r.platform,
+    version: r.version,
+    channel: r.channel,
+    file_path: r.file_path,
+    file_size_bytes: Number(r.file_size_bytes || 0),
+    release_notes: r.release_notes,
+    min_supported_version: r.min_supported_version,
+    status: r.status,
+    download_count: r.download_count ?? 0,
+    created_at: r.created_at,
+    published_at: r.published_at,
+  }));
+
+  const activeRelease = allReleases.find((r) => r.status === "active") || allReleases[0];
+
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+  let downloadsToday = 0;
+  let downloadsThisMonth = 0;
+
+  for (const log of logs ?? []) {
+    const time = new Date(log.created_at).getTime();
+    if (time >= startOfDay) downloadsToday++;
+    if (time >= startOfMonth) downloadsThisMonth++;
   }
 
-  const hasDownloads = trend.some((t) => t.value > 0);
+  const totalDownloads = allReleases.reduce((sum, r) => sum + r.download_count, 0);
+
+  const analytics: AnalyticsSummary = {
+    activeVersion: activeRelease ? `v${activeRelease.version}` : "None",
+    latestReleaseDate: activeRelease?.published_at || activeRelease?.created_at || null,
+    latestChannel: activeRelease?.channel || "N/A",
+    latestSizeMb: activeRelease ? (activeRelease.file_size_bytes / (1024 * 1024)).toFixed(1) + " MB" : "0 MB",
+    totalDownloads,
+    downloadsToday,
+    downloadsThisMonth,
+  };
 
   return (
     <AdminShell title="App Releases">
-      <div className="flex flex-col gap-6">
-        <div>
-          <h2 className="text-lg font-semibold">App Releases</h2>
-          <p className="mt-1 text-sm text-black/40 dark:text-white/40">
-            Upload, publish and track Android APK releases.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <StatTile label="Current Version" value={latest?.version ?? "None"} />
-          <StatTile label="Release Channel" value={latest?.channel ?? "-"} />
-          <StatTile label="APK Size" value={latest ? formatFileSize(latest.file_size) : "-"} />
-          <StatTile label="Latest Release Date" value={latest ? formatDateTime(latest.created_at) : "-"} />
-          <StatTile label="Total Downloads" value={analytics.total} />
-          <StatTile label="Downloads Today" value={analytics.today} />
-          <StatTile label="Downloads This Week" value={analytics.thisWeek} />
-          <StatTile label="Downloads This Month" value={analytics.thisMonth} />
-        </div>
-
-        <UploadReleaseForm />
-
-        {hasDownloads && (
-          <AdminCard className="flex flex-col gap-4">
-            <AdminCardTitle>Downloads - last 14 days</AdminCardTitle>
-            <TrendBarChart data={trend} />
-          </AdminCard>
-        )}
-
-        <AdminCard className="p-0">
-          <div className="p-6 pb-0">
-            <AdminCardTitle>Release History</AdminCardTitle>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Version</TableHead>
-                <TableHead>Channel</TableHead>
-                <TableHead>File Size</TableHead>
-                <TableHead>Upload Date</TableHead>
-                <TableHead>Uploaded By</TableHead>
-                <TableHead>Downloads</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {releases.map((r) => {
-                const status = r.is_published ? "Published" : r.archived_at ? "Archived" : "Draft";
-                const tone = r.is_published ? "good" : r.archived_at ? "neutral" : "warning";
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-medium">{r.version}</TableCell>
-                    <TableCell>
-                      <AdminBadge>{r.channel}</AdminBadge>
-                    </TableCell>
-                    <TableCell className="text-black/40 dark:text-white/40">{formatFileSize(r.file_size)}</TableCell>
-                    <TableCell className="text-black/40 dark:text-white/40">{formatDateTime(r.created_at)}</TableCell>
-                    <TableCell className="text-black/40 dark:text-white/40">
-                      {(r.uploaded_by && emailById.get(r.uploaded_by)) ?? "-"}
-                    </TableCell>
-                    <TableCell>{r.download_count}</TableCell>
-                    <TableCell>
-                      <AdminBadge tone={tone}>{status}</AdminBadge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <ReleaseRowActions
-                        id={r.id}
-                        version={r.version}
-                        isPublished={r.is_published}
-                        isArchived={!!r.archived_at}
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {!releases.length && (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-6 text-center text-black/40 dark:text-white/40">
-                    No releases yet.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </AdminCard>
-      </div>
+      <ReleaseManagementUI releases={allReleases} analytics={analytics} />
     </AdminShell>
   );
 }

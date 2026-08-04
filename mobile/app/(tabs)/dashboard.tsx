@@ -58,7 +58,10 @@ export default function DashboardScreen() {
   }, [profile]);
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(() => {
+      void load();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [load]);
 
   // Real-time: any insert/update/delete on these tables for this cottage

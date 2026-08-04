@@ -20,7 +20,7 @@ export function InviteModeratorForm() {
           </AdminButton>
         </div>
         <p className="text-xs text-black/40 dark:text-white/40">
-          If they don't already have an account, they'll get an email to set a password. If they do, they can sign
+          If they don&apos;t already have an account, they&apos;ll get an email to set a password. If they do, they can sign
           in to /platform-admin/login right away.
         </p>
         {state?.error && <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>}

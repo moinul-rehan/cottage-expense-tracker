@@ -1,61 +1,98 @@
--- Native app release distribution (starting with Android APK, architected to
--- extend to google_play/app_store/windows/macos/linux later without
--- structural changes - see `platform` check constraint).
---
--- Storage: a PRIVATE bucket (never publicly listable/guessable - downloads
--- only ever happen through the app's own /download/latest route, which
--- fetches bytes server-side via the service-role client and streams them
--- back, or via a short-lived signed URL). No RLS policies on either table:
--- both are service-role-only, gated by requirePlatformAdmin/requirePlatformOwner
--- in application code, matching the platform_moderators pattern.
-insert into storage.buckets (id, name, public) values ('app-releases', 'app-releases', false);
+-- Native App Release Management & Download Analytics
+-- Migration: 0046_app_releases.sql
 
-create table app_releases (
+-- 1. Create app_releases table
+create table if not exists app_releases (
   id uuid primary key default gen_random_uuid(),
-  platform text not null default 'android'
-    check (platform in ('android', 'google_play', 'app_store', 'windows', 'macos', 'linux')),
+  platform text not null default 'android' check (platform in ('android', 'google_play', 'app_store', 'windows', 'macos', 'linux')),
   version text not null,
-  channel text not null default 'stable' check (channel in ('stable', 'beta', 'alpha')),
-  storage_path text not null,
-  file_size bigint not null,
-  sha256 text not null,
+  channel text not null default 'beta' check (channel in ('stable', 'beta', 'alpha')),
+  file_path text not null,
+  file_size_bytes bigint not null default 0,
+  checksum_sha256 text,
   release_notes text,
   min_supported_version text,
-  uploaded_by uuid references auth.users(id) on delete set null,
-  is_published boolean not null default false,
-  archived_at timestamptz,
-  download_count bigint not null default 0,
+  status text not null default 'draft' check (status in ('active', 'archived', 'draft')),
+  uploaded_by uuid references profiles(id) on delete set null,
+  download_count integer not null default 0,
   created_at timestamptz not null default now(),
-  unique (platform, version)
+  published_at timestamptz
 );
 
--- Enforces "only one release can remain active" per platform at the DB
--- level: publishing a new version must archive/unpublish the previous one
--- in the same transaction, or this index rejects the insert/update.
-create unique index app_releases_one_active_per_platform
-  on app_releases (platform)
-  where is_published and archived_at is null;
+-- Index for fast lookup of active releases by platform and channel
+create index if not exists idx_app_releases_platform_status on app_releases(platform, status, channel);
+create unique index if not exists idx_app_releases_unique_version on app_releases(platform, version);
 
-alter table app_releases enable row level security;
-
-create table app_release_downloads (
+-- 2. Create app_download_logs table for analytics
+create table if not exists app_download_logs (
   id uuid primary key default gen_random_uuid(),
-  release_id uuid not null references app_releases(id) on delete cascade,
-  downloaded_at timestamptz not null default now()
+  release_id uuid references app_releases(id) on delete cascade,
+  platform text not null default 'android',
+  user_agent text,
+  created_at timestamptz not null default now()
 );
 
-create index app_release_downloads_release_id_idx on app_release_downloads (release_id);
-create index app_release_downloads_downloaded_at_idx on app_release_downloads (downloaded_at);
+create index if not exists idx_app_download_logs_created_at on app_download_logs(created_at);
+create index if not exists idx_app_download_logs_release_id on app_download_logs(release_id);
 
-alter table app_release_downloads enable row level security;
+-- 3. Function & Trigger to automatically archive previous active releases when a new release becomes active
+create or replace function auto_archive_previous_active_release()
+returns trigger as $$
+begin
+  if new.status = 'active' then
+    update app_releases
+    set status = 'archived'
+    where platform = new.platform
+      and channel = new.channel
+      and id != new.id
+      and status = 'active';
 
--- Atomic counter bump, called right after a download actually starts
--- streaming (not just when the page loads) - see recordDownload in
--- src/lib/data/releases.ts.
-create or replace function increment_release_download_count(p_release_id uuid)
+    if new.published_at is null then
+      new.published_at := now();
+    end if;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trigger_auto_archive_previous_release on app_releases;
+create trigger trigger_auto_archive_previous_release
+  before insert or update of status on app_releases
+  for each row
+  when (new.status = 'active')
+  execute function auto_archive_previous_active_release();
+
+-- 4. RPC Function to increment download count & record analytics log securely
+create or replace function record_app_download(p_release_id uuid, p_user_agent text default null)
 returns void as $$
 begin
-  update app_releases set download_count = download_count + 1 where id = p_release_id;
-  insert into app_release_downloads (release_id) values (p_release_id);
+  update app_releases
+  set download_count = download_count + 1
+  where id = p_release_id;
+
+  insert into app_download_logs (release_id, platform, user_agent)
+  select p_release_id, platform, p_user_agent
+  from app_releases
+  where id = p_release_id;
 end;
 $$ language plpgsql security definer;
+
+-- 5. RLS Policies
+alter table app_releases enable row level security;
+alter table app_download_logs enable row level security;
+
+-- Public can view active releases
+create policy "Public can view active releases"
+  on app_releases for select
+  using (status = 'active');
+
+-- Service role & admins have full control
+create policy "Admins full control on app_releases"
+  on app_releases for all
+  using (true)
+  with check (true);
+
+create policy "Admins full control on app_download_logs"
+  on app_download_logs for all
+  using (true)
+  with check (true);

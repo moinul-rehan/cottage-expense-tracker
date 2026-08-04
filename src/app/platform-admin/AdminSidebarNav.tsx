@@ -2,28 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Megaphone, ShieldUser, Package } from "lucide-react";
+import { House, Mail, Megaphone, ShieldUser, Smartphone } from "lucide-react";
 import { Users } from "@/components/animate-ui/icons/users";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
 import { ArrowLeft } from "@/components/animate-ui/icons/arrow-left";
 import { cn } from "@/lib/utils";
 import type { IconComponent } from "@/lib/icon-type";
 
-// SnowUI's own icon set is Phosphor; the project already has lucide-react
-// installed app-wide (not Phosphor), so this uses the closest lucide glyph
-// per item rather than adding a second icon-library dependency.
-
 type NavLink = { href: string; label: string; icon: IconComponent; matchPrefix?: string };
 
-// Each feature gets its own equal-weight entry (no "Dashboards"/"Manage"
-// grouping) so Cottages/Users/Notifications/Feedback read as distinct
-// destinations rather than nested under a catch-all label.
 const FEATURE_LINKS: NavLink[] = [
   { href: "/platform-admin", label: "Cottages", icon: House, matchPrefix: "/platform-admin/cottages" },
   { href: "/platform-admin/users", label: "Users", icon: Users },
+  { href: "/platform-admin/releases", label: "App Releases", icon: Smartphone },
+  { href: "/platform-admin/email", label: "Send Email", icon: Mail },
   { href: "/platform-admin/notifications", label: "Notifications", icon: Megaphone },
   { href: "/platform-admin/feedback", label: "Feedback", icon: MessageSquareWarning },
-  { href: "/platform-admin/releases", label: "App Releases", icon: Package },
 ];
 
 function NavLinkItem({ link, active }: { link: NavLink; active: boolean }) {
@@ -41,11 +35,7 @@ function NavLinkItem({ link, active }: { link: NavLink; active: boolean }) {
   );
 }
 
-/** [isOwner]: only owners (the env PLATFORM_ADMIN_EMAILS allowlist) manage
- * moderators - a moderator has the same power as an owner over every other
- * section here, but not over this one. See requirePlatformOwner in
- * src/lib/platform-admin.ts. */
-export function AdminSidebarNav({ isOwner }: { isOwner: boolean }) {
+export function AdminSidebarNav({ isOwner }: { isOwner?: boolean }) {
   const pathname = usePathname();
 
   const isActive = (link: NavLink) =>

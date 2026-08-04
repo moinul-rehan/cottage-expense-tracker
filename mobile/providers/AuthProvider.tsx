@@ -34,36 +34,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function handleSessionChange(userSession: Session | null) {
+      setSession(userSession);
+      if (!userSession) {
+        if (!cancelled) setProfile(null);
+        return;
+      }
+      const { data } = await supabase
+        .from("profiles")
+        .select(PROFILE_COLUMNS)
+        .eq("id", userSession.user.id)
+        .single();
+      if (!cancelled) setProfile(data as Profile | null);
+    }
+
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+      if (cancelled) return;
       setLoading(false);
+      handleSessionChange(data.session);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
+      if (cancelled) return;
+      handleSessionChange(newSession);
     });
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!session) {
-      setProfile(null);
-      return;
-    }
-    let cancelled = false;
-    supabase
-      .from("profiles")
-      .select(PROFILE_COLUMNS)
-      .eq("id", session.user.id)
-      .single()
-      .then(({ data }) => {
-        if (!cancelled) setProfile(data as Profile | null);
-      });
     return () => {
       cancelled = true;
+      listener.subscription.unsubscribe();
     };
-  }, [session]);
+  }, []);
 
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
