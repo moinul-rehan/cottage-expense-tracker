@@ -198,7 +198,7 @@ function NotificationSheetBody({
   }
 
   function onDragPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
-    if (!ready.current) return;
+    if (!ready) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     dragState.current = { startY: e.clientY, startTranslate: translateY };
     setAnimate(false);
