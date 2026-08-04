@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Download, QrCode, Apple } from "lucide-react";
+import { Download, QrCode, Apple, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ActiveRelease } from "./page";
 
 function detectPlatform(): "android" | "ios" | "desktop" {
@@ -30,35 +31,38 @@ export function DownloadClientFeatures({ activeRelease }: { activeRelease: Activ
   )}&color=DE7356&bgcolor=FFFFFF`;
 
   return (
-    <div className="mt-8 flex flex-col items-center">
+    <div className="mt-8 flex flex-col items-center gap-6">
       {/* Primary CTA Button & Platform Adaptive Component */}
       {platform === "ios" ? (
         <div className="flex flex-col items-center gap-3">
-          <button
-            type="button"
+          <Button
+            size="lg"
             disabled
-            className="flex items-center gap-3 rounded-2xl bg-white/10 px-8 py-4 text-base font-semibold text-white/50 cursor-not-allowed border border-white/10 opacity-75"
+            className="h-12 rounded-full px-8 text-base opacity-75"
           >
-            <Apple className="size-6" />
+            <Apple className="size-5 mr-2" />
             iOS version coming soon
-          </button>
-          <span className="text-xs text-white/40">
+          </Button>
+          <span className="text-xs text-muted-foreground">
             iPhone and iPad native versions are currently in development.
           </span>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4">
-          <a
-            href="/download/latest"
-            className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary px-8 py-4 text-base font-bold text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary/90 hover:shadow-primary/40 active:scale-95"
+          <Button
+            size="lg"
+            nativeButton={false}
+            render={<a href="/download/latest" download />}
+            className="h-12 rounded-full px-8 text-base gap-2 shadow-md shadow-primary/20"
           >
-            <Download className="size-6 transition-transform group-hover:-translate-y-0.5" />
-            <span>Download for Android</span>
-          </a>
+            <Download className="size-5" />
+            Download for Android
+            <ArrowRight className="size-4" />
+          </Button>
 
           {/* Metadata Pill */}
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/60">
-            <span className="flex items-center gap-1 font-semibold text-white">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">
               Version: <span className="text-primary font-bold">v{activeRelease?.version}</span>
             </span>
             <span>•</span>
@@ -66,7 +70,7 @@ export function DownloadClientFeatures({ activeRelease }: { activeRelease: Activ
             <span>•</span>
             <span>Released: {activeRelease?.releaseDate}</span>
             <span>•</span>
-            <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 font-semibold text-emerald-400 uppercase text-[10px]">
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-semibold text-primary uppercase text-[10px]">
               {activeRelease?.channel}
             </span>
           </div>
@@ -75,19 +79,19 @@ export function DownloadClientFeatures({ activeRelease }: { activeRelease: Activ
 
       {/* Desktop QR Code Scanner Widget */}
       {platform === "desktop" && (
-        <div className="mt-10 flex flex-col items-center rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xs">
-          <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
+        <div className="mt-4 flex flex-col items-center rounded-2xl border border-border bg-card p-5 shadow-xs">
+          <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
             <QrCode className="size-4 text-primary" />
             <span>Scan to Download Directly on Mobile Phone</span>
           </div>
-          <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-white p-2.5 shadow-lg">
+          <div className="mt-3 overflow-hidden rounded-xl border border-border bg-white p-2.5 shadow-xs">
             <img
               src={qrCodeDataUrl}
               alt="Scan QR Code to Download APK"
               className="size-36 rounded-md object-contain"
             />
           </div>
-          <p className="mt-2 text-[11px] text-white/40">
+          <p className="mt-2 text-[11px] text-muted-foreground">
             Open camera app on your Android phone to scan
           </p>
         </div>
