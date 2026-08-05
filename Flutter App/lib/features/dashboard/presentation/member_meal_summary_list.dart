@@ -47,63 +47,143 @@ class _MemberCard extends StatelessWidget {
     final balancePositive = row.balance >= 0;
     final initial = row.firstName.isNotEmpty ? row.firstName[0].toUpperCase() : '?';
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: surface.card,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: surface.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    void showDetails(BuildContext context) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (ctx) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: row.avatarUrl != null && row.avatarUrl!.isNotEmpty
-                      ? Image.network(
-                          row.avatarUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _Initial(initial: initial),
-                        )
-                      : _Initial(initial: initial),
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: row.avatarUrl != null && row.avatarUrl!.isNotEmpty
+                          ? Image.network(
+                              row.avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => _Initial(initial: initial),
+                            )
+                          : _Initial(initial: initial),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        row.displayName,
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: surface.foreground),
+                      ),
+                      Text('Meal Summary Breakdown', style: TextStyle(fontSize: 13, color: surface.mutedForeground)),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Total Meals Taken'),
+                trailing: Text(_count(row.meals), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Total Deposit Amount'),
+                trailing: Text(_tk(row.deposit), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Total Calculated Cost'),
+                trailing: Text(_tk(row.cost), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Net Meal Balance'),
+                trailing: Text(
+                  _tk(row.balance),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: balancePositive ? const Color(0xFF289029) : CottageColors.destructive,
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  row.displayName,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: surface.foreground),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => showDetails(context),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: surface.card,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: surface.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: row.avatarUrl != null && row.avatarUrl!.isNotEmpty
+                        ? Image.network(
+                            row.avatarUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => _Initial(initial: initial),
+                          )
+                        : _Initial(initial: initial),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _Stat(label: 'Total Meal', value: _count(row.meals), surface: surface)),
-              Expanded(child: _Stat(label: 'Deposit', value: _tk(row.deposit), surface: surface)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _Stat(label: 'Meal Cost', value: _tk(row.cost), surface: surface)),
-              Expanded(
-                child: _Stat(
-                  label: 'Balance',
-                  value: _tk(row.balance),
-                  surface: surface,
-                  valueColor: balancePositive ? const Color(0xFF289029) : CottageColors.destructive,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    row.displayName,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: surface.foreground),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: _Stat(label: 'Total Meal', value: _count(row.meals), surface: surface)),
+                Expanded(child: _Stat(label: 'Deposit', value: _tk(row.deposit), surface: surface)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: _Stat(label: 'Meal Cost', value: _tk(row.cost), surface: surface)),
+                Expanded(
+                  child: _Stat(
+                    label: 'Balance',
+                    value: _tk(row.balance),
+                    surface: surface,
+                    valueColor: balancePositive ? const Color(0xFF289029) : CottageColors.destructive,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

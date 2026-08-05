@@ -107,7 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 24),
                         _BazaarDutySection(data: data, profile: profile),
                         const SizedBox(height: 24),
-                        UtilityExpenseList(data: data),
+                        UtilityExpenseList(data: data, profile: profile),
                         const SizedBox(height: 24),
                         MemberMealSummaryList(rows: data.memberMealRows),
                         const SizedBox(height: 24),

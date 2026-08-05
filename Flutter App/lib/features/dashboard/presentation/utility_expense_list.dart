@@ -8,9 +8,13 @@ import '../data/dashboard_data.dart';
 /// `collectedThisMonth` from [DashboardData]), same tone colors from
 /// [CottageSurface], just laid out as a single-column list of rows per the
 /// Rento Figma kit's mobile home screen.
+import 'utility_breakdown_sheet.dart';
+import '../../../core/models/profile.dart';
+
 class UtilityExpenseList extends StatelessWidget {
   final DashboardData data;
-  const UtilityExpenseList({super.key, required this.data});
+  final Profile profile;
+  const UtilityExpenseList({super.key, required this.data, required this.profile});
 
   String _tk(double value) => '${value.toStringAsFixed(2)} tk';
 
@@ -24,6 +28,7 @@ class UtilityExpenseList extends StatelessWidget {
         fg: surface.toneBlueFg,
         label: 'Cottage Balance',
         value: _tk(data.cottageBalance),
+        onTap: () => showUtilityBreakdownSheet(context, profile: profile, data: data),
       ),
       _Row(
         icon: Icons.receipt_long_outlined,
@@ -31,6 +36,7 @@ class UtilityExpenseList extends StatelessWidget {
         fg: surface.toneOrangeFg,
         label: 'Total Utility Expense',
         value: _tk(data.totalUtilityExpense),
+        onTap: () => showUtilityBreakdownSheet(context, profile: profile, data: data),
       ),
       _Row(
         icon: Icons.payments_outlined,
@@ -38,6 +44,7 @@ class UtilityExpenseList extends StatelessWidget {
         fg: surface.toneRedFg,
         label: 'Outstanding From Members',
         value: _tk(data.outstandingFromMembers),
+        onTap: () => showUtilityBreakdownSheet(context, profile: profile, data: data),
       ),
       _Row(
         icon: Icons.payments_outlined,
@@ -45,6 +52,7 @@ class UtilityExpenseList extends StatelessWidget {
         fg: surface.toneGreenFg,
         label: 'Collected This Month',
         value: _tk(data.collectedThisMonth),
+        onTap: () => showUtilityBreakdownSheet(context, profile: profile, data: data),
       ),
     ];
 
@@ -68,33 +76,44 @@ class _Row extends StatelessWidget {
   final Color fg;
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
-  const _Row({required this.icon, required this.bg, required this.fg, required this.label, required this.value});
+  const _Row({
+    required this.icon,
+    required this.bg,
+    required this.fg,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final surface = context.surface;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: surface.card,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: surface.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-            child: Icon(icon, color: fg, size: 24),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(label, style: TextStyle(fontSize: 13, color: surface.mutedForeground)),
-          ),
-          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: surface.foreground)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: surface.card,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: surface.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, color: fg, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(label, style: TextStyle(fontSize: 13, color: surface.mutedForeground)),
+            ),
+            Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: surface.foreground)),
+          ],
+        ),
       ),
     );
   }
