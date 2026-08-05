@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/utils/format_month.dart';
+import '../../../main.dart';
 import '../../notifications/presentation/notification_bell.dart';
 import 'verified_badge.dart';
 
@@ -99,79 +100,270 @@ class DashboardHeader extends StatelessWidget {
 /// is likewise decorative -- the app currently follows `ThemeMode.system`
 /// with no manual override plumbed through `main.dart`, and wiring a real
 /// app-wide theme switch is out of scope for a dashboard-only redesign.
-class _NavRow extends StatelessWidget {
+class _NavRow extends StatefulWidget {
   final Profile profile;
   const _NavRow({required this.profile});
 
   @override
+  State<_NavRow> createState() => _NavRowState();
+}
+
+class _NavRowState extends State<_NavRow> {
+  String _selectedLang = 'EN';
+
+  void _showLanguagePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Language',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.language, color: CottageColors.primary),
+              title: const Text('English (EN)'),
+              trailing: _selectedLang == 'EN'
+                  ? const Icon(Icons.check_circle, color: CottageColors.primary)
+                  : null,
+              onTap: () {
+                setState(() => _selectedLang = 'EN');
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Language set to English')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.language, color: CottageColors.primary),
+              title: const Text('Bengali (BN)'),
+              trailing: _selectedLang == 'BN'
+                  ? const Icon(Icons.check_circle, color: CottageColors.primary)
+                  : null,
+              onTap: () {
+                setState(() => _selectedLang = 'BN');
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Language set to Bengali')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _toggleTheme() {
+    final current = themeModeNotifier.value;
+    final isDark = current == ThemeMode.dark ||
+        (current == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+    themeModeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isDark ? 'Switched to Light Theme' : 'Switched to Dark Theme'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _openProfile() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: CottageColors.primary,
+                  backgroundImage: widget.profile.avatarUrl != null &&
+                          widget.profile.avatarUrl!.isNotEmpty
+                      ? NetworkImage(widget.profile.avatarUrl!)
+                      : null,
+                  child: widget.profile.avatarUrl == null ||
+                          widget.profile.avatarUrl!.isEmpty
+                      ? Text(
+                          widget.profile.firstName.isNotEmpty
+                              ? widget.profile.firstName[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 14),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.profile.displayName,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      widget.profile.isSuperAdmin ? 'Super Admin' : 'Cottage Member',
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Full Name'),
+              subtitle: Text('${widget.profile.firstName} ${widget.profile.lastName}'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_outline),
+              title: const Text('Role'),
+              subtitle: Text(widget.profile.isSuperAdmin ? 'Super Admin' : 'Member'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final initial = profile.firstName.isNotEmpty ? profile.firstName[0].toUpperCase() : '?';
-    return Row(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: 36,
-            height: 36,
-            color: Colors.white,
-            padding: const EdgeInsets.all(5),
-            child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
-          ),
-        ),
-        const Spacer(),
-        _Pill(child: const Text('EN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: CottageColors.primary))),
-        const SizedBox(width: 8),
-        _IconPill(icon: Icons.dark_mode_outlined),
-        const SizedBox(width: 4),
-        Theme(
-          data: Theme.of(context).copyWith(
-            iconTheme: const IconThemeData(color: CottageColors.primaryForeground),
-          ),
-          child: const NotificationBell(),
-        ),
-        const SizedBox(width: 4),
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: Colors.white,
-          backgroundImage: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-              ? NetworkImage(profile.avatarUrl!)
-              : null,
-          child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-              ? Text(initial, style: const TextStyle(color: CottageColors.primary, fontWeight: FontWeight.w700, fontSize: 13))
-              : null,
-        ),
-      ],
+    final initial = widget.profile.firstName.isNotEmpty
+        ? widget.profile.firstName[0].toUpperCase()
+        : '?';
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (context, mode, _) {
+        final isDark = mode == ThemeMode.dark ||
+            (mode == ThemeMode.system &&
+                MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+        return Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 36,
+                height: 36,
+                color: Colors.white,
+                padding: const EdgeInsets.all(5),
+                child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+              ),
+            ),
+            const Spacer(),
+            _Pill(
+              onTap: _showLanguagePicker,
+              child: Text(
+                _selectedLang,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: CottageColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _IconPill(
+              onTap: _toggleTheme,
+              icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+            ),
+            const SizedBox(width: 4),
+            Theme(
+              data: Theme.of(context).copyWith(
+                iconTheme: const IconThemeData(color: CottageColors.primaryForeground),
+              ),
+              child: const NotificationBell(),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: _openProfile,
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.white,
+                backgroundImage: widget.profile.avatarUrl != null &&
+                        widget.profile.avatarUrl!.isNotEmpty
+                    ? NetworkImage(widget.profile.avatarUrl!)
+                    : null,
+                child: widget.profile.avatarUrl == null ||
+                        widget.profile.avatarUrl!.isEmpty
+                    ? Text(
+                        initial,
+                        style: const TextStyle(
+                          color: CottageColors.primary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
 class _Pill extends StatelessWidget {
   final Widget child;
-  const _Pill({required this.child});
+  final VoidCallback? onTap;
+  const _Pill({required this.child, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999)),
-      child: child,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999)),
+        child: child,
+      ),
     );
   }
 }
 
 class _IconPill extends StatelessWidget {
   final IconData icon;
-  const _IconPill({required this.icon});
+  final VoidCallback? onTap;
+  const _IconPill({required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999)),
-      child: Icon(icon, size: 16, color: CottageColors.primary),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999)),
+        child: Icon(icon, size: 16, color: CottageColors.primary),
+      ),
     );
   }
 }

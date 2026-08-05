@@ -95,60 +95,145 @@ class _DutyRow extends StatelessWidget {
     // "(you)" is a separate, always-shown suffix when it applies.
     final highlighted = status == BazaarDutyStatus.active;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: highlighted ? CottageColors.primary.withValues(alpha: 0.08) : Colors.transparent,
-        border: highlighted ? Border.all(color: CottageColors.primary) : null,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              width: 50,
-              height: 50,
-              child: member?.avatarUrl != null && member!.avatarUrl!.isNotEmpty
-                  ? Image.network(
-                      member!.avatarUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _AvatarInitial(initial: initial),
-                    )
-                  : _AvatarInitial(initial: initial),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: surface.foreground),
-                      ),
+    void showDetails(BuildContext context) {
+      final statusStr = status == BazaarDutyStatus.active
+          ? 'On Duty'
+          : status == BazaarDutyStatus.today
+              ? 'Today'
+              : status == BazaarDutyStatus.upcoming
+                  ? 'Upcoming'
+                  : 'Completed';
+
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (ctx) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.shopping_basket_outlined, color: CottageColors.primary),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Bazaar Duty Details',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: surface.foreground,
                     ),
-                    if (isMe)
-                      Text(' (you)', style: TextStyle(fontSize: 14, color: surface.mutedForeground)),
-                  ],
+                  ),
+                  const Spacer(),
+                  if (status == BazaarDutyStatus.active)
+                    const _StatusBadge(text: 'On Duty', color: Color(0xFF289029)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundColor: surface.accent,
+                  backgroundImage: member?.avatarUrl != null && member!.avatarUrl!.isNotEmpty
+                      ? NetworkImage(member!.avatarUrl!)
+                      : null,
+                  child: member?.avatarUrl == null || member!.avatarUrl!.isEmpty
+                      ? Text(initial, style: const TextStyle(fontWeight: FontWeight.bold))
+                      : null,
                 ),
-                Text(
-                  '${_formatDate(duty.startDate)} – ${_formatDate(duty.endDate)}'
-                  '${duty.note != null && duty.note!.isNotEmpty ? " · ${duty.note}" : ""}',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14, color: surface.mutedForeground),
-                ),
+                title: Text(name + (isMe ? ' (You)' : ''), style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text('Status: $statusStr'),
+              ),
+              const Divider(),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Start Date:', style: TextStyle(color: Colors.grey)),
+                  Text(_formatDate(duty.startDate), style: const TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('End Date:', style: TextStyle(color: Colors.grey)),
+                  Text(_formatDate(duty.endDate), style: const TextStyle(fontWeight: FontWeight.w600)),
+                ],
+              ),
+              if (duty.note != null && duty.note!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('Note:', style: TextStyle(fontWeight: FontWeight.bold, color: surface.foreground)),
+                const SizedBox(height: 4),
+                Text(duty.note!, style: TextStyle(color: surface.mutedForeground)),
               ],
-            ),
+              const SizedBox(height: 16),
+            ],
           ),
-          if (status == BazaarDutyStatus.active) _StatusBadge(text: 'On Duty', color: const Color(0xFF289029)),
-          if (status == BazaarDutyStatus.today) _StatusBadge(text: 'Today', color: const Color(0xFFFA9033)),
-        ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => showDetails(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: highlighted ? CottageColors.primary.withValues(alpha: 0.08) : Colors.transparent,
+          border: highlighted ? Border.all(color: CottageColors.primary) : null,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: member?.avatarUrl != null && member!.avatarUrl!.isNotEmpty
+                    ? Image.network(
+                        member!.avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _AvatarInitial(initial: initial),
+                      )
+                    : _AvatarInitial(initial: initial),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: surface.foreground),
+                        ),
+                      ),
+                      if (isMe)
+                        Text(' (you)', style: TextStyle(fontSize: 14, color: surface.mutedForeground)),
+                    ],
+                  ),
+                  Text(
+                    '${_formatDate(duty.startDate)} – ${_formatDate(duty.endDate)}'
+                    '${duty.note != null && duty.note!.isNotEmpty ? " · ${duty.note}" : ""}',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 14, color: surface.mutedForeground),
+                  ),
+                ],
+              ),
+            ),
+            if (status == BazaarDutyStatus.active) _StatusBadge(text: 'On Duty', color: const Color(0xFF289029)),
+            if (status == BazaarDutyStatus.today) _StatusBadge(text: 'Today', color: const Color(0xFFFA9033)),
+          ],
+        ),
       ),
     );
   }

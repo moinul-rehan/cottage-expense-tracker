@@ -20,21 +20,28 @@ Future<void> main() async {
   runApp(const CottageApp());
 }
 
+final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+
 class CottageApp extends StatelessWidget {
   const CottageApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Cottage',
-      theme: buildCottageTheme(Brightness.light),
-      darkTheme: buildCottageTheme(Brightness.dark),
-      themeMode: ThemeMode.system,
-      debugShowCheckedModeBanner: false,
-      home: !SupabaseService.isInitialized
-          ? _SupabaseErrorScreen(error: SupabaseService.initializationError)
-          : const _AuthGate(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          title: 'Cottage',
+          theme: buildCottageTheme(Brightness.light),
+          darkTheme: buildCottageTheme(Brightness.dark),
+          themeMode: mode,
+          debugShowCheckedModeBanner: false,
+          home: !SupabaseService.isInitialized
+              ? _SupabaseErrorScreen(error: SupabaseService.initializationError)
+              : const _AuthGate(),
+        );
+      },
     );
   }
 }
