@@ -5,6 +5,7 @@ import { requireSuperAdmin } from "@/lib/data/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { notifyUsers } from "@/lib/data/notifications";
+import { todayInDhaka } from "@/lib/dhaka-date";
 import { formatDate } from "@/lib/format-date";
 
 export type InviteMemberState = { error?: string; success?: string } | undefined;
@@ -194,7 +195,7 @@ export async function assignBazaarDuty(
   if (endDate < startDate) {
     return { error: "End date must be on or after the start date." };
   }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   if (endDate < today) {
     // A duty entirely in the past would insert successfully but never show
     // up anywhere (Members page and Dashboard both only query duties whose

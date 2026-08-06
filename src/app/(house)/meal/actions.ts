@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/data/dal";
 import { createClient } from "@/lib/supabase/server";
 import { notifyUsers, notifyUsersIndividually } from "@/lib/data/notifications";
+import { todayInDhaka } from "@/lib/dhaka-date";
 
 export type MealActionState = { error?: string } | undefined;
 
@@ -24,7 +25,7 @@ export async function addBazaarEntry(
   const supabase = await createClient();
   const amount = Number(formData.get("amount"));
   const description = String(formData.get("description") ?? "").trim() || null;
-  const entryDate = String(formData.get("entry_date") ?? "") || new Date().toISOString().slice(0, 10);
+  const entryDate = String(formData.get("entry_date") ?? "") || todayInDhaka();
   const spentBy = String(formData.get("spent_by") ?? profile.id);
   const creditDeposit = formData.get("credit_deposit") === "on";
 
@@ -209,7 +210,7 @@ export async function addDailyMealsForDate(
   }
 
   const supabase = await createClient();
-  const mealDate = String(formData.get("meal_date") ?? "") || new Date().toISOString().slice(0, 10);
+  const mealDate = String(formData.get("meal_date") ?? "") || todayInDhaka();
   const memberIds = String(formData.get("member_ids") ?? "")
     .split(",")
     .filter(Boolean);

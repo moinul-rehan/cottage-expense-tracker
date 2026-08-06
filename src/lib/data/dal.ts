@@ -2,6 +2,7 @@ import 'server-only'
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { todayInDhaka } from '@/lib/dhaka-date'
 
 export { getDisplayName, getFullName } from './display-name'
 
@@ -87,7 +88,7 @@ export const getCurrentProfile = cache(async (): Promise<Profile> => {
   return {
     ...profile,
     cottage_name: cottage?.name ?? '',
-    active_month_key: cottage?.active_month_key ?? new Date().toISOString().slice(0, 7),
+    active_month_key: cottage?.active_month_key ?? todayInDhaka().slice(0, 7),
   }
 })
 

@@ -4,13 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getDisplayName } from "@/lib/data/display-name";
 import { formatDate } from "@/lib/format-date";
+import { todayInDhaka } from "@/lib/dhaka-date";
 import { cn } from "@/lib/utils";
 import type { BazaarDuty } from "@/lib/data/bazaar-duty";
 
 type Member = { id: string; first_name: string; last_name: string | null; avatar_url: string | null };
 
 function dutyStatus(startIso: string, endIso: string) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   if (startIso <= today && today <= endIso) return "active" as const;
   if (startIso === today) return "today" as const;
   return "upcoming" as const;

@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getMonthlyDues } from "./finance";
 import { getMealTotals } from "./meal";
+import { todayInDhaka } from "@/lib/dhaka-date";
 
 export { formatMonthKey } from "@/lib/format-month";
 
@@ -12,12 +13,12 @@ export async function getActiveMonthKey(supabase: SupabaseClient, cottageId: str
     .select("active_month_key")
     .eq("id", cottageId)
     .single();
-  return (data?.active_month_key as string | undefined) ?? new Date().toISOString().slice(0, 7);
+  return (data?.active_month_key as string | undefined) ?? todayInDhaka().slice(0, 7);
 }
 
 /** Today's date if it falls within `monthKey`, otherwise the 1st of that month - a sane default for date pickers when the active month isn't the real calendar month. */
 export function defaultDateForMonth(monthKey: string): string {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   return today.slice(0, 7) === monthKey ? today : `${monthKey}-01`;
 }
 

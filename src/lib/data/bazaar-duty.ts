@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { todayInDhaka } from "@/lib/dhaka-date";
 
 export type BazaarDuty = {
   id: string;
@@ -11,7 +12,7 @@ export type BazaarDuty = {
 
 /** All duties (current or upcoming) per member, for the admin Members page. */
 export async function getUpcomingBazaarDuties(supabase: SupabaseClient, cottageId: string) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   const { data } = await supabase
     .from("bazaar_duties")
     .select("id, user_id, start_date, end_date, note")
@@ -36,7 +37,7 @@ export async function getCottageBazaarDuties(
   cottageId: string,
   limit = 8
 ): Promise<BazaarDuty[]> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   const { data } = await supabase
     .from("bazaar_duties")
     .select("id, user_id, start_date, end_date, note")
@@ -60,7 +61,7 @@ export async function getAllBazaarDuties(supabase: SupabaseClient, cottageId: st
 
 /** The current member's own current/next duty, for their Dashboard. */
 export async function getMyNextBazaarDuty(supabase: SupabaseClient, userId: string) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   const { data } = await supabase
     .from("bazaar_duties")
     .select("id, user_id, start_date, end_date, note")

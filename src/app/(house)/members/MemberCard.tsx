@@ -40,6 +40,7 @@ import {
 import { ConfirmPasswordDialog } from "@/components/ConfirmPasswordDialog";
 import { getDisplayName } from "@/lib/data/display-name";
 import { VerifiedBadge, hasElevatedAccess } from "@/components/verified-badge";
+import { todayInDhaka } from "@/lib/dhaka-date";
 
 type Member = {
   id: string;
@@ -265,7 +266,7 @@ function AssignDutyDialog({
   otherDuties: OtherDuty[];
 }) {
   const [state, action, pending] = useActionState(assignBazaarDuty, undefined);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayInDhaka();
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
 
