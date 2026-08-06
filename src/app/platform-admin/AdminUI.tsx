@@ -87,6 +87,37 @@ export function AdminSelect({ className, ...props }: React.ComponentProps<"selec
   );
 }
 
+export function AdminSwitch({
+  checked,
+  onCheckedChange,
+  disabled,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onCheckedChange(!checked)}
+      className={cn(
+        "relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:pointer-events-none disabled:opacity-50",
+        checked ? "bg-black dark:bg-white" : "bg-black/15 dark:bg-white/15"
+      )}
+    >
+      <span
+        className={cn(
+          "absolute top-0.5 left-0.5 size-5 rounded-full bg-white transition-transform dark:bg-black",
+          checked && "translate-x-5"
+        )}
+      />
+    </button>
+  );
+}
+
 const badgeTones = {
   neutral: "bg-black/4 text-black/60 dark:bg-white/10 dark:text-white/60",
   good: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",

@@ -4,7 +4,7 @@ import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { sendEmail } from "@/lib/email";
 
 export type SendEmailInput = {
-  recipientEmail: string;
+  recipientEmails: string[];
   templateType: "approved" | "rejected" | "custom";
   cottageName?: string;
   subject: string;
@@ -18,14 +18,25 @@ export type SendEmailInput = {
 export async function sendAdminCustomEmail(input: SendEmailInput) {
   await requirePlatformAdmin();
 
-  const recipientEmail = input.recipientEmail.trim();
+  // De-duplicate case-insensitively (a user picked from the list and typed
+  // into the free-text field could easily collide).
+  const seen = new Set<string>();
+  const recipientEmails = input.recipientEmails
+    .map((e) => e.trim())
+    .filter((e) => e.length > 0)
+    .filter((e) => {
+      const key = e.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   const subject = input.subject.trim();
   const headline = input.headline.trim();
   const bodyText = input.bodyText.trim();
   const rejectionReason = (input.rejectionReason || "").trim();
 
-  if (!recipientEmail) {
-    return { error: "Recipient email is required." };
+  if (!recipientEmails.length) {
+    return { error: "At least one recipient is required." };
   }
   if (!subject) {
     return { error: "Subject line is required." };
@@ -178,14 +189,10 @@ export async function sendAdminCustomEmail(input: SendEmailInput) {
   </table>
 </div>`;
 
-  try {
-    await sendEmail({
-      to: recipientEmail,
-      subject,
-      html,
-    });
-    return { success: true };
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : "Failed to send email." };
-  }
+  // One send per recipient (not a single `to: [...]` call) so each
+  // recipient's address stays private from the others. sendEmail() never
+  // throws (see its doc comment) - a missing API key or a bad address just
+  // silently no-ops that one send rather than surfacing per-recipient here.
+  await Promise.all(recipientEmails.map((to) => sendEmail({ to, subject, html })));
+  return { success: true, sentCount: recipientEmails.length };
 }

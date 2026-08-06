@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { AdminCard, AdminCardTitle, AdminButton, AdminInput } from "../AdminUI";
 import { sendAdminCustomEmail } from "./actions";
-import { CheckCircle2, AlertCircle, Send, Sparkles, User, Mail, FileText } from "lucide-react";
+import { CheckCircle2, AlertCircle, Send, Sparkles, User, Users, Mail, FileText, Search } from "lucide-react";
 
 export type AdminUserOption = {
   id: string;
@@ -13,10 +13,34 @@ export type AdminUserOption = {
   status: string;
 };
 
+/** Splits on commas, semicolons, or newlines - however someone pastes a list. */
+function parseManualEmails(raw: string): string[] {
+  return raw
+    .split(/[,;\n]/)
+    .map((e) => e.trim())
+    .filter(Boolean);
+}
+
 export function AdminEmailComposer({ users }: { users: AdminUserOption[] }) {
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [recipientEmail, setRecipientEmail] = useState<string>("");
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [userSearch, setUserSearch] = useState("");
+  const [manualEmails, setManualEmails] = useState<string>("");
   const [cottageName, setCottageName] = useState<string>("");
+
+  const filteredUsers = useMemo(() => {
+    const q = userSearch.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter(
+      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.cottageName.toLowerCase().includes(q)
+    );
+  }, [users, userSearch]);
+
+  const selectedUsers = useMemo(() => users.filter((u) => selectedUserIds.has(u.id)), [users, selectedUserIds]);
+  const recipientEmails = useMemo(() => {
+    const fromUsers = selectedUsers.map((u) => u.email);
+    const manual = parseManualEmails(manualEmails);
+    return Array.from(new Set([...fromUsers, ...manual].map((e) => e.trim()).filter(Boolean)));
+  }, [selectedUsers, manualEmails]);
 
   const [templateType, setTemplateType] = useState<"approved" | "rejected" | "custom">("approved");
   const [subject, setSubject] = useState<string>("Your Cottage is approved 🎉");
@@ -69,21 +93,43 @@ export function AdminEmailComposer({ users }: { users: AdminUserOption[] }) {
     }
   }
 
-  function handleUserSelect(userId: string) {
-    setSelectedUserId(userId);
-    const selected = users.find((u) => u.id === userId);
-    if (selected) {
-      setRecipientEmail(selected.email);
-      setCottageName(selected.cottageName);
-      applyTemplate(templateType, selected.cottageName);
-    }
+  function toggleUser(userId: string) {
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) {
+        next.delete(userId);
+      } else {
+        next.add(userId);
+      }
+      // Re-derive the template's cottage-name placeholder: only meaningful
+      // when exactly one recipient is picked, otherwise fall back to a
+      // generic phrase so the preview doesn't awkwardly name just one of
+      // several recipients' cottages.
+      const nextUsers = users.filter((u) => next.has(u.id));
+      const name = nextUsers.length === 1 ? nextUsers[0].cottageName : "";
+      setCottageName(name);
+      applyTemplate(templateType, name || "your Cottage");
+      return next;
+    });
+  }
+
+  function selectAllFiltered() {
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev);
+      for (const u of filteredUsers) next.add(u.id);
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedUserIds(new Set());
   }
 
   function handleSend() {
     setFeedback(null);
     startTransition(async () => {
       const res = await sendAdminCustomEmail({
-        recipientEmail,
+        recipientEmails,
         templateType,
         cottageName,
         subject,
@@ -99,7 +145,9 @@ export function AdminEmailComposer({ users }: { users: AdminUserOption[] }) {
       } else {
         setFeedback({
           type: "success",
-          text: `Email successfully sent to ${recipientEmail}!`,
+          text: `Email sent to ${res?.sentCount ?? recipientEmails.length} recipient${
+            (res?.sentCount ?? recipientEmails.length) === 1 ? "" : "s"
+          }!`,
         });
       }
     });
@@ -219,39 +267,93 @@ export function AdminEmailComposer({ users }: { users: AdminUserOption[] }) {
               </div>
             </div>
 
-            {/* Existing User Selection Dropdown */}
+            {/* Registered User Multi-Select */}
             <div>
               <label className="mb-1.5 flex items-center justify-between text-xs font-semibold text-black/60 dark:text-white/60">
                 <span className="flex items-center gap-1">
-                  <User className="size-3.5" /> Select Registered User
+                  <Users className="size-3.5" /> Select Recipients
                 </span>
-                <span className="text-[11px] text-black/40 dark:text-white/40">Optional</span>
+                <span className="text-[11px] text-black/40 dark:text-white/40">
+                  {selectedUserIds.size} selected
+                </span>
               </label>
-              <select
-                value={selectedUserId}
-                onChange={(e) => handleUserSelect(e.target.value)}
-                className="w-full rounded-lg border border-black/10 bg-black/[0.02] p-2.5 text-sm dark:border-white/10 dark:bg-white/5 dark:text-white"
-              >
-                <option value="">-- Choose User from Database --</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} ({u.email}) - {u.cottageName || "No Cottage"} [{u.status}]
-                  </option>
+
+              <div className="relative mb-2">
+                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-black/30 dark:text-white/30" />
+                <AdminInput
+                  type="text"
+                  placeholder="Search by name, email, or cottage…"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+
+              <div className="mb-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={selectAllFiltered}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Select all {userSearch ? "filtered" : ""}
+                </button>
+                {selectedUserIds.size > 0 && (
+                  <>
+                    <span className="text-black/20 dark:text-white/20">·</span>
+                    <button
+                      type="button"
+                      onClick={clearSelection}
+                      className="text-xs font-medium text-black/50 hover:underline dark:text-white/50"
+                    >
+                      Clear
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className="max-h-56 overflow-y-auto rounded-lg border border-black/10 dark:border-white/10">
+                {filteredUsers.length === 0 && (
+                  <p className="p-3 text-center text-xs text-black/40 dark:text-white/40">No matching users.</p>
+                )}
+                {filteredUsers.map((u) => (
+                  <label
+                    key={u.id}
+                    className="flex cursor-pointer items-center gap-2.5 border-b border-black/5 p-2.5 text-sm last:border-b-0 hover:bg-black/2 dark:border-white/5 dark:hover:bg-white/5"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedUserIds.has(u.id)}
+                      onChange={() => toggleUser(u.id)}
+                      className="size-4 shrink-0 accent-primary"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-black dark:text-white">{u.name}</p>
+                      <p className="truncate text-xs text-black/50 dark:text-white/50">
+                        {u.email} · {u.cottageName || "No Cottage"} · {u.status}
+                      </p>
+                    </div>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* Recipient Email */}
+            {/* Manual/additional emails */}
             <div>
-              <label className="mb-1 block text-xs font-semibold text-black/60 dark:text-white/60">
-                Recipient Email Address *
+              <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-black/60 dark:text-white/60">
+                <User className="size-3.5" /> Additional Emails (optional)
               </label>
-              <AdminInput
-                type="email"
-                placeholder="user@example.com"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
+              <textarea
+                rows={2}
+                placeholder="Comma, semicolon, or newline-separated - for people not in the list above"
+                value={manualEmails}
+                onChange={(e) => setManualEmails(e.target.value)}
+                className="w-full rounded-lg border border-black/10 bg-black/[0.02] p-2.5 text-sm text-black placeholder:text-black/30 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30"
               />
+              {recipientEmails.length > 0 && (
+                <p className="mt-1.5 text-[11px] text-black/40 dark:text-white/40">
+                  Sending to: {recipientEmails.join(", ")}
+                </p>
+              )}
             </div>
 
             {/* Subject Line */}
@@ -341,12 +443,14 @@ export function AdminEmailComposer({ users }: { users: AdminUserOption[] }) {
             <div className="mt-2 flex items-center justify-end gap-3">
               <AdminButton
                 type="button"
-                disabled={isPending || !recipientEmail}
+                disabled={isPending || recipientEmails.length === 0}
                 onClick={handleSend}
                 className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <Send className="size-4" />
-                {isPending ? "Sending..." : "Send Email Now"}
+                {isPending
+                  ? "Sending..."
+                  : `Send Email${recipientEmails.length > 1 ? ` (${recipientEmails.length})` : ""}`}
               </AdminButton>
             </div>
           </div>

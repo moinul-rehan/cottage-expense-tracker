@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Mail, Megaphone, ShieldUser, Smartphone } from "lucide-react";
+import { House, Mail, Megaphone, Settings, ShieldUser, Smartphone } from "lucide-react";
 import { Users } from "@/components/animate-ui/icons/users";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
 import { ArrowLeft } from "@/components/animate-ui/icons/arrow-left";
@@ -55,6 +55,10 @@ export function AdminSidebarNav({ isOwner }: { isOwner?: boolean }) {
           <NavLinkItem
             link={{ href: "/platform-admin/moderators", label: "Moderators", icon: ShieldUser }}
             active={pathname.startsWith("/platform-admin/moderators")}
+          />
+          <NavLinkItem
+            link={{ href: "/platform-admin/settings", label: "Settings", icon: Settings }}
+            active={pathname.startsWith("/platform-admin/settings")}
           />
         </div>
       )}
