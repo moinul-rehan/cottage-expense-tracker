@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Cottage (debug)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/Flutter App",
+      "program": "${workspaceFolder}/Flutter App/lib/main.dart",
+      "args": ["--dart-define-from-file=env.json"]
+    },
+    {
+      "name": "Cottage (profile)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/Flutter App",
+      "program": "${workspaceFolder}/Flutter App/lib/main.dart",
+      "flutterMode": "profile",
+      "args": ["--dart-define-from-file=env.json"]
+    },
+    {
+      "name": "Cottage (release)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/Flutter App",
+      "program": "${workspaceFolder}/Flutter App/lib/main.dart",
+      "flutterMode": "release",
+      "args": ["--dart-define-from-file=env.json"]
+    }
+  ]
+}
